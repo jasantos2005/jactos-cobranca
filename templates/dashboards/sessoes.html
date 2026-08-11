@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Controle de Sessões — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;position:fixed;top:0;left:0;z-index:100}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:15px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.content{padding:24px 28px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:24px;font-weight:700;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.online{background:rgba(0,200,160,.15);color:var(--primary)}
+.offline{background:rgba(139,148,158,.15);color:var(--muted)}
+.inativo{background:rgba(248,81,73,.15);color:var(--red)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.dot-green{background:var(--primary);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">🕐 Controle de Sessões</div>
+      <div class="header-sub">Monitoramento de acesso e tempo de sessão dos usuários</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">Atualiza a cada 30s &nbsp;<button onclick="location.reload()" style="padding:4px 10px;border-radius:5px;background:var(--primary);color:#0d1117;border:none;font-size:11px;font-weight:600;cursor:pointer">↻ Atualizar</button></div>
+  </header>
+  <div class="content">
+
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">Online agora</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ online|length }}</div>
+      </div>
+      <div class="kpi" style="border-color:var(--blue)">
+        <div class="kpi-label">Sessões hoje</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ total_hoje }}</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">Tempo médio</div>
+        <div class="kpi-value" style="color:var(--amber);font-size:18px">{{ media_min }}min</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">Por inatividade</div>
+        <div class="kpi-value" style="color:var(--red)">{{ total_inatividade }}</div>
+      </div>
+    </div>
+
+    <!-- ONLINE AGORA -->
+    {% if online %}
+    <div class="card">
+      <div class="card-title">🟢 Usuários online agora</div>
+      <table>
+        <thead><tr><th>Usuário</th><th>Logou em</th><th>Tempo online</th><th>IP</th></tr></thead>
+        <tbody>
+        {% for s in online %}
+        <tr>
+          <td><span class="dot dot-green"></span><b>{{ s.usuario_nome }}</b></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px">{{ s.login_em[11:16] }}</td>
+          <td><span class="badge online">{{ s.tempo_online }}</span></td>
+          <td style="font-size:11px;color:var(--muted2)">{{ s.ip or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- HISTÓRICO DO DIA -->
+    <div class="card">
+      <div class="card-title">📋 Histórico de sessões hoje</div>
+      <table>
+        <thead><tr><th>Usuário</th><th>Login</th><th>Logout</th><th>Duração</th><th>Motivo</th><th>IP</th></tr></thead>
+        <tbody>
+        {% for s in historico %}
+        <tr>
+          <td><b>{{ s.usuario_nome }}</b></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px">{{ s.login_em[11:16] }}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px">{{ s.logout_em[11:16] if s.logout_em else '—' }}</td>
+          <td>
+            {% if s.duracao_min %}
+              {% set h = s.duracao_min // 60 %}
+              {% set m = s.duracao_min % 60 %}
+              <span class="badge {% if s.motivo_logout == 'Inatividade' %}inativo{% else %}offline{% endif %}">
+                {% if h %}{{ h }}h{% endif %}{{ m }}min
+              </span>
+            {% else %}<span style="color:var(--muted2)">—</span>{% endif %}
+          </td>
+          <td>
+            {% if s.motivo_logout == 'Inatividade' %}<span class="badge inativo">⏰ Inatividade</span>
+            {% elif s.motivo_logout == 'Manual' %}<span class="badge offline">🚪 Manual</span>
+            {% else %}<span style="color:var(--muted2)">—</span>{% endif %}
+          </td>
+          <td style="font-size:11px;color:var(--muted2)">{{ s.ip or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RESUMO POR USUÁRIO -->
+    <div class="card">
+      <div class="card-title">👤 Resumo por usuário — hoje</div>
+      <table>
+        <thead><tr><th>Usuário</th><th>Sessões</th><th>Tempo total</th><th>Por inatividade</th></tr></thead>
+        <tbody>
+        {% for u in resumo %}
+        <tr>
+          <td><b>{{ u.usuario_nome }}</b></td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace">{{ u.sessoes }}</td>
+          <td>
+            {% set h = u.total_min // 60 %}
+            {% set m = u.total_min % 60 %}
+            <span class="badge online">{% if h %}{{ h }}h{% endif %}{{ m }}min</span>
+          </td>
+          <td style="text-align:center;color:{% if u.inatividades > 0 %}var(--red){% else %}var(--muted2){% endif %}">{{ u.inatividades }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+<script>setTimeout(()=>location.reload(), 30000);</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Qualidade de Vendas — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:10px}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;font-family:'Inter',sans-serif}
+select:focus,input[type=date]:focus{border-color:var(--primary)}
+.btn-filter{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:28px;font-weight:700;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.grid-2{display:grid;grid-template-columns:1fr 1.6fr;gap:18px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-ok{background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-cob{background:rgba(248,81,73,.15);color:var(--red)}
+.badge-neutro{background:rgba(139,148,158,.15);color:var(--muted)}
+.vendor-bar{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.vendor-bar:last-child{border-bottom:none}
+.vendor-nome{font-size:13px;font-weight:600;flex:1}
+.vendor-stats{font-size:11px;color:var(--muted);margin-top:2px}
+.vendor-pct{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:4px}
+.bar-fill{height:4px;border-radius:2px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">📊 Qualidade de Vendas</div>
+      <div class="header-sub">Clientes ativados que entraram na cobrança</div>
+    </div>
+    <div class="filters">
+      <select id="sel-mes">
+        {% for m in meses %}
+        <option value="{{ m }}" {% if m == mes_sel %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+      <select id="sel-vendedor">
+        <option value="">Todos vendedores</option>
+        {% for v in vendedores %}
+        <option value="{{ v }}" {% if v == vendedor_sel %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+      <select id="sel-parcela">
+        <option value="">Todas parcelas</option>
+        <option value="1" {% if parcela_sel == '1' %}selected{% endif %}>1ª parcela</option>
+        <option value="2" {% if parcela_sel == '2' %}selected{% endif %}>2ª parcela</option>
+        <option value="3" {% if parcela_sel == '3' %}selected{% endif %}>3ª parcela</option>
+        <option value="4" {% if parcela_sel == '4' %}selected{% endif %}>4ª parcela</option>
+        <option value="5" {% if parcela_sel == '5' %}selected{% endif %}>5ª parcela</option>
+      </select>
+      <button class="btn-filter" onclick="filtrar()">Filtrar</button>
+    </div>
+  </header>
+  <div class="content">
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">Ativados no período</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.total }}</div>
+        <div class="kpi-sub">clientes novos</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">Na cobrança</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.na_cobranca }}</div>
+        <div class="kpi-sub">com fatura em aberto</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">Taxa inadimplência</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.taxa }}%</div>
+        <div class="kpi-sub">dos ativados</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">Adimplentes</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.total - kpis.na_cobranca }}</div>
+        <div class="kpi-sub">pagando em dia</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">💸 Prejuízo total</div>
+        <div class="kpi-value" style="color:var(--red);font-size:18px">R$ {{ "%.2f"|format(kpis.prejuizo_total or 0) }}</div>
+        <div class="kpi-sub">equip + comissão + receita</div>
+      </div>
+    </div>
+
+    <!-- Inadimplência por cidade -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">🗺️ Inadimplência por Cidade</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        {% for c in inad_cidade %}
+        <div style="background:var(--bg);border:1px solid {% if c.taxa >= 25 %}var(--red){% elif c.taxa >= 15 %}var(--amber){% else %}var(--primary){% endif %};border-radius:8px;padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:13px;font-weight:700">{{ c.cidade }}</div>
+            <div style="font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:{% if c.taxa >= 25 %}var(--red){% elif c.taxa >= 15 %}var(--amber){% else %}var(--primary){% endif %}">{{ c.taxa }}%</div>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:6px">
+            <div style="height:4px;border-radius:2px;width:{{ [c.taxa, 100]|min }}%;background:{% if c.taxa >= 25 %}var(--red){% elif c.taxa >= 15 %}var(--amber){% else %}var(--primary){% endif %}"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">{{ c.inad }} de {{ c.total }} clientes</div>
+          <div style="font-size:10px;color:var(--red);margin-top:2px">R$ {{ "%.2f"|format(c.valor) }} em aberto</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Score vendedores -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">⭐ Score de Qualidade por Vendedor</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+        {% for v in score_vendedores %}
+        {% if v.total >= 3 %}
+        <div style="background:var(--bg);border:1px solid {% if v.score >= 8 %}var(--primary){% elif v.score >= 6 %}var(--amber){% else %}var(--red){% endif %};border-radius:8px;padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:700">{{ v.vendedor }}</div>
+            <div style="font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;color:{% if v.score >= 8 %}var(--primary){% elif v.score >= 6 %}var(--amber){% else %}var(--red){% endif %}">{{ v.score }}</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.8">
+            📦 {{ v.total }} vendas<br>
+            🔴 {{ v.pct_inad }}% inadimplência<br>
+            ✅ {{ v.pct_3m }}% pagou 3+ meses<br>
+            ⚠️ {{ v.pct_1a }}% não pagou 1ª parcela
+          </div>
+          {% if v.prejuizo > 0 %}
+          <div style="font-size:10px;color:var(--red);margin-top:6px;line-height:1.6">
+            💸 Prejuízo total: <b>R$ {{ "%.2f"|format(v.prejuizo) }}</b><br>
+            📦 Equipamentos: R$ {{ "%.2f"|format(v.custo_instalacao) }}<br>
+            🤝 Comissão: R$ {{ "%.2f"|format(v.custo_comissao) }}<br>
+            💰 Receita perdida: R$ {{ "%.2f"|format(v.valor_risco) }}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Card planos -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">📦 Inadimplência por Plano</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+        {% for p in ranking_planos %}
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">{{ p.plano }}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:11px;color:var(--muted)">{{ p.na_cobranca }} de {{ p.total }} clientes</div>
+            <div style="font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:{% if p.taxa >= 20 %}var(--red){% elif p.taxa >= 10 %}var(--amber){% else %}var(--primary){% endif %}">{{ p.taxa }}%</div>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:2px;margin-top:6px">
+            <div style="height:4px;border-radius:2px;width:{{ p.taxa }}%;background:{% if p.taxa >= 20 %}var(--red){% elif p.taxa >= 10 %}var(--amber){% else %}var(--primary){% endif %}"></div>
+          </div>
+          {% if p.valor_risco > 0 %}
+          <div style="font-size:10px;color:var(--muted2);margin-top:4px">R$ {{ "%.2f"|format(p.valor_risco) }} em risco</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Ranking vendedores -->
+      <div class="card">
+        <div class="card-title">🏆 Ranking por Inadimplência</div>
+        {% set max_cob = kpis.ranking[0].na_cobranca if kpis.ranking else 1 %}
+        {% for v in kpis.ranking %}
+        <div class="vendor-bar">
+          <div style="flex:1">
+            <div class="vendor-nome">{{ v.vendedor }}</div>
+            <div class="bar-wrap">
+              <div class="bar-fill" style="width:{{ (v.na_cobranca / (max_cob or 1) * 100)|int }}%;background:{% if v.na_cobranca == 0 %}var(--primary){% elif v.na_cobranca <= 2 %}var(--amber){% else %}var(--red){% endif %}"></div>
+            </div>
+            <div class="vendor-stats">
+              {{ v.na_cobranca }} na cobrança de {{ v.total }} ativados
+              {% if v.valor_risco > 0 %} · R$ {{ "%.2f"|format(v.valor_risco) }} em risco{% endif %}
+            </div>
+          </div>
+          <div class="vendor-pct" style="color:{% if v.na_cobranca == 0 %}var(--primary){% elif v.na_cobranca <= 2 %}var(--amber){% else %}var(--red){% endif %}">
+            {{ ((v.na_cobranca / (v.total or 1)) * 100)|int }}%
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Tabela clientes -->
+      <div class="card">
+        <div class="card-title">👥 Clientes Ativados</div>
+        <div style="overflow-x:auto;max-height:450px;overflow-y:auto">
+        <table>
+          <thead><tr>
+            <th>Cliente</th><th>Vendedor</th><th>Ativação</th><th>Plano</th><th>Status</th><th>Meses pagos</th><th>Serasa</th><th>Parcela</th><th>Atraso</th>
+          </tr></thead>
+          <tbody>
+          {% for r in rows %}
+          <tr>
+            <td style="font-size:12px;font-weight:600">{{ r.razao }}</td>
+            <td style="font-size:12px;color:var(--muted)">{{ r.vendedor_nome or '—' }}</td>
+            <td style="font-size:11px;color:var(--muted2)">{{ r.data_ativacao[:10] if r.data_ativacao else '—' }}</td>
+            <td style="font-size:11px;color:var(--muted)">{{ r.plano_nome or '—' }}</td>
+            <td>
+              {% if r.na_cobranca %}
+                <span class="badge badge-cob">🔴 Cobrança</span>
+              {% else %}
+                <span class="badge badge-ok">✅ OK</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.serasa == 'reprovado' %}<span class="badge badge-cob" title="{{ r.serasa_det }}">🔴 Reprovado</span>
+              {% elif r.serasa == 'ok' %}<span class="badge badge-ok">✅ OK</span>
+              {% elif r.serasa == 'pendente' %}<span class="badge badge-neutro">⏳ Pendente</span>
+              {% else %}<span class="badge badge-neutro">— IXC direto</span>{% endif %}
+            </td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;color:{% if r.meses_pagos == 0 and r.na_cobranca %}var(--red){% elif r.meses_pagos <= 2 and r.na_cobranca %}var(--amber){% else %}var(--primary){% endif %}">
+              {% if r.na_cobranca %}{{ r.meses_pagos }}{% else %}—{% endif %}
+            </td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.menor_parcela == 1 %}var(--red){% elif r.menor_parcela == 2 %}var(--amber){% else %}var(--muted){% endif %}">
+              {% if r.menor_parcela > 0 %}{{ r.menor_parcela }}ª{% else %}—{% endif %}
+            </td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.maior_atraso > 60 %}var(--red){% elif r.maior_atraso > 30 %}var(--amber){% else %}var(--muted){% endif %}">
+              {% if r.maior_atraso > 0 %}{{ r.maior_atraso }}d{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+function filtrar(){
+  const mes = document.getElementById('sel-mes').value;
+  const v   = document.getElementById('sel-vendedor').value;
+  const p   = document.getElementById('sel-parcela').value;
+  location.href = `/cobranca/qualidade-vendas?mes=${mes}&vendedor=${encodeURIComponent(v)}&parcela=${p}`;
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

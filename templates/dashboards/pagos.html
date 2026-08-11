@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pagos — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.content{padding:24px 28px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.valor{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary)}
+.badge-pago{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;background:rgba(0,200,160,.15);color:var(--primary)}
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:12px;color:var(--muted)}
+.pag-btns{display:flex;gap:6px}
+.pag-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.pag-btn:hover:not(:disabled){background:var(--primary);color:#0d1117;border-color:var(--primary)}
+.pag-btn:disabled{opacity:.3;cursor:default}
+.page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+.empty{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">Boletos Pagos</div>
+      <div class="header-sub">{{ total }} pagamentos nos últimos 30 dias</div>
+    </div>
+  </header>
+  <div class="content">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:0">Histórico de Pagamentos</div>
+        {% if usuario.nivel == 99 %}
+        <select onchange="location.href='/cobranca/pagos?filtrar_operador='+this.value+'&pagina=1'"
+          style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="0" {% if not filtrar_operador %}selected{% endif %}>👥 Todos os operadores</option>
+          {% for op in operadores %}
+          <option value="{{ op.id }}" {% if filtrar_operador == op.id %}selected{% endif %}>{{ op.nome }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Boleto</th><th>Cliente</th><th>Vencimento</th>
+            <th>Pago em</th><th>Valor Recebido</th><th>Operador</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in dados %}
+          <tr>
+            <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">#{{ row.id_fatura }}</span></td>
+            <td>
+              <strong>{{ row.razao }}</strong>
+              <br><small style="color:var(--muted);font-size:11px">{{ row.cnpj_cpf }}</small>
+            </td>
+            <td style="font-size:12px">{{ row.data_vencimento }}</td>
+            <td style="font-size:12px;color:var(--primary)">{{ row.data_pagamento or '—' }}</td>
+            <td class="valor">R$ {{ "%.2f"|format(row.valor_recebido) }}</td>
+            <td style="font-size:12px;color:var(--muted)">{{ row.operador }}</td>
+            <td><span class="badge-pago">✓ Pago</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="empty">Nenhum pagamento encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>{{ total }} pagamentos · Pág. {{ filtros.pagina }}/{{ paginas }}</span>
+        <div class="pag-btns">
+          <button class="pag-btn" onclick="mudaPagina(-1)" {% if filtros.pagina<=1 %}disabled{% endif %}>‹ Anterior</button>
+          <button class="pag-btn" onclick="mudaPagina(1)" {% if filtros.pagina>=paginas %}disabled{% endif %}>Próximo ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+</main>
+<script>
+let pagAtual = {{ filtros.pagina }};
+function mudaPagina(d){ window.location.href=`/cobranca/pagos?pagina=${pagAtual+d}`; }
+
+// ── SOM DE MOEDA ──────────────────────────────────────────────
+function tocarMoeda() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = ctx.currentTime;
+    // Moeda 1
+    const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
+    o1.connect(g1); g1.connect(ctx.destination);
+    o1.frequency.setValueAtTime(1200, t); o1.frequency.exponentialRampToValueAtTime(800, t+0.15);
+    g1.gain.setValueAtTime(0.4, t); g1.gain.exponentialRampToValueAtTime(0.001, t+0.3);
+    o1.start(t); o1.stop(t+0.3);
+    // Moeda 2
+    const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.frequency.setValueAtTime(1500, t+0.1); o2.frequency.exponentialRampToValueAtTime(900, t+0.25);
+    g2.gain.setValueAtTime(0.3, t+0.1); g2.gain.exponentialRampToValueAtTime(0.001, t+0.35);
+    o2.start(t+0.1); o2.stop(t+0.35);
+    // Moeda 3
+    const o3 = ctx.createOscillator(); const g3 = ctx.createGain();
+    o3.connect(g3); g3.connect(ctx.destination);
+    o3.frequency.setValueAtTime(1800, t+0.2); o3.frequency.exponentialRampToValueAtTime(1000, t+0.4);
+    g3.gain.setValueAtTime(0.25, t+0.2); g3.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+    o3.start(t+0.2); o3.stop(t+0.5);
+  } catch(e) {}
+}
+
+function mostrarToast(razao, valor, hora) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#00c8a0;color:#0d1117;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,200,160,.4);animation:slideIn .3s ease;max-width:300px';
+  t.innerHTML = `💰 Pagamento recebido!<br><span style="font-size:12px;font-weight:400">${razao} · R$ ${parseFloat(valor).toLocaleString('pt-BR',{minimumFractionDigits:2})} · ${hora}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+
+// ── POLLING ────────────────────────────────────────────────────
+let ultimoCheck = new Date(Date.now() - 60000).toISOString().replace('T',' ').substring(0,19);
+let jaNotificados = new Set();
+
+async function verificarPagamentos() {
+  try {
+    const r = await fetch(`/cobranca/api/novos-pagamentos?desde=${encodeURIComponent(ultimoCheck)}`);
+    const res = await r.json();
+    if (res.novos && res.novos.length > 0) {
+      let novos = res.novos.filter(p => !jaNotificados.has(p.id));
+      if (novos.length > 0) {
+        tocarMoeda();
+        novos.forEach(p => {
+          jaNotificados.add(p.id);
+          mostrarToast(p.razao, p.valor_recebido, p.hora_pag);
+        });
+        setTimeout(() => location.reload(), 3000);
+      }
+    }
+    ultimoCheck = new Date().toISOString().replace('T',' ').substring(0,19);
+  } catch(e) {}
+}
+
+// Inicia polling a cada 30 segundos
+setInterval(verificarPagamentos, 30000);
+</script>
+<style>
+@keyframes slideIn { from { transform: translateX(120%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+</style>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

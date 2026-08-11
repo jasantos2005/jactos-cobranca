@@ -1,0 +1,99 @@
+from app.core.db import query
+import sqlite3
+from datetime import datetime
+
+COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
+
+def get_reprovados_ativados(data_ini="2026-01-01", data_fim=None):
+    conn = sqlite3.connect(COMERCIAL_DB)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    filtro_data = f"AND p.criado_em >= \'{data_ini}\'"
+    if data_fim:
+        filtro_data += f" AND p.criado_em <= \'{data_fim}\'"
+
+    cur.execute(f"""
+        SELECT DISTINCT p.id, p.razao, p.ixc_cliente_id,
+               p.criado_em, p.id_vendedor_hub,
+               al_rep.detalhes AS serasa_detalhes,
+               al_lib.detalhes AS liberado_por
+        FROM hc_precadastros p
+        JOIN hc_auditoria_log al_rep ON al_rep.precadastro_id=p.id
+            AND al_rep.resultado='reprovado'
+        LEFT JOIN hc_auditoria_log al_lib ON al_lib.precadastro_id=p.id
+            AND al_lib.regra IN ('LIBERACAO','SUPERVISOR_BYPASS')
+        LEFT JOIN hc_usuarios u ON u.id=p.id_vendedor_hub
+        WHERE p.status='ativado'
+          AND p.ixc_cliente_id IS NOT NULL
+          AND p.razao NOT LIKE '%TESTE%'
+          {filtro_data}
+        ORDER BY p.criado_em DESC
+    """)
+    rows = [dict(r) for r in cur.fetchall()]
+    conn.close()
+
+    if not rows:
+        return []
+
+    ids = tuple(r["ixc_cliente_id"] for r in rows if r["ixc_cliente_id"])
+    if not ids:
+        return []
+    ph = ",".join(["%s"]*len(ids))
+
+    # Busca status atual no IXC
+    inadimplentes = query(f"""
+        SELECT DISTINCT f.id_cliente, SUM(f.valor_aberto) AS total_aberto,
+               MAX(DATEDIFF(CURDATE(), f.data_vencimento)) AS maior_atraso
+        FROM ixcprovedor.fn_areceber f
+        INNER JOIN ixcprovedor.cliente_contrato cc ON cc.id_cliente=f.id_cliente AND cc.status='A'
+        WHERE f.status='A' AND f.data_vencimento < CURDATE()
+        AND f.id_cliente IN ({ph})
+        GROUP BY f.id_cliente
+    """, ids)
+    ids_inad = {r["id_cliente"]: r for r in inadimplentes}
+
+    cancelados = query(f"""
+        SELECT DISTINCT id_cliente FROM ixcprovedor.cliente_contrato
+        WHERE status='I' AND id_cliente IN ({ph})
+    """, ids)
+    ids_cancel = {r["id_cliente"] for r in cancelados}
+
+    # Busca vendedor
+    conn2 = sqlite3.connect(COMERCIAL_DB)
+    conn2.row_factory = sqlite3.Row
+    cur2 = conn2.cursor()
+    cur2.execute(f"SELECT ixc_cliente_id, vendedor_nome, cidade_nome FROM hc_contratos_cache WHERE ixc_cliente_id IN ({','.join('?'*len(ids))})", ids)
+    comercial_map = {r["ixc_cliente_id"]: dict(r) for r in cur2.fetchall()}
+    conn2.close()
+
+    result = []
+    for r in rows:
+        inad = ids_inad.get(r["ixc_cliente_id"])
+        cancel = r["ixc_cliente_id"] in ids_cancel
+        com = comercial_map.get(r["ixc_cliente_id"], {})
+        status = "cancelado" if cancel else ("inadimplente" if inad else "ok")
+        result.append({
+            **r,
+            "status": status,
+            "total_aberto": float(inad["total_aberto"]) if inad else 0,
+            "maior_atraso": int(inad["maior_atraso"]) if inad else 0,
+            "vendedor": com.get("vendedor_nome", "—"),
+            "cidade": com.get("cidade_nome", "—"),
+        })
+    return result
+
+def get_kpis_reprovados(data_ini="2026-01-01", data_fim=None):
+    rows = get_reprovados_ativados(data_ini, data_fim)
+    total = len(rows)
+    inad  = [r for r in rows if r["status"] == "inadimplente"]
+    ok    = [r for r in rows if r["status"] == "ok"]
+    cancel= [r for r in rows if r["status"] == "cancelado"]
+    return {
+        "total": total,
+        "inadimplentes": len(inad),
+        "pagando": len(ok),
+        "cancelados": len(cancel),
+        "taxa_inad": round(len(inad)/total*100, 1) if total else 0,
+        "total_aberto": sum(r["total_aberto"] for r in inad),
+    }

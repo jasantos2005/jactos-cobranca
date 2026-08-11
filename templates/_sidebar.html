@@ -1,0 +1,158 @@
+<nav class="sidebar">
+  <div class="sb-logo" style="padding:20px 18px 16px;border-bottom:1px solid #e2e8f0">
+    <div style="font-size:18px;font-weight:700;color:#059669">⚡ HubCobrança</div>
+    <div style="font-size:10px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-top:2px">ISP · Cobrança</div>
+  </div>
+
+  <div class="sb-nav">
+
+    {% set path = request.url.path %}
+
+    <!-- COBRANÇA -->
+    <div class="sb-group {% if '/cobranca/' in path and 'qualidade' not in path and 'reprovados' not in path and 'cancelamentos' not in path and 'resultado' not in path and 'retencao' not in path and 'gerencial' not in path and 'retiradas' not in path %}active{% endif %}" onclick="toggleGroup(this)">
+      <div class="sb-group-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        <span>Cobrança</span>
+        <svg class="sb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="sb-group-items">
+        <a class="sb-item {% if path == '/cobranca/' %}active{% endif %}" href="/cobranca/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Visão Geral</a>
+        <a class="sb-item {% if path == '/cobranca/fila' %}active{% endif %}" href="/cobranca/fila">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Primeira Cobrança</a>
+        <a class="sb-item {% if path == '/cobranca/segunda-cobranca' %}active{% endif %}" href="/cobranca/segunda-cobranca">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4"/></svg>Segunda Cobrança</a>
+        <a class="sb-item {% if path == '/cobranca/nunca-pagaram' %}active{% endif %}" href="/cobranca/nunca-pagaram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>🚨 Nunca Pagaram</a>
+        <a class="sb-item {% if path == '/cobranca/promessas' %}active{% endif %}" href="/cobranca/promessas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Promessas Quebradas</a>
+        <a class="sb-item {% if path == '/cobranca/promessas-realizadas' %}active{% endif %}" href="/cobranca/promessas-realizadas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Promessas Realizadas</a>
+        <a class="sb-item {% if path == '/cobranca/pagos' %}active{% endif %}" href="/cobranca/pagos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Pagos</a>
+      </div>
+    </div>
+
+    <!-- RETIRADAS -->
+    <div class="sb-group {% if 'retiradas' in path %}active{% endif %}" onclick="toggleGroup(this)">
+      <div class="sb-group-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        <span>Retiradas</span>
+        <svg class="sb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="sb-group-items">
+        <a class="sb-item {% if path == '/retiradas/auditoria' %}active{% endif %}" href="/retiradas/auditoria">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Auditoria</a>
+        <a class="sb-item {% if path == '/retiradas/' %}active{% endif %}" href="/retiradas/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Dashboard</a>
+        <a class="sb-item {% if path == '/retiradas/sem-agendamento' %}active{% endif %}" href="/retiradas/sem-agendamento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sem Agendamento</a>
+        <a class="sb-item {% if path == '/retiradas/agendadas' %}active{% endif %}" href="/retiradas/agendadas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Agendadas</a>
+        <a class="sb-item {% if path == '/retiradas/monitoramento' %}active{% endif %}" href="/retiradas/monitoramento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Monitoramento</a>
+        <a class="sb-item {% if path == '/retiradas/admin/tecnicos' %}active{% endif %}" href="/retiradas/admin/tecnicos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Técnicos</a>
+      </div>
+    </div>
+
+    <!-- GESTÃO -->
+    <div class="sb-group {% if 'qualidade' in path or 'reprovados' in path or 'cancelamentos' in path or 'resultado' in path or 'retencao' in path or 'gerencial' in path or 'equipamentos' in path %}active{% endif %}" onclick="toggleGroup(this)">
+      <div class="sb-group-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        <span>Gestão</span>
+        <svg class="sb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="sb-group-items">
+        <a class="sb-item {% if path == '/cobranca/qualidade-vendas' %}active{% endif %}" href="/cobranca/qualidade-vendas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Qualidade de Vendas</a>
+        <a class="sb-item {% if path == '/cobranca/reprovados-serasa' %}active{% endif %}" href="/cobranca/reprovados-serasa">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>🔍 Reprovados Serasa</a>
+        <a class="sb-item {% if path == '/cobranca/cancelamentos' %}active{% endif %}" href="/cobranca/cancelamentos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>❌ Cancelamentos</a>
+        <a class="sb-item {% if path == '/cobranca/cancelamentos-inadimplencia' %}active{% endif %}" href="/cobranca/cancelamentos-inadimplencia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>💔 Cancel. Inadimplência</a>
+        <a class="sb-item {% if path == '/cobranca/equipamentos-cancelados' %}active{% endif %}" href="/cobranca/equipamentos-cancelados">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>📦 Equipamentos Cancelados</a>
+        <a class="sb-item {% if path == '/cobranca/resultado-nunca-pagaram' %}active{% endif %}" href="/cobranca/resultado-nunca-pagaram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>📊 Resultado Nunca Pagaram</a>
+        <a class="sb-item {% if path == '/cobranca/retencao' %}active{% endif %}" href="/cobranca/retencao">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>🛡️ Retenção</a>
+        <a class="sb-item {% if path == '/cobranca/gerencial' %}active{% endif %}" href="/cobranca/gerencial">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>📊 Dashboard Gerencial</a>
+      </div>
+    </div>
+
+    <!-- PESSOAL -->
+    <div class="sb-group {% if path == '/cobranca/desempenho' %}active{% endif %}" onclick="toggleGroup(this)">
+      <div class="sb-group-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Pessoal</span>
+        <svg class="sb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="sb-group-items">
+        <a class="sb-item {% if path == '/cobranca/desempenho' %}active{% endif %}" href="/cobranca/desempenho">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Meu Desempenho</a>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    {% if usuario.nivel >= 3 %}
+    <div class="sb-group {% if '/cobranca/admin' in path %}active{% endif %}" onclick="toggleGroup(this)">
+      <div class="sb-group-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        <span>Admin</span>
+        <svg class="sb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="sb-group-items">
+        <a class="sb-item {% if path == '/cobranca/equipe' %}active{% endif %}" href="/cobranca/equipe">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Equipe</a>
+        <a class="sb-item {% if path == '/cobranca/desempenho-equipe' %}active{% endif %}" href="/cobranca/desempenho-equipe">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>Desempenho Equipe</a>
+        <a class="sb-item {% if path == '/cobranca/sessoes' %}active{% endif %}" href="/cobranca/sessoes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>🕐 Sessões</a>
+        <a class="sb-item {% if path == '/cobranca/admin/' %}active{% endif %}" href="/cobranca/admin/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>Administração</a>
+        <a class="sb-item {% if path == '/cobranca/admin/permissoes' %}active{% endif %}" href="/cobranca/admin/permissoes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Permissões</a>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <div class="sb-footer">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong style="color:var(--text);display:block;font-size:13px">{{ usuario.nome }}</strong>
+        <span style="font-size:11px;color:var(--muted2)">{{ usuario.setor or 'Sistema' }}</span>
+      </div>
+      <a href="/logout" style="font-size:11px;color:var(--muted2);text-decoration:none;padding:4px 8px;border:1px solid var(--border);border-radius:4px">Sair</a>
+    </div>
+  </div>
+</nav>
+
+<style>
+.sb-group{margin:2px 0}
+.sb-group-header{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .15s;user-select:none}
+.sb-group-header:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-group-header svg:first-child{width:18px;height:18px;flex-shrink:0}
+.sb-group-header span{flex:1}
+.sb-chevron{width:14px;height:14px;flex-shrink:0;transition:transform .2s}
+.sb-group-items{display:none;padding-left:8px}
+.sb-group.active .sb-group-items{display:block}
+.sb-group.active .sb-chevron{transform:rotate(180deg)}
+.sb-group.active .sb-group-header{color:var(--primary)}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:16px;height:16px;flex-shrink:0}
+</style>
+
+<script>
+function toggleGroup(el){
+  const isActive = el.classList.contains('active');
+  document.querySelectorAll('.sb-group').forEach(g => g.classList.remove('active'));
+  if(!isActive) el.classList.add('active');
+}
+</script>

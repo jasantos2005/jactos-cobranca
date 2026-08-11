@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin — HubCobrança Cobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.content{padding:24px 28px;flex:1}
+.msg-bar{padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:20px}
+.msg-bar.ok{background:rgba(0,200,160,.1);color:var(--primary);border:1px solid rgba(0,200,160,.2)}
+.msg-bar.erro{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.2)}
+.section-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.badge-count{background:var(--amber);color:#0d1117;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px}
+.badge-count.green{background:var(--primary)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.nivel-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.n0{background:rgba(248,81,73,.15);color:var(--red)}
+.n1{background:rgba(31,111,235,.15);color:#79b8ff}
+.n2{background:rgba(240,160,0,.15);color:var(--amber)}
+.n3{background:rgba(0,200,160,.15);color:var(--primary)}
+.n99{background:rgba(160,80,240,.15);color:#c792ea}
+.btn{padding:5px 12px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.8}
+.btn-green{background:var(--primary);color:#0d1117}
+.btn-amber{background:var(--amber);color:#0d1117}
+.btn-red{background:var(--red);color:#fff}
+.btn-gray{background:var(--border2);color:var(--muted)}
+.btn-blue{background:var(--blue);color:#fff}
+select,input[type=text],input[type=password],input[type=number]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:6px 10px;outline:none}
+select:focus,input:focus{border-color:var(--primary)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.form-row label{font-size:12px;color:var(--muted);white-space:nowrap}
+.inline-form{display:inline}
+.page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+<main class="main">
+  <header class="header">
+    <div class="header-title">Administração do Sistema</div>
+    <div class="header-sub">Usuários, permissões e acessos</div>
+  </header>
+
+  <div class="content">
+
+    {% if msg %}
+      {% set tipo = "ok" if msg.startswith("ok:") else "erro" %}
+      <div class="msg-bar {{ tipo }}">{{ msg[3:] }}</div>
+    {% endif %}
+
+    <!-- PENDENTES -->
+    {% if pendentes %}
+    <div class="card">
+      <div class="section-title">
+        ⏳ Aguardando Aprovação
+        <span class="badge-count">{{ pendentes|length }}</span>
+      </div>
+      <table>
+        <thead><tr><th>Nome</th><th>Login</th><th>Ação</th></tr></thead>
+        <tbody>
+        {% for u in pendentes %}
+        <tr>
+          <td><strong>{{ u.nome }}</strong></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">{{ u.login }}</td>
+          <td>
+            <form method="post" action="/cobranca/admin/aprovar/{{ u.id }}" class="inline-form" style="display:inline-flex;gap:6px;align-items:center">
+              <select name="nivel" style="font-size:12px">
+                <option value="1">Nível 1 — Fila</option>
+                <option value="2">Nível 2 — Fila+Andamento+Pagos</option>
+                <option value="3">Nível 3 — Tudo</option>
+              </select>
+              <button class="btn btn-green" type="submit">✓ Aprovar</button>
+            </form>
+            <form method="post" action="/cobranca/admin/rejeitar/{{ u.id }}" class="inline-form" style="display:inline;margin-left:6px" onsubmit="return confirm('Rejeitar este cadastro?')">
+              <button class="btn btn-red" type="submit">✕ Rejeitar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- CRIAR USUÁRIO -->
+    <div class="card">
+      <div class="section-title">➕ Criar Usuário</div>
+      <form method="post" action="/cobranca/admin/criar">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px">
+          <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Nome completo</label><input type="text" name="nome" required style="width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Login</label><input type="text" name="login" required style="width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Senha</label><input type="password" name="senha" required style="width:100%"/></div>
+          <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Setor</label>
+            <select name="setor" style="width:100%"><option value="Cobrança">Cobrança</option><option value="Financeiro">Financeiro</option><option value="Diretoria">Diretoria</option></select></div>
+          <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Nível</label>
+            <select name="nivel" style="width:100%">
+              <option value="1">Nível 1 — Fila</option>
+              <option value="2">Nível 2 — Fila+Andamento+Pagos</option>
+              <option value="3" selected>Nível 3 — Tudo</option>
+              <option value="99">Diretoria — Admin total</option>
+            </select></div>
+        </div>
+        <button class="btn btn-green" type="submit">Criar usuário</button>
+      </form>
+    </div>
+
+    <!-- USUÁRIOS ATIVOS -->
+    <div class="card">
+      <div class="section-title">
+        👥 Usuários
+        <span class="badge-count green">{{ ativos|length }}</span>
+      </div>
+      <table>
+        <thead><tr><th>Nome</th><th>Login</th><th>Setor</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+        {% for u in ativos %}
+        <tr>
+          <td><strong>{{ u.nome }}</strong></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">{{ u.login }}</td>
+          <td>{{ u.setor }}</td>
+          <td>
+            <form method="post" action="/cobranca/admin/nivel/{{ u.id }}" style="display:inline-flex;gap:6px;align-items:center">
+              <select name="nivel" onchange="this.form.submit()" style="font-size:12px">
+                {% for nv, label in niveis.items() %}
+                  {% if nv != 0 %}
+                  <option value="{{ nv }}" {% if u.nivel == nv %}selected{% endif %}>{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="/cobranca/admin/toggle/{{ u.id }}" style="display:inline">
+              <button class="btn {% if u.ativo %}btn-amber{% else %}btn-gray{% endif %}" type="submit">
+                {% if u.ativo %}Ativo{% else %}Bloqueado{% endif %}
+              </button>
+            </form>
+          </td>
+          <td style="display:flex;gap:6px;flex-wrap:wrap;padding:10px">
+            <!-- Reset senha -->
+            <button class="btn btn-blue" onclick="abrirReset({{ u.id }},'{{ u.nome }}')">🔑 Senha</button>
+            <!-- Excluir -->
+            {% if u.nivel != 99 %}
+            <form method="post" action="/cobranca/admin/excluir/{{ u.id }}" style="display:inline" onsubmit="return confirm('Excluir {{ u.nome }}?')">
+              <button class="btn btn-red" type="submit">🗑</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- LOG DE ACESSOS -->
+    <div class="card">
+      <div class="section-title">📋 Log de Acessos (últimos 50)</div>
+      <table>
+        <thead><tr><th>Quando</th><th>Login</th><th>Ação</th><th>IP</th></tr></thead>
+        <tbody>
+        {% for log in logs %}
+        <tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">{{ log.quando }}</td>
+          <td>{{ log.login }}</td>
+          <td><span class="nivel-badge {% if log.acao == 'LOGIN' %}n3{% else %}n0{% endif %}">{{ log.acao }}</span></td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">{{ log.ip or '—' }}</td>
+        </tr>
+        {% endfor %}
+        {% if not logs %}<tr><td colspan="4" style="text-align:center;color:var(--muted2);padding:20px">Nenhum acesso registrado.</td></tr>{% endif %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+</main>
+
+<!-- Modal reset senha -->
+<div id="modal-reset" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:340px">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">Resetar Senha</div>
+    <div id="reset-nome" style="font-size:12px;color:var(--muted);margin-bottom:16px"></div>
+    <form method="post" id="reset-form">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Nova senha</label>
+      <input type="password" name="nova_senha" required style="width:100%;margin-bottom:12px"/>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green" type="submit" style="flex:1">Salvar</button>
+        <button class="btn btn-gray" type="button" onclick="fecharReset()" style="flex:1">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function abrirReset(uid, nome){
+  document.getElementById('reset-nome').textContent = nome;
+  document.getElementById('reset-form').action = '/cobranca/admin/senha/' + uid;
+  const m = document.getElementById('modal-reset');
+  m.style.display='flex';
+}
+function fecharReset(){document.getElementById('modal-reset').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharReset();});
+</script>
+</body>
+</html>

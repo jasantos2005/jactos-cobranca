@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Retenção — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center}
+select.fsel{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none}
+.btn{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:24px;font-weight:700;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.score-bar{width:80px;height:6px;background:var(--border);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:6px}
+.score-fill{height:6px;border-radius:3px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.n-critico{background:rgba(248,81,73,.15);color:var(--red)}
+.n-atencao{background:rgba(240,160,0,.15);color:var(--amber)}
+.n-ok{background:rgba(0,200,160,.15);color:var(--primary)}
+.btn-cobrar{padding:4px 10px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:11px;font-weight:600;cursor:pointer}
+.paginacao{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
+.paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">🛡️ Dashboard de Retenção</div>
+      <div class="header-sub">Clientes em risco de cancelamento — score baseado em atraso, OPA e histórico</div>
+    </div>
+    <div class="filters">
+      <select class="fsel" id="sel-nivel" onchange="filtrarNivel(this.value)">
+        <option value="">Todos os níveis</option>
+        <option value="critico">🔴 Crítico (score 70+)</option>
+        <option value="atencao">🟡 Atenção (score 40+)</option>
+        <option value="bom">⭐ Clientes Bons</option>
+        <option value="opa">📱 Com chamado OPA</option>
+      </select>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--blue);cursor:pointer" onclick="filtrarNivel('')">
+        <div class="kpi-label">Total em risco</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ kpis.total }}</div>
+        <div class="kpi-sub">clientes monitorados</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red);cursor:pointer" onclick="filtrarNivel('critico')">
+        <div class="kpi-label">🔴 Críticos</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.criticos }}</div>
+        <div class="kpi-sub">score 70+</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber);cursor:pointer" onclick="filtrarNivel('atencao')">
+        <div class="kpi-label">🟡 Atenção</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.atencao }}</div>
+        <div class="kpi-sub">score 40-69</div>
+      </div>
+      <div class="kpi" style="border-color:var(--purple);cursor:pointer" onclick="filtrarNivel('opa')">
+        <div class="kpi-label">📱 Com chamado OPA</div>
+        <div class="kpi-value" style="color:var(--purple)">{{ kpis.com_opa }}</div>
+        <div class="kpi-sub">financeiro ou suporte</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">💸 Valor em risco</div>
+        <div class="kpi-value" style="color:var(--red);font-size:18px">R$ {{ "%.2f"|format(kpis.valor) }}</div>
+        <div class="kpi-sub">total em aberto</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary);cursor:pointer" onclick="filtrarNivel('bom')">
+        <div class="kpi-label">⭐ Clientes Bons</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.clientes_bons }}</div>
+        <div class="kpi-sub">pagavam em dia — prioridade</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto">
+      <table id="tabela">
+        <thead><tr>
+          <th>Score</th><th>Nível</th><th>Cliente</th><th>Cidade</th><th>Vendedor</th>
+          <th>Atraso</th><th>Parcelas</th><th>Em dia</th><th>Valor</th>
+          <th>OPA Fin</th><th>OPA Sup</th><th>Contato</th><th>Ação</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr data-nivel="{{ r.nivel }}" data-opa="{{ '1' if r.opa_fin > 0 or r.opa_sup > 0 else '0' }}">
+          <td>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:{% if r.score >= 70 %}var(--red){% elif r.score >= 40 %}var(--amber){% else %}var(--primary){% endif %}">{{ r.score }}</span>
+            <div class="score-bar"><div class="score-fill" style="width:{{ r.score }}%;background:{% if r.score >= 70 %}var(--red){% elif r.score >= 40 %}var(--amber){% else %}var(--primary){% endif %}"></div></div>
+          </td>
+          <td>
+            {% if r.nivel == 'critico' %}<span class="badge n-critico">🔴 Crítico</span>
+            {% elif r.nivel == 'atencao' %}<span class="badge n-atencao">🟡 Atenção</span>
+            {% elif r.nivel == 'bom' %}<span class="badge" style="background:rgba(0,200,160,.15);color:var(--primary)">⭐ Bom</span>
+            {% else %}<span class="badge n-ok">🟢 Ok</span>{% endif %}
+          </td>
+          <td>
+            <div style="font-weight:600">{{ r.razao }}</div>
+            <div style="font-size:10px;color:var(--muted2)">{{ r.telefone or '—' }}</div>
+          </td>
+          <td style="font-size:11px;color:var(--muted)">{{ r.cidade }}</td>
+          <td style="font-size:11px;color:var(--muted)">{{ r.vendedor }}</td>
+          <td style="text-align:center">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.dias_atraso >= 60 %}var(--red){% elif r.dias_atraso >= 30 %}var(--amber){% else %}var(--muted){% endif %}">{{ r.dias_atraso }}d</span>
+          </td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ r.total_pagas }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary)">{{ r.pagas_em_dia }}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">R$ {{ "%.2f"|format(r.total_aberto) }}</td>
+          <td style="text-align:center;color:{% if r.opa_fin > 0 %}var(--amber){% else %}var(--muted2){% endif %};font-family:'JetBrains Mono',monospace;font-size:12px">
+            {% if r.opa_fin > 0 %}{{ r.opa_fin }}x{% else %}—{% endif %}
+          </td>
+          <td style="text-align:center;color:{% if r.opa_sup > 0 %}var(--purple){% else %}var(--muted2){% endif %};font-family:'JetBrains Mono',monospace;font-size:12px">
+            {% if r.opa_sup > 0 %}{{ r.opa_sup }}x{% else %}—{% endif %}
+          </td>
+          <td style="text-align:center">
+            <button onclick="abrirContato({{ r.id_cliente }}, '{{ r.razao|replace("'","") }}')" style="padding:3px 8px;border-radius:5px;background:rgba(137,87,229,.15);color:var(--purple);border:1px solid var(--purple);font-size:10px;cursor:pointer">+ Contato</button>
+          </td>
+          <td>
+            {% if r.total_pagas >= 50 %}<span style="background:rgba(240,160,0,.2);color:var(--amber);font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;display:block;text-align:center;margin-bottom:3px">⭐ VIP</span>{% endif %}
+            <a href="tel:{{ r.telefone }}" style="display:inline-block;padding:4px 8px;border-radius:6px;background:rgba(0,200,160,.1);color:var(--primary);font-size:11px;font-weight:600;text-decoration:none;margin-right:4px">📞</a>
+            <a href="https://wa.me/55{{ r.telefone|replace('(','') |replace(')','') |replace(' ','') |replace('-','') }}?text={{ ('Olá ' ~ r.razao.split()[0] ~ '! Identificamos que sua fatura está em atraso. Podemos ajudar a regularizar sua situação. Entre em contato conosco!')|urlencode }}" target="_blank" style="display:inline-block;padding:4px 8px;border-radius:6px;background:rgba(0,200,160,.1);color:var(--primary);font-size:11px;font-weight:600;text-decoration:none">💬</a>
+            <button onclick="abrirRetido({{ r.id_cliente }}, '{{ r.razao|replace("'","") }}')" style="display:inline-block;padding:4px 8px;border-radius:6px;background:rgba(248,81,73,.1);color:var(--red);border:none;font-size:11px;font-weight:600;cursor:pointer">✅</button>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% if paginas > 1 %}
+      <div class="paginacao">
+        {% for p in range(1, paginas+1) %}
+        <a href="?pagina={{ p }}" class="{% if p == pagina %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+<script>
+function filtrarNivel(nivel){
+  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
+    if(!nivel){
+      tr.style.display='';
+    } else if(nivel === 'opa'){
+      tr.style.display=(tr.dataset.opa==='1')?'':'none';
+    } else {
+      tr.style.display=(tr.dataset.nivel===nivel)?'':'none';
+    }
+  });
+  const sel = document.getElementById('sel-nivel');
+  if(sel) sel.value = nivel;
+}
+</script>
+<!-- Modal Contato -->
+<div id="modal-contato" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:420px;max-width:95vw">
+    <div style="font-size:14px;font-weight:700;margin-bottom:16px">📞 Registrar Contato</div>
+    <div id="mc-razao" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+    <input type="hidden" id="mc-cliente-id"/>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Tipo</label>
+      <select id="mc-tipo" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px">
+        <option>Ligação realizada</option>
+        
+        <option>Não atendeu</option>
+        <option>Proposta de negociação</option>
+        <option>Acordo firmado</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Observação</label>
+      <textarea id="mc-obs" rows="3" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharModal('modal-contato')" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">Cancelar</button>
+      <button onclick="salvarContato()" style="padding:8px 16px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-weight:600;cursor:pointer">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Retido -->
+<div id="modal-retido" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:420px;max-width:95vw">
+    <div style="font-size:14px;font-weight:700;margin-bottom:16px">✅ Marcar como Retido</div>
+    <div id="mr-razao" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+    <input type="hidden" id="mr-cliente-id"/>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Ação que funcionou</label>
+      <select id="mr-acao" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px">
+        <option>Cliente pagou espontaneamente</option>
+        <option>Negociação de desconto</option>
+        <option>Parcelamento da dívida</option>
+        <option>Contato proativo funcionou</option>
+        <option>Acordo de prazo</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Observação</label>
+      <textarea id="mr-obs" rows="2" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharModal('modal-retido')" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">Cancelar</button>
+      <button onclick="salvarRetido()" style="padding:8px 16px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-weight:600;cursor:pointer">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+function fecharModal(id){ document.getElementById(id).style.display='none'; }
+function abrirContato(id, razao){
+  document.getElementById('mc-cliente-id').value=id;
+  document.getElementById('mc-razao').textContent=razao;
+  document.getElementById('mc-obs').value='';
+  document.getElementById('modal-contato').style.display='flex';
+}
+function abrirRetido(id, razao){
+  document.getElementById('mr-cliente-id').value=id;
+  document.getElementById('mr-razao').textContent=razao;
+  document.getElementById('mr-obs').value='';
+  document.getElementById('modal-retido').style.display='flex';
+}
+async function salvarContato(){
+  const fd=new FormData();
+  fd.append('cliente_id', document.getElementById('mc-cliente-id').value);
+  fd.append('tipo', document.getElementById('mc-tipo').value);
+  fd.append('obs', document.getElementById('mc-obs').value);
+  const r=await fetch('/cobranca/api/retencao-contato',{method:'POST',body:fd});
+  if((await r.json()).ok){ fecharModal('modal-contato'); alert('Contato registrado!'); }
+}
+async function salvarRetido(){
+  const fd=new FormData();
+  fd.append('cliente_id', document.getElementById('mr-cliente-id').value);
+  fd.append('acao', document.getElementById('mr-acao').value);
+  fd.append('obs', document.getElementById('mr-obs').value);
+  const r=await fetch('/cobranca/api/retencao-retido',{method:'POST',body:fd});
+  if((await r.json()).ok){ fecharModal('modal-retido'); location.reload(); }
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

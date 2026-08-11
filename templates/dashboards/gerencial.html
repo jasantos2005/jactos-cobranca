@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard Gerencial — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:15px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.content{padding:24px 28px}
+.secao{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin:20px 0 10px}
+.secao:first-child{margin-top:0}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:6px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:6px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:6px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;text-decoration:none;color:var(--text);display:block;transition:all .2s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.card-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px}
+.card-value{font-size:32px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.card-sub{font-size:11px;color:var(--muted2);margin-top:6px}
+.card-trend{position:absolute;top:16px;right:16px;font-size:18px}
+.card-icon{position:absolute;bottom:12px;right:16px;font-size:28px;opacity:.15}
+.alerta{border-left:4px solid var(--red)}
+.aviso{border-left:4px solid var(--amber)}
+.ok{border-left:4px solid var(--primary)}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">📊 Dashboard Gerencial</div>
+      <div class="header-sub">Visão executiva — {{ d.mes_atu }} | Atualizado agora</div>
+    </div>
+  </header>
+  <div class="content">
+
+    <div class="secao">💰 Saúde Financeira</div>
+    <div class="grid-4">
+      <a href="/cobranca/" class="card ok">
+        <div class="card-label">Receita Mensal</div>
+        <div class="card-value" style="color:var(--primary);font-size:22px">R$ {{ "%.0f"|format(d.rec_mensal) }}</div>
+        <div class="card-sub">{{ d.contratos }} contratos (+{{ d.contratos_var }}% vs {{ d.ano_ant }}) | ticket R$ {{ "%.2f"|format(d.ticket) }}</div>
+        <div style="font-size:10px;margin-top:4px;color:{% if d.rec_var > 0 %}var(--primary){% else %}var(--red){% endif %}">
+          {% if d.rec_var > 0 %}📈{% else %}📉{% endif %} {{ d.rec_var }}% vs jul/{{ d.ano_ant }} (R$ {{ "%.0f"|format(d.rec_ant) }})
+        </div>
+        <div class="card-icon">💰</div>
+      </a>
+      <a href="/cobranca/fila" class="card {% if d.taxa_inad > 15 %}alerta{% elif d.taxa_inad > 10 %}aviso{% else %}ok{% endif %}">
+        <div class="card-label">Inadimplência</div>
+        <div class="card-value" style="color:{% if d.taxa_inad > 15 %}var(--red){% elif d.taxa_inad > 10 %}var(--amber){% else %}var(--primary){% endif %}">{{ d.taxa_inad }}%</div>
+        <div class="card-sub">{{ d.total_inad }} clientes | R$ {{ "%.0f"|format(d.total_aberto) }} em aberto</div>
+        <div style="font-size:10px;margin-top:6px;line-height:1.8;color:var(--muted2)">
+          🔴 {{ d.mes_atu[:4] }}: <b style="color:var(--red)">{{ d.inad_ano_atual }}</b> (R$ {{ "%.0f"|format(d.inad_ano_atual_v) }})<br>
+          🟡 {{ d.ano_ant }}: <b style="color:var(--amber)">{{ d.inad_ano_ant_s }}</b> &nbsp;|&nbsp; 📦 Histórico: {{ d.inad_historico }}
+        </div>
+        <div class="card-icon">⚠️</div>
+      </a>
+      <a href="/cobranca/fila" class="card aviso">
+        <div class="card-label">Risco Real (40%)</div>
+        <div class="card-value" style="color:var(--amber);font-size:22px">R$ {{ "%.0f"|format(d.risco_real) }}</div>
+        <div class="card-sub">estimativa que não será recuperado</div>
+        <div class="card-icon">🎯</div>
+      </a>
+      <a href="/cobranca/retencao" class="card {% if d.vend_problema > 0 %}alerta{% else %}ok{% endif %}">
+        <div class="card-label">Vendedores c/ Problema</div>
+        <div class="card-value" style="color:{% if d.vend_problema > 0 %}var(--red){% else %}var(--primary){% endif %}">{{ d.vend_problema }}</div>
+        <div class="card-sub">acima de 15% de inadimplência</div>
+        <div class="card-icon">👤</div>
+      </a>
+    </div>
+
+    <hr class="divider"/>
+    <div class="secao">🚨 Alertas Operacionais</div>
+    <div class="grid-4">
+      <a href="/cobranca/nunca-pagaram" class="card {% if d.nunca_pagaram > 10 %}alerta{% elif d.nunca_pagaram > 0 %}aviso{% else %}ok{% endif %}">
+        <div class="card-label">Nunca Pagaram</div>
+        <div class="card-value" style="color:{% if d.nunca_pagaram > 10 %}var(--red){% elif d.nunca_pagaram > 0 %}var(--amber){% else %}var(--primary){% endif %}">{{ d.nunca_pagaram }}</div>
+        <div class="card-sub">clientes ativos sem 1ª parcela</div>
+        <div class="card-icon">🆕</div>
+      </a>
+      <a href="/cobranca/retiradas/auditoria" class="card {% if d.os39_abertas > 20 %}alerta{% else %}aviso{% endif %}">
+        <div class="card-label">OS Retirada (39)</div>
+        <div class="card-value" style="color:var(--amber)">{{ d.os39_abertas }}</div>
+        <div class="card-sub">equipamentos a retirar</div>
+        <div class="card-icon">🚛</div>
+      </a>
+      <a href="/cobranca/retiradas/auditoria" class="card {% if d.os38_pendentes > 10 %}alerta{% else %}aviso{% endif %}">
+        <div class="card-label">OS Estoque (38)</div>
+        <div class="card-value" style="color:{% if d.os38_pendentes > 10 %}var(--red){% else %}var(--amber){% endif %}">{{ d.os38_pendentes }}</div>
+        <div class="card-sub">devoluções pendentes</div>
+        <div class="card-icon">📦</div>
+      </a>
+      <a href="/cobranca/retencao" class="card {% if d.opa_criticos > 5 %}alerta{% else %}aviso{% endif %}">
+        <div class="card-label">Críticos OPA</div>
+        <div class="card-value" style="color:{% if d.opa_criticos > 5 %}var(--red){% else %}var(--amber){% endif %}">{{ d.opa_criticos }}</div>
+        <div class="card-sub">clientes com 2+ chamados/30d</div>
+        <div class="card-icon">📱</div>
+      </a>
+    </div>
+
+    <hr class="divider"/>
+    <div class="secao">📦 Qualidade de Vendas — {{ d.mes_ant }}</div>
+    <div class="grid-3">
+      <a href="/cobranca/qualidade-vendas" class="card aviso">
+        <div class="card-label">Taxa Inadimplência Vendas</div>
+        <div class="card-value" style="color:{% if d.qual_taxa > 15 %}var(--red){% else %}var(--amber){% endif %}">{{ d.qual_taxa }}%</div>
+        <div class="card-sub">{{ d.qual_inad }} de {{ d.qual_total }} ativados inadimplentes</div>
+        <div class="card-icon">📊</div>
+      </a>
+      <a href="/cobranca/qualidade-vendas" class="card alerta">
+        <div class="card-label">Prejuízo do Mês</div>
+        <div class="card-value" style="color:var(--red);font-size:22px">R$ {{ "%.0f"|format(d.qual_prejuizo) }}</div>
+        <div class="card-sub">equipamentos + comissão + receita perdida</div>
+        <div class="card-icon">💸</div>
+      </a>
+      <a href="/cobranca/qualidade-vendas" class="card alerta">
+        <div class="card-label">Pior Vendedor</div>
+        <div class="card-value" style="color:var(--red);font-size:16px;margin-top:4px">{{ d.pior_vendedor[:20] }}</div>
+        <div class="card-sub">R$ {{ "%.0f"|format(d.pior_prejuizo) }} de prejuízo</div>
+        <div class="card-icon">👤</div>
+      </a>
+    </div>
+
+    <hr class="divider"/>
+    <div class="secao">❌ Cancelamentos — {{ d.mes_atu }}</div>
+    <div class="grid-3">
+      <a href="/cobranca/cancelamentos" class="card aviso">
+        <div class="card-label">Total Cancelamentos</div>
+        <div class="card-value" style="color:var(--amber)">{{ d.cancel_total }}</div>
+        <div style="font-size:10px;margin-top:4px;color:{% if d.cancel_var > 0 %}var(--red){% else %}var(--primary){% endif %}">
+          {% if d.cancel_var > 0 %}📈{% else %}📉{% endif %} {{ d.cancel_var }}% vs jul/{{ d.ano_ant }} ({{ d.cancel_ant }})
+        </div>
+        <div class="card-icon">❌</div>
+      </a>
+      <a href="/cobranca/cancelamentos-inadimplencia" class="card alerta">
+        <div class="card-label">Por Inadimplência</div>
+        <div class="card-value" style="color:var(--red)">{{ d.cancel_inad }}</div>
+        <div class="card-sub">{{ ((d.cancel_inad/d.cancel_total*100)|int) if d.cancel_total else 0 }}% dos cancelamentos</div>
+        <div style="font-size:10px;margin-top:4px;color:{% if d.cancel_inad_var > 0 %}var(--red){% else %}var(--primary){% endif %}">
+          {% if d.cancel_inad_var > 0 %}📈{% else %}📉{% endif %} {{ d.cancel_inad_var }}% vs jul/{{ d.ano_ant }} ({{ d.cancel_inad_ant }})
+        </div>
+        <div class="card-icon">💔</div>
+      </a>
+      <a href="/cobranca/cancelamentos" class="card aviso">
+        <div class="card-label">Receita Perdida</div>
+        <div class="card-value" style="color:var(--amber);font-size:22px">R$ {{ "%.0f"|format(d.cancel_receita) }}</div>
+        <div class="card-sub">por mês com cancelamentos</div>
+        <div class="card-icon">📉</div>
+      </a>
+    </div>
+
+    <hr class="divider"/>
+    <div class="secao">🛡️ Retenção</div>
+    <div class="grid-3">
+      <a href="/cobranca/retencao" class="card ok">
+        <div class="card-label">Clientes em Risco</div>
+        <div class="card-value" style="color:var(--amber)">{{ d.ret_total }}</div>
+        <div class="card-sub">🔴 {{ d.ret_criticos }} críticos | 🟡 {{ d.ret_atencao }} atenção</div>
+        <div class="card-icon">🎯</div>
+      </a>
+      <a href="/cobranca/retencao" class="card ok">
+        <div class="card-label">Contatos Realizados</div>
+        <div class="card-value" style="color:var(--primary)">{{ d.contatos_mes }}</div>
+        <div class="card-sub">este mês</div>
+        <div class="card-icon">📞</div>
+      </a>
+      <a href="/cobranca/retencao" class="card ok">
+        <div class="card-label">Retidos com Sucesso</div>
+        <div class="card-value" style="color:var(--primary)">{{ d.retidos_mes }}</div>
+        <div class="card-sub">este mês</div>
+        <div class="card-icon">✅</div>
+      </a>
+    </div>
+
+  </div>
+</main>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

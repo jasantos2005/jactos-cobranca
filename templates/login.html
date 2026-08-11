@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Login — HubCobrança Cobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh;display:flex;align-items:stretch;}
+/* painel esquerdo */
+.lp-left{flex:1.2;background:#ffffff;padding:48px 44px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-width:0;}
+.lp-left::before{content:'';position:absolute;top:-120px;right:-120px;width:400px;height:400px;border-radius:50%;background:rgba(5,150,105,.06);pointer-events:none;}
+.lp-left::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;border-radius:50%;background:rgba(124,58,237,.04);pointer-events:none;}
+.lp-brand{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+.lp-brand-icon{width:38px;height:38px;border-radius:10px;background:#059669;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.lp-brand-name{font-size:18px;font-weight:900;color:#1e293b;letter-spacing:-.5px;}
+.lp-brand-name span{color:#00c8a0;}
+.lp-hero{position:relative;z-index:1;}
+.lp-hero-tag{display:inline-block;background:rgba(5,150,105,.08);border:1px solid rgba(0,200,160,.2);color:#059669;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px;}
+.lp-hero-title{font-size:28px;font-weight:900;color:#1e293b;line-height:1.2;margin-bottom:10px;letter-spacing:-.5px;}
+.lp-hero-title span{color:#059669;}
+.lp-hero-sub{font-size:13px;color:#475569;line-height:1.65;max-width:300px;}
+.lp-modules{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1;}
+.lp-mod{background:#f8fafc;border:0.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;transition:background .2s,border-color .2s;}
+.lp-mod:hover{background:#ecfdf5;border-color:rgba(5,150,105,.3);}
+.lp-mod-icon{font-size:18px;margin-bottom:8px;}
+.lp-mod-name{font-size:12px;font-weight:700;color:#1e293b;margin-bottom:3px;}
+.lp-mod-desc{font-size:11px;color:#64748b;line-height:1.4;}
+.lp-mod-badge{display:inline-block;margin-top:6px;font-size:10px;font-weight:600;color:#00c8a0;background:rgba(5,150,105,.08);border-radius:4px;padding:2px 7px;}
+.lp-mod-badge.novo{color:#f5a623;background:rgba(245,166,35,.12);}
+.lp-slider{position:relative;border-radius:14px;overflow:hidden;margin-top:16px}
+.lp-slide{display:none;padding:22px;border-radius:14px;animation:lpFade .5s ease}
+.lp-slide.active{display:block}
+@keyframes lpFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.lp-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.lp-slide-title{font-size:19px;font-weight:800;line-height:1.25;margin-bottom:8px;letter-spacing:-.3px}
+.lp-slide-sub{font-size:12px;color:#475569;line-height:1.6;margin-bottom:14px}
+.lp-slide-mods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lp-smod{background:#fff;border-radius:8px;padding:10px 12px;border:1px solid rgba(0,0,0,.06)}
+.lp-smod-icon{font-size:15px;margin-bottom:4px}
+.lp-smod-name{font-size:11px;font-weight:700;margin-bottom:2px}
+.lp-smod-desc{font-size:10px;color:#64748b}
+.lp-progress{height:3px;background:#e2e8f0;border-radius:3px;margin-top:12px}
+.lp-progress-bar{height:3px;background:#059669;width:0%;transition:width 5s linear;border-radius:3px}
+.lp-dots{display:flex;gap:5px;justify-content:center;margin-top:8px}
+.lp-dot{width:6px;height:6px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;display:inline-block}
+.lp-dot.active{background:#059669;width:16px;border-radius:3px}
+.lp-slider{position:relative;border-radius:14px;overflow:hidden;margin-top:24px;}
+.lp-slide{display:none;padding:24px;border-radius:14px;animation:fadeIn .5s ease}
+.lp-slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.lp-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.lp-slide-title{font-size:20px;font-weight:800;line-height:1.25;margin-bottom:8px;letter-spacing:-.3px}
+.lp-slide-sub{font-size:12px;color:#475569;line-height:1.6;margin-bottom:14px}
+.lp-slide-mods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lp-smod{background:#fff;border-radius:8px;padding:10px 12px;border:1px solid rgba(0,0,0,.06)}
+.lp-smod-icon{font-size:16px;margin-bottom:4px}
+.lp-smod-name{font-size:11px;font-weight:700;margin-bottom:2px}
+.lp-smod-desc{font-size:10px;color:#64748b}
+.lp-progress{height:3px;background:#e2e8f0;border-radius:0 0 14px 14px;margin-top:12px}
+.lp-progress-bar{height:3px;background:#059669;width:0%;transition:width 5s linear;border-radius:3px}
+.lp-dots{display:flex;gap:5px;justify-content:center;margin-top:10px}
+.lp-dot{width:6px;height:6px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;display:inline-block}
+.lp-dot.active{background:#059669;width:16px;border-radius:3px}
+/* painel direito */
+.lp-right{flex:1;background:#ffffff;border-left:1px solid #e2e8f0;padding:48px 44px;display:flex;flex-direction:column;justify-content:center;min-width:340px;max-width:480px;}
+.box{width:100%;}
+.logo{margin-bottom:28px;}
+.logo-mark{font-size:22px;font-weight:700;color:#059669;}
+.logo-sub{font-size:11px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+h2{font-size:16px;font-weight:600;margin-bottom:20px;color:#1e293b;}
+.field{margin-bottom:14px;}
+label{display:block;font-size:12px;color:#475569;margin-bottom:5px;font-weight:500;}
+input{width:100%;padding:9px 12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:7px;color:#1e293b;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;}
+input:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.1);}
+.btn{width:100%;padding:10px;background:#059669;color:#ffffff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.erro{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.2);padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:16px;}
+.link{margin-top:18px;font-size:12px;color:#64748b;}
+.link a{color:#059669;text-decoration:none;}
+.footer{text-align:center;margin-top:24px;font-size:11px;color:#94a3b8;}
+</style>
+</head>
+<body>
+
+  <!-- ESQUERDA: vitrine dos módulos -->
+  <div class="lp-left">
+    <div class="lp-brand">
+      <div class="lp-brand-icon">&#9889;</div>
+      <div class="lp-brand-name">Ia<span>Tech</span>Hub</div>
+    </div>
+
+    <div class="lp-hero">
+      <div class="lp-hero-tag">Plataforma ISP</div>
+      <div class="lp-hero-title">Tudo que seu<br>provedor <span>precisa</span></div>
+      <div class="lp-hero-sub">Automações integradas ao IXC Soft para escalar vendas, operações e retenção de clientes.</div>
+    </div>
+
+    <div class="lp-slider">
+      <div class="lp-slide active" style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5)">
+        <span class="lp-tag" style="background:#dcfce7;color:#059669">💰 Cobrança</span>
+        <div class="lp-slide-title" style="color:#1e293b">HubCobrança<br><span style="color:#059669">Controle total da inadimplência</span></div>
+        <div class="lp-slide-sub">Fila de cobrança, dashboard gerencial, retenção de clientes e análise de cancelamentos em tempo real.</div>
+        <div class="lp-slide-mods">
+          <div class="lp-smod"><div class="lp-smod-icon">📊</div><div class="lp-smod-name" style="color:#059669">Dashboard Gerencial</div><div class="lp-smod-desc">Visão executiva completa</div></div>
+          <div class="lp-smod"><div class="lp-smod-icon">🛡️</div><div class="lp-smod-name" style="color:#059669">Retenção</div><div class="lp-smod-desc">Score de risco por cliente</div></div>
+        </div>
+      </div>
+      <div class="lp-slide" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)">
+        <span class="lp-tag" style="background:#dbeafe;color:#2563eb">🛒 Comercial</span>
+        <div class="lp-slide-title" style="color:#1e293b">HubComercial<br><span style="color:#2563eb">Vendas inteligentes</span></div>
+        <div class="lp-slide-sub">Pré-cadastro, auditoria de contratos, consulta Serasa, ranking de vendedores e ativação automática no IXC.</div>
+        <div class="lp-slide-mods">
+          <div class="lp-smod"><div class="lp-smod-icon">✅</div><div class="lp-smod-name" style="color:#2563eb">Ativação Automática</div><div class="lp-smod-desc">Integrado ao IXC Soft</div></div>
+          <div class="lp-smod"><div class="lp-smod-icon">🏆</div><div class="lp-smod-name" style="color:#2563eb">Ranking Vendedores</div><div class="lp-smod-desc">Metas e desempenho</div></div>
+        </div>
+      </div>
+      <div class="lp-slide" style="background:linear-gradient(135deg,#fdf4ff,#fae8ff)">
+        <span class="lp-tag" style="background:#fae8ff;color:#7c3aed">🔧 Técnico</span>
+        <div class="lp-slide-title" style="color:#1e293b">HubProdutividade<br><span style="color:#7c3aed">Técnicos em campo</span></div>
+        <div class="lp-slide-sub">Ranking de técnicos, controle de OS, SLA em tempo real e relatórios automáticos via Telegram.</div>
+        <div class="lp-slide-mods">
+          <div class="lp-smod"><div class="lp-smod-icon">📈</div><div class="lp-smod-name" style="color:#7c3aed">Ranking Técnicos</div><div class="lp-smod-desc">Score por desempenho</div></div>
+          <div class="lp-smod"><div class="lp-smod-icon">⏱️</div><div class="lp-smod-name" style="color:#7c3aed">SLA em Tempo Real</div><div class="lp-smod-desc">Monitoramento de OS</div></div>
+        </div>
+      </div>
+      <div class="lp-slide" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)">
+        <span class="lp-tag" style="background:#ffedd5;color:#ea580c">🚛 Retiradas</span>
+        <div class="lp-slide-title" style="color:#1e293b">HubTécnico<br><span style="color:#ea580c">Gestão de campo</span></div>
+        <div class="lp-slide-sub">Controle de retiradas, agendamentos, frota e rastreamento de técnicos integrado ao IXC.</div>
+        <div class="lp-slide-mods">
+          <div class="lp-smod"><div class="lp-smod-icon">📦</div><div class="lp-smod-name" style="color:#ea580c">Controle de Estoque</div><div class="lp-smod-desc">Equipamentos e comodatos</div></div>
+          <div class="lp-smod"><div class="lp-smod-icon">🗓️</div><div class="lp-smod-name" style="color:#ea580c">Agendamentos</div><div class="lp-smod-desc">Rota otimizada</div></div>
+        </div>
+      </div>
+      <div class="lp-progress"><div class="lp-progress-bar" id="lp-bar"></div></div>
+      <div class="lp-dots">
+        <span class="lp-dot active" onclick="lpGo(0)"></span>
+        <span class="lp-dot" onclick="lpGo(1)"></span>
+        <span class="lp-dot" onclick="lpGo(2)"></span>
+        <span class="lp-dot" onclick="lpGo(3)"></span>
+      </div>
+    </div>
+      <div class="lp-mod">
+        <div class="lp-mod-icon">&#129309;</div>
+        <div class="lp-mod-name">Hub Retencao</div>
+        <div class="lp-mod-desc">Atendimento de cancelamentos e reconquista</div>
+        <div class="lp-mod-badge novo">Novo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIREITA: formulário -->
+  <div class="lp-right">
+    <div class="box">
+      <div class="logo">
+        <div class="logo-mark">HubCobrança</div>
+        <div class="logo-sub">Cobrança</div>
+      </div>
+      <h2>Acesso ao sistema</h2>
+
+      {% if erro %}
+        <div class="erro">{{ erro }}</div>
+      {% endif %}
+
+      <form method="post" action="/login">
+        <div class="field">
+          <label>Login</label>
+          <input type="text" name="login" autocomplete="username" autofocus required placeholder="Seu login"/>
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" name="senha" autocomplete="current-password" required placeholder="Sua senha"/>
+        </div>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+
+      <div class="link"><a href="/registro">Não tem conta? Cadastre-se</a></div>
+      <div class="footer" style="text-align:center;margin-top:24px;font-size:11px;color:#94a3b8;line-height:1.8">
+        <div><b style="color:#059669">HubCobrança</b> v5.09</div>
+        <div>© 2026 <b style="color:#1e293b">IaTechHub</b> · Todos os direitos reservados</div>
+        <div style="margin-top:2px;font-size:10px">Desenvolvido por <b style="color:#059669">Ailton Santos</b></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let _lpc = 0;
+const _lps = document.querySelectorAll('.lp-slide');
+const _lpd = document.querySelectorAll('.lp-dot');
+const _lpb = document.getElementById('lp-bar');
+function lpGo(n){
+  _lps[_lpc].classList.remove('active');
+  _lpd[_lpc].classList.remove('active');
+  _lpc = n;
+  _lps[_lpc].classList.add('active');
+  _lpd[_lpc].classList.add('active');
+  if(_lpb){_lpb.style.transition='none';_lpb.style.width='0%';setTimeout(()=>{_lpb.style.transition='width 5s linear';_lpb.style.width='100%';},50);}
+}
+let _lpt = setInterval(()=>lpGo((_lpc+1)%_lps.length), 5000);
+const _lps0 = document.querySelector('.lp-slider');
+if(_lps0){
+  _lps0.addEventListener('mouseenter',()=>clearInterval(_lpt));
+  _lps0.addEventListener('mouseleave',()=>{_lpt=setInterval(()=>lpGo((_lpc+1)%_lps.length),5000);});
+}
+lpGo(0);
+</script>
+<script>
+let _lpc=0;
+const _lps=document.querySelectorAll('.lp-slide');
+const _lpd=document.querySelectorAll('.lp-dot');
+const _lpb=document.getElementById('lp-bar');
+function lpGo(n){
+  _lps[_lpc].classList.remove('active');
+  _lpd[_lpc].classList.remove('active');
+  _lpc=n;
+  _lps[_lpc].classList.add('active');
+  _lpd[_lpc].classList.add('active');
+  if(_lpb){_lpb.style.transition='none';_lpb.style.width='0%';setTimeout(()=>{_lpb.style.transition='width 5s linear';_lpb.style.width='100%';},50);}
+}
+let _lpt=setInterval(()=>lpGo((_lpc+1)%_lps.length),5000);
+const _lps0=document.querySelector('.lp-slider');
+if(_lps0){
+  _lps0.addEventListener('mouseenter',()=>clearInterval(_lpt));
+  _lps0.addEventListener('mouseleave',()=>{_lpt=setInterval(()=>lpGo((_lpc+1)%_lps.length),5000);});
+}
+lpGo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Auditoria de Retiradas — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--cyan:#39c5cf}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:28px;font-weight:700;margin-top:6px}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;font-family:'Inter',sans-serif}
+input[type=date]:focus{border-color:var(--primary)}
+.btn-filter{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-ok{background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-sem-foto{background:rgba(240,160,0,.15);color:var(--amber)}
+.badge-sem-tecnico{background:rgba(248,81,73,.15);color:var(--red)}
+.ranking-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ranking-item:last-child{border-bottom:none}
+.ranking-pos{font-size:18px;font-weight:700;color:var(--muted2);width:30px;text-align:center}
+.ranking-nome{font-size:13px;font-weight:600;flex:1}
+.ranking-total{font-size:20px;font-weight:700;color:var(--primary)}
+.ranking-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px}
+.ranking-bar-fill{height:4px;background:var(--primary);border-radius:2px}
+.tab-btns{display:flex;gap:6px;margin-bottom:16px}
+.tab-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s}
+.tab-btn.active{background:var(--primary);color:#0d1117;border-color:var(--primary);font-weight:600}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">🔍 Auditoria de Retiradas</div>
+      <div class="header-sub">Monitoramento de OS 39 — técnico, foto e devolução ao estoque</div>
+    </div>
+    <div class="filters">
+      <input type="date" id="data-ini" value="{{ data_ini }}"/>
+      <input type="date" id="data-fim" value="{{ data_fim }}"/>
+      <button class="btn-filter" onclick="filtrar()">Filtrar</button>
+    </div>
+  </header>
+  <div class="content">
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">Total 7 dias</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.total_7d or 0 }}</div>
+        <div class="kpi-sub">OS retirada finalizadas</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">✅ Válidas</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.validas or 0 }}</div>
+        <div class="kpi-sub">com técnico e foto</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">📷 Sem foto</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.sem_foto or 0 }}</div>
+        <div class="kpi-sub">pendente auditoria</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">👷 Sem técnico</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.sem_tecnico or 0 }}</div>
+        <div class="kpi-sub">não atribuído</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Ranking técnicos -->
+      <div class="card">
+        <div class="card-title">🏆 Ranking de Técnicos <span style="font-size:11px;color:var(--muted2)">{{ data_ini }} → {{ data_fim }}</span></div>
+        {% set max_ret = ranking[0].total_retiradas if ranking else 1 %}
+        {% for t in ranking %}
+        <div class="ranking-item">
+          <div class="ranking-pos">{{ loop.index }}</div>
+          <div style="flex:1">
+            <div class="ranking-nome">{{ t.tecnico }}</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <div class="ranking-bar" style="flex:1">
+                <div class="ranking-bar-fill" style="width:{{ (t.total_retiradas / max_ret * 100)|int }}%"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">
+              📷 {{ t.com_foto }} com foto
+              {% if t.sem_foto > 0 %}<span style="color:var(--amber)"> · ⚠️ {{ t.sem_foto }} sem foto</span>{% endif %}
+            </div>
+          </div>
+          <div class="ranking-total">{{ t.total_retiradas }}</div>
+        </div>
+        {% else %}
+        <p style="color:var(--muted2);font-size:13px">Nenhuma retirada no período.</p>
+        {% endfor %}
+      </div>
+
+      <!-- OS pendentes auditoria -->
+      <div class="card">
+        <div class="card-title">⚠️ Pendentes de Auditoria <span style="font-size:11px;color:var(--muted2)">últimos 7 dias</span></div>
+        <div class="tab-btns">
+          <button class="tab-btn active" onclick="filtrarTabela('todos')">Todos</button>
+          <button class="tab-btn" onclick="filtrarTabela('sem_foto')">Sem foto</button>
+          <button class="tab-btn" onclick="filtrarTabela('sem_tecnico')">Sem técnico</button>
+          <button class="tab-btn" onclick="filtrarTabela('ok')">✅ OK</button>
+        </div>
+        <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+        <table id="tabela-os">
+          <thead><tr>
+            <th>OS</th><th>Cliente</th><th>Técnico</th><th>Data</th><th>Status</th>
+          </tr></thead>
+          <tbody>
+          {% for os in os_pendentes %}
+          <tr data-status="{{ os.status_auditoria }}">
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px">#{{ os.os_id }}</td>
+            <td><strong style="font-size:12px">{{ os.razao }}</strong></td>
+            <td style="font-size:12px;color:var(--muted)">{{ os.tecnico or '—' }}</td>
+            <td style="font-size:11px;color:var(--muted2)">{{ os.data_fechamento }}</td>
+            <td>
+              {% if os.status_auditoria == 'ok' %}
+                <span class="badge badge-ok">✅ OK</span>
+              {% elif os.status_auditoria == 'sem_foto' %}
+                <span class="badge badge-sem-foto">📷 Sem foto</span>
+              {% else %}
+                <span class="badge badge-sem-tecnico">👷 Sem técnico</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="text-align:center;color:var(--muted2);padding:24px">Nenhuma OS encontrada.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+function filtrar(){
+  const ini = document.getElementById('data-ini').value;
+  const fim = document.getElementById('data-fim').value;
+  location.href = `/cobranca/retiradas/auditoria?data_ini=${ini}&data_fim=${fim}`;
+}
+function filtrarTabela(status){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('#tabela-os tbody tr').forEach(tr=>{
+    tr.style.display = (status==='todos' || tr.dataset.status===status) ? '' : 'none';
+  });
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

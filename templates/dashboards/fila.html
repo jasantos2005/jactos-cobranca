@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Primeira Cobrança — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--cyan:#39c5cf}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:14px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s}
+.filter-btn:hover{color:var(--text);border-color:var(--muted)}
+.filter-btn.active{background:var(--primary);color:#0d1117;border-color:var(--primary);font-weight:600}
+.search-box{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;width:200px;font-family:'Inter',sans-serif}
+.search-box:focus{border-color:var(--primary)}
+.content{padding:20px 28px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.cli-link{color:var(--text);font-weight:600;cursor:pointer;font-size:13px}
+.cli-link:hover{color:var(--primary);text-decoration:underline}
+.cli-doc{font-size:11px;color:var(--muted2);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.cli-id{font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace}
+.tel{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);cursor:pointer}
+.tel:hover{text-decoration:underline}
+.valor{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary)}
+.badge-atraso{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.badge-30{background:rgba(240,160,0,.15);color:var(--amber)}
+.badge-60{background:rgba(240,120,0,.15);color:#f07800}
+.badge-90{background:rgba(248,81,73,.15);color:var(--red)}
+.badge-90p{background:rgba(248,81,73,.25);color:#ff6b6b}
+.btn{padding:6px 12px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-green{background:var(--primary);color:#0d1117}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted);font-size:11px}
+.btn:hover{opacity:.85}
+.paginacao{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+.pag-btns{display:flex;gap:6px}
+.pag-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.pag-btn:hover:not([disabled]){color:var(--text)}
+.pag-btn[disabled]{opacity:.3;cursor:not-allowed}
+.empty{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
+.page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:900px;display:flex;flex-direction:column;max-height:90vh;overflow:hidden}
+.modal-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0}
+.modal-header-left{flex:1}
+.modal-title{font-size:16px;font-weight:700}
+.modal-subtitle{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;flex-shrink:0;padding:0 4px}
+.modal-close:hover{color:var(--text)}
+.modal-scroll{overflow-y:auto;flex:1}
+.modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:20px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--surface)}
+.sec-title{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+.info-item label{display:block;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.info-item .val{font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.copy-btn{background:none;border:none;color:var(--primary);font-size:11px;cursor:pointer;padding:0;line-height:1}
+.copy-btn:hover{text-decoration:underline}
+.status-ativo{color:var(--primary);font-weight:600}
+.status-inativo{color:var(--red);font-weight:600}
+.status-bloqueado{color:var(--amber);font-weight:600}
+.status-cancelado{color:var(--muted2);font-weight:600}
+.fat-table{width:100%;border-collapse:collapse;font-size:12px}
+.fat-table th{padding:7px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border);text-align:left}
+.fat-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.fat-table tr:last-child td{border-bottom:none}
+.os-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.os-card:last-child{margin-bottom:0}
+.os-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px}
+.os-assunto{font-size:12px;font-weight:600}
+.os-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.os-proto{font-size:11px;color:var(--muted2);font-family:'JetBrains Mono',monospace}
+.os-msg{font-size:12px;color:var(--muted);line-height:1.5;margin-top:4px}
+.badge-s{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.bs-a{background:rgba(0,200,160,.15);color:var(--primary)}
+.bs-f{background:rgba(139,148,158,.1);color:var(--muted)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field label{display:block;font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+select,textarea,input[type=date]{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;padding:8px 10px;outline:none;font-family:'Inter',sans-serif}
+select:focus,textarea:focus,input[type=date]:focus{border-color:var(--primary)}
+textarea{resize:vertical;min-height:70px}
+#campo-promessa{display:none;transition:all .2s}
+.pago-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.pago-row input{width:16px;height:16px;cursor:pointer;accent-color:var(--primary)}
+.pago-row label{font-size:13px;cursor:pointer}
+.loading-m{text-align:center;padding:40px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:#0f2a1f;border:1px solid var(--primary);color:var(--primary);padding:10px 18px;border-radius:8px;font-size:13px;z-index:999;display:none;font-weight:600}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">Primeira Cobrança</div>
+      <div class="header-sub">{{ total }} faturas aguardando cobrança</div>
+    </div>
+    <div class="filters">
+      {# Degraus: 120=+90d, 90=61-90d, 60=31-60d, 30=1-30d — ordem de prioridade #}
+      {# Liberado = degrau_liberado e todos os anteriores (mais antigos) #}
+      {% set lib120 = true %}
+      {% set lib90  = degrau_liberado in ['90','60','30'] %}
+      {% set lib60  = degrau_liberado in ['60','30'] %}
+      {% set lib30  = degrau_liberado in ['30'] %}
+
+      {% if is_admin %}
+        <button class="filter-btn {% if filtros.faixa=='120' %}active{% endif %}" onclick="setFaixa('120')">+90d</button>
+        <button class="filter-btn {% if filtros.faixa=='90' %}active{% endif %}"  onclick="setFaixa('90')">61–90d</button>
+        <button class="filter-btn {% if filtros.faixa=='60' %}active{% endif %}"  onclick="setFaixa('60')">31–60d</button>
+        <button class="filter-btn {% if filtros.faixa=='30' %}active{% endif %}"  onclick="setFaixa('30')">1–30d</button>
+        <span style="margin-left:12px;font-size:11px;color:var(--muted)">|</span>
+        <button class="filter-btn" style="margin-left:8px;background:rgba(255,180,0,.1);color:var(--amber);border-color:var(--amber)" onclick="abrirLiberarDegrau()">⚙️ Liberar degrau</button>
+      {% else %}
+        {% if faixa_90p_ok or lib120 %}<button class="filter-btn {% if filtros.faixa=='120' %}active{% endif %}" onclick="setFaixa('120')">+90d{% if faixa_90p_ok and not lib120 %} 🔓{% endif %}</button>
+        {% else %}<button class="filter-btn" disabled style="opacity:.4;cursor:not-allowed" title="🔒 Não liberado">🔒 +90d</button>{% endif %}
+        {% if faixa_90_ok or lib90 %}<button class="filter-btn {% if filtros.faixa=='90' %}active{% endif %}" onclick="setFaixa('90')">61–90d{% if faixa_90_ok and not lib90 %} 🔓{% endif %}</button>
+        {% else %}<button class="filter-btn" disabled style="opacity:.4;cursor:not-allowed" title="🔒 Não liberado">🔒 61–90d</button>{% endif %}
+        {% if faixa_60_ok or lib60 %}<button class="filter-btn {% if filtros.faixa=='60' %}active{% endif %}" onclick="setFaixa('60')">31–60d{% if faixa_60_ok and not lib60 %} 🔓{% endif %}</button>
+        {% else %}<button class="filter-btn" disabled style="opacity:.4;cursor:not-allowed" title="🔒 Não liberado">🔒 31–60d</button>{% endif %}
+        {% if faixa_30_ok or lib30 %}<button class="filter-btn {% if filtros.faixa=='30' %}active{% endif %}" onclick="setFaixa('30')">1–30d{% if faixa_30_ok and not lib30 %} 🔓{% endif %}</button>
+        {% else %}<button class="filter-btn" disabled style="opacity:.4;cursor:not-allowed" title="🔒 Não liberado">🔒 1–30d</button>{% endif %}
+      {% endif %}
+      <button class="filter-btn {% if filtros.ocultar_cancelados %}active{% endif %}" onclick="toggleCancelados()" style="border-color:var(--amber);{% if filtros.ocultar_cancelados %}background:var(--amber);color:#0d1117;{% endif %}">⊘ Ocultar Cancelados</button>
+      <input class="search-box" id="busca" type="search" placeholder="Buscar cliente, CPF..." value="{{ filtros.busca or '' }}" onchange="setBusca(this.value)"/>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="card">
+      <div class="card-title">Boletos para cobrar</div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID Cliente</th><th>Cliente</th><th>Telefone</th>
+            <th>Vencimento</th><th>Valor</th><th>Atraso</th>
+            <th>OS Retirada</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in dados %}
+          <tr{% if row.cobrado_hoje %} style="background:rgba(240,160,0,.06);border-left:3px solid var(--amber)"{% endif %}>
+            <td><span class="cli-id">#{{ row.id_cliente }}</span></td>
+            <td>
+              {% if row.paga_em_dia %}<span style="display:inline-block;background:rgba(248,81,73,.15);color:#ff6b6b;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:5px;vertical-align:middle">⚠️ Paga outras faturas</span>{% endif %}{% if row.recorrente %}<span style="display:inline-block;background:rgba(240,160,0,.15);color:var(--amber);font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:5px;vertical-align:middle">🔄 Recorrente · {{ row.ultima_cobranca }}</span>{% endif %}{% if row.recem_ativado %}<span style="background:rgba(248,81,73,.15);color:#f85149;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:5px;vertical-align:middle">🆕 Nunca pagou</span>{% endif %}<span class="cli-link" onclick="abrirModal({{ row.id_cliente }}, {{ row.id_fatura }})">{{ row.razao }}</span>
+              <div class="cli-doc">{{ row.cpf_cnpj or '—' }}</div>
+            </td>
+            <td>
+              {% if row.telefone %}<span class="tel" onclick="copiar('{{ row.telefone }}',this)">{{ row.telefone }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td style="font-size:12px;color:var(--muted)">{{ row.data_vencimento }}</td>
+            <td class="valor">R$ {{ "%.2f"|format(row.valor_aberto or 0) }}</td>
+            <td>
+              {% set d = row.dias_atraso %}
+              {% if d <= 30 %}<span class="badge-atraso badge-30">{{ d }}d</span>
+              {% elif d <= 60 %}<span class="badge-atraso badge-60">{{ d }}d</span>
+              {% elif d <= 90 %}<span class="badge-atraso badge-90">{{ d }}d</span>
+              {% else %}<span class="badge-atraso badge-90p">{{ d }}d</span>{% endif %}
+            </td>
+            <td>
+              {% if row.tem_os %}<span style="font-size:11px;color:var(--amber)">⚠ OS aberta</span>
+              {% else %}<button class="btn btn-outline" onclick="abrirOS({{ row.id_cliente }},this)">+ Abrir OS</button>{% endif %}
+            </td>
+            <td><button class="btn btn-blue" onclick="abrirModal({{ row.id_cliente }}, {{ row.id_fatura }})">Cobrar</button></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="empty">Nenhuma fatura na fila.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="paginacao">
+        <span>{{ total }} faturas · Pág. {{ filtros.pagina }}/{{ paginas }}</span>
+        <div class="pag-btns">
+          <button class="pag-btn" onclick="mudaPagina(-1)" {% if filtros.pagina <= 1 %}disabled{% endif %}>‹ Anterior</button>
+          <button class="pag-btn" onclick="mudaPagina(1)" {% if filtros.pagina >= paginas %}disabled{% endif %}>Próximo ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+</main>
+
+<!-- OVERLAY MODAL -->
+<div class="overlay" id="overlay" onclick="clickOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-title" id="m-nome">—</div>
+        <div class="modal-subtitle" id="m-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-scroll">
+      <div class="modal-body" id="modal-body">
+        <div class="loading-m">Buscando dados do cliente...</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-green" onclick="registrar(false,this)">✓ Registrar Cobrança</button>
+      <button class="btn" style="background:rgba(0,200,160,.15);color:var(--primary);border:1px solid var(--primary)" onclick="registrarEAbrirOS()">✓ Registrar + Abrir OS Cobrança</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let faixaAtual='{{ filtros.faixa }}', buscaAtual='{{ filtros.busca or "" }}', pagAtual={{ filtros.pagina }}, ocultarCancelados={{ 'true' if filtros.ocultar_cancelados else 'false' }};
+let fnIdAtual=null;
+let clienteAtual=null;
+
+function setFaixa(f){location.href=`/cobranca/fila?faixa=${f}&pagina=1&busca=${buscaAtual}&ocultar_cancelados=${ocultarCancelados}`}
+
+async function abrirLiberarDegrau(){
+  const degraus = [
+    {val:'120', label:'+90d (mais antigo)'},
+    {val:'90',  label:'61–90d'},
+    {val:'60',  label:'31–60d'},
+    {val:'30',  label:'1–30d (mais novo)'},
+  ];
+  const opts = degraus.map(d=>`<option value="${d.val}">${d.label}</option>`).join('');
+  const html = `<div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+    <b style="font-size:14px">⚙️ Liberar degrau manualmente</b>
+    <p style="font-size:12px;color:var(--muted);margin:0">Selecione a faixa mais antiga que os operadores poderão acessar. As faixas mais recentes continuarão bloqueadas.</p>
+    <select id="sel-degrau" style="padding:8px;border-radius:6px;border:1px solid var(--border)">${opts}</select>
+    <button class="btn btn-green" onclick="confirmarDegrau()">✓ Confirmar</button>
+  </div>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function confirmarDegrau(){
+  const degrau = document.getElementById('sel-degrau').value;
+  const fd = new FormData();
+  fd.append('degrau', degrau);
+  const r = await fetch('/cobranca/api/fila/liberar-degrau', {method:'POST', body:fd});
+  const res = await r.json();
+  if(res.ok){ toast('✓ Degrau liberado: ' + degrau); closeModal(); location.reload(); }
+  else { toast('Erro: ' + res.msg); }
+}
+function toggleCancelados(){location.href=`/cobranca/fila?faixa=${faixaAtual}&pagina=1&busca=${buscaAtual}&ocultar_cancelados=${!ocultarCancelados}`}
+function setBusca(v){clearTimeout(window._bt);window._bt=setTimeout(()=>{location.href=`/cobranca/fila?faixa=${faixaAtual}&pagina=1&busca=${encodeURIComponent(v)}&ocultar_cancelados=${ocultarCancelados}`},500)}
+function mudaPagina(d){location.href=`/cobranca/fila?faixa=${faixaAtual}&pagina=${pagAtual+d}&busca=${buscaAtual}&ocultar_cancelados=${ocultarCancelados}`}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+
+function copiar(txt,el){
+  navigator.clipboard.writeText(txt).then(()=>{
+    const o=el.textContent; el.textContent='✓ Copiado'; el.style.color='var(--primary)';
+    setTimeout(()=>{el.textContent=o;el.style.color=''},1800);
+  });
+}
+
+function statusContrato(ativo, statusInternet){
+  const a = (ativo||'').toString().toUpperCase();
+  const s = (statusInternet||'').toUpperCase();
+  if(a==='N' || a==='0') return '<span class="status-cancelado">⊘ Cancelado</span>';
+  if(s==='CA') return '<span class="status-bloqueado">⚠ Bloqueio Automático</span>';
+  if(s==='CM') return '<span class="status-bloqueado">⚠ Bloqueio Manual</span>';
+  if(s==='B')  return '<span class="status-bloqueado">⚠ Bloqueado</span>';
+  if(s==='FA') return '<span class="status-bloqueado">⚠ Bloq. Financeiro</span>';
+  if(s==='S' || s==='A') return '<span class="status-ativo">● Ativo</span>';
+  if(s==='I') return '<span class="status-inativo">○ Inativo</span>';
+  if(s==='N') return '<span class="status-bloqueado">⚠ Bloqueado</span>';
+  return `<span style="color:var(--muted)">${s||'—'}</span>`;
+}
+
+async function abrirModal(idCliente, fnId){
+  fnIdAtual   = fnId;
+  clienteAtual = idCliente;
+  document.getElementById('m-nome').textContent = 'Carregando...';
+  document.getElementById('m-subtitle').innerHTML = '';
+  document.getElementById('modal-body').innerHTML = '<div class="loading-m">Buscando dados do cliente...</div>';
+  document.getElementById('overlay').classList.add('open');
+
+  const r   = await fetch(`/cobranca/api/cliente/${idCliente}`);
+  const res = await r.json();
+  const c   = res.cliente || {};
+  const fat = res.faturas  || [];
+  const os  = res.os       || [];
+
+  document.getElementById('m-nome').textContent = c.razao || '—';
+  // Verifica OS de cobrança aberta (após modal renderizado)
+  const _idClienteOS = idCliente;
+  setTimeout(()=>{
+    fetch(`/cobranca/api/check-os-cobranca/${_idClienteOS}`)
+      .then(r=>r.json())
+      .then(osData=>{
+        const el = document.getElementById('os-cobranca-status');
+        if(!el) return;
+        if(osData.aberta){
+          el.innerHTML=`<div style="background:rgba(240,160,0,.12);border:1px solid var(--amber);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--amber);margin-bottom:8px">⚠ OS de Cobrança já aberta: <strong>#${osData.id_os}</strong> — ${osData.data_abertura}</div>`;
+        } else {
+          el.innerHTML=`<div style="background:rgba(0,200,160,.08);border:1px solid var(--primary);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--primary);margin-bottom:8px">✓ Nenhuma OS de cobrança aberta</div>`;
+        }
+      }).catch(()=>{});
+  }, 100);
+  document.getElementById('m-subtitle').innerHTML =
+    `<span>ID #${c.id||'—'}</span>` +
+    `<span style="font-family:'JetBrains Mono',monospace">${c.cnpj_cpf||'—'}</span>` +
+    statusContrato(c.ativo, c.status_internet);
+
+  // Telefones
+  const fones = [
+    c.fone          ? {label:'Fixo',     val:c.fone}          : null,
+    c.telefone_comercial ? {label:'Comercial', val:c.telefone_comercial} : null,
+    c.telefone_celular   ? {label:'Celular',   val:c.telefone_celular}   : null,
+    c.whatsapp      ? {label:'WhatsApp', val:c.whatsapp}      : null,
+  ].filter(Boolean);
+
+  const fonesHtml = fones.length
+    ? fones.map(f=>`<span style="margin-right:14px"><span style="font-size:10px;color:var(--muted2)">${f.label}: </span><span class="tel" onclick="copiar('${f.val}',this)">${f.val}</span></span>`).join('')
+    : '—';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div>
+      <div class="sec-title">Dados do Cliente</div>
+      <div id="os-cobranca-status"></div>
+      <div class="info-grid">
+        <div class="info-item"><label>Telefones</label>
+          <div class="val" style="flex-wrap:wrap;align-items:center;gap:8px">
+            ${fonesHtml}
+            ${c.whatsapp ? `<a href="https://wa.me/55${c.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent('Olá! Aqui é da ClickDF 📶\nSr(a). '+c.razao+', existe mensalidade em aberto referente ao contrato '+(fat[0]?.id_contrato||'')+'.')}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;background:rgba(37,211,102,.15);color:#25d366;font-size:12px;font-weight:600;text-decoration:none;border:1px solid rgba(37,211,102,.3)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.122 1.528 5.862L.057 23.454a.75.75 0 00.918.918l5.63-1.474A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.898 0-3.677-.52-5.2-1.426l-.374-.222-3.878 1.016 1.033-3.77-.242-.389A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+              WhatsApp
+            </a>` : ''}
+          </div>
+        </div>
+        <div class="info-item"><label>E-mail</label>
+          <div class="val">${c.email||'—'}${c.email?`<button class="copy-btn" onclick="copiar('${c.email}',this)">📋 copiar</button>`:''}</div>
+        </div>
+        <div class="info-item" style="grid-column:1/-1"><label>Endereço</label>
+          <div class="val">${[c.endereco+(c.numero&&c.numero!='SN'?', '+c.numero:''),c.bairro,c.cidade,c.uf].filter(Boolean).join(' — ')||'—'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-title">Faturas em Aberto — ${fat.length} fatura(s) &nbsp;<span id="total-sel" style="color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:11px"></span></div>
+      ${fat.length ? `<table class="fat-table">
+        <thead><tr><th style="width:32px"></th><th>Doc.</th><th>Vencimento</th><th>Valor</th><th>Atraso</th></tr></thead>
+        <tbody>${fat.map((f,i)=>`<tr style="cursor:pointer" onclick="toggleFatura(${i})">
+          <td><input type="checkbox" id="fat-${i}" data-id="${f.id}" data-val="${f.valor_aberto||0}" onchange="calcTotal()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--primary)"/></td>
+          <td style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:11px">${f.id||'—'}</td>
+          <td style="font-size:12px">${f.data_vencimento||'—'}</td>
+          <td class="valor" style="font-size:12px">R$ ${parseFloat(f.valor_aberto||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+          <td><span class="badge-atraso ${f.dias_atraso<=30?'badge-30':f.dias_atraso<=60?'badge-60':f.dias_atraso<=90?'badge-90':'badge-90p'}">${f.dias_atraso}d</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted2);margin-top:6px">Selecione as faturas que estão sendo cobradas neste contato.</div>` : '<p style="font-size:12px;color:var(--muted2)">Nenhuma fatura em aberto.</p>'}
+    </div>
+
+    <div>
+      <div class="sec-title">Histórico de OS — ${os.length} registro(s)</div>
+      ${os.length ? os.map(o=>`<div class="os-card">
+        <div class="os-top">
+          <span class="os-assunto">${o.assunto||'OS'}</span>
+          <div class="os-meta">
+            <span class="os-proto">#${o.protocolo||o.id}</span>
+            <span class="badge-s ${o.status==='A'?'bs-a':'bs-f'}">${o.status==='A'?'Aberta':'Fechada'}</span>
+            <span style="font-size:10px;color:var(--muted2)">${o.data_abertura||''}${o.data_fechamento?' → '+o.data_fechamento:''}</span>
+          </div>
+        </div>
+        ${o.mensagem?`<div class="os-msg">${o.mensagem}</div>`:''}
+      </div>`).join('') : '<p style="font-size:12px;color:var(--muted2)">Nenhuma OS de cobrança encontrada.</p>'}
+    </div>
+
+    <div>
+      <div class="sec-title">Registrar Cobrança</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Ação realizada</label>
+          <select id="m-acao" onchange="checkPromessa()">
+            <option value="">Selecione a ação...</option>
+            <option>Ligação realizada</option>
+            <option>Não atendeu</option>
+            <option>Caixa postal</option>
+            <option>Número inexistente</option>
+            
+            <option>Promessa de pagamento</option>
+            <option>Cliente vai pagar hoje</option>
+            
+            <option>Pagamento confirmado</option>
+            <option>📦 Material recolhido</option>
+            <option>🚛 Solicitar retirada</option>
+          </select>
+        </div>
+        <div class="form-field" id="campo-promessa">
+          <label>Data da promessa</label>
+          <input type="date" id="m-data-promessa"/>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top:12px">
+        <label>Observação</label>
+        <textarea id="m-obs" placeholder="Descreva o contato realizado..."></textarea>
+      </div>
+      <div class="pago-row">
+        <input type="checkbox" id="m-pago"/>
+        <label for="m-pago">Marcar como pago</label>
+      </div>
+    </div>
+  `;
+}
+
+function checkPromessa(){
+  const v = document.getElementById('m-acao').value;
+  document.getElementById('campo-promessa').style.display = v==='Promessa de pagamento'?'block':'none';
+}
+
+function fecharModal(){
+  document.getElementById('overlay').classList.remove('open');
+  fnIdAtual=null;
+}
+function clickOverlay(e){ if(e.target===document.getElementById('overlay')) fecharModal(); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') fecharModal(); });
+
+function toggleFatura(i){
+  const cb = document.getElementById('fat-'+i);
+  if(cb) cb.checked = !cb.checked;
+  calcTotal();
+}
+
+function calcTotal(){
+  const cbs = document.querySelectorAll('[id^="fat-"]');
+  let total=0, count=0;
+  cbs.forEach(cb=>{ if(cb.checked){ total+=parseFloat(cb.dataset.val||0); count++; } });
+  const el = document.getElementById('total-sel');
+  if(el) el.textContent = count>0 ? `— ${count} selecionada(s) · Total: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '';
+}
+
+function getFaturasSelecionadas(){
+  const cbs = document.querySelectorAll('[id^="fat-"]');
+  const ids = [];
+  cbs.forEach(cb=>{ if(cb.checked) ids.push(cb.dataset.id); });
+  return ids;
+}
+
+let _registrando = false;
+async function registrar(silencioso=false, btn=null){
+  if(_registrando){ return false; }
+  _registrando = true;
+  if(btn){ btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'Registrando...'; }
+  const acao = document.getElementById('m-acao')?.value;
+  const obs  = document.getElementById('m-obs')?.value||'';
+  const pago = document.getElementById('m-pago')?.checked?1:0;
+  const dp   = document.getElementById('m-data-promessa')?.value||'';
+  if(!acao){alert('Selecione uma ação.');_registrando=false; if(btn){btn.disabled=false; btn.textContent=btn.dataset.origText||'✓ Registrar Cobrança';} return false;}
+  if(acao==='Promessa de pagamento'&&!dp){alert('Informe a data da promessa.');_registrando=false; if(btn){btn.disabled=false; btn.textContent=btn.dataset.origText||'✓ Registrar Cobrança';} return false;}
+  
+  // Faturas selecionadas no modal
+  const fatSel = getFaturasSelecionadas();
+  // Se nenhuma selecionada, usa fnIdAtual (fatura da linha)
+  const ids = fatSel.length > 0 ? fatSel : (fnIdAtual ? [fnIdAtual] : []);
+  
+  if(!ids.length){alert('Selecione ao menos uma fatura ou feche e clique em Cobrar novamente.');_registrando=false; if(btn){btn.disabled=false; btn.textContent=btn.dataset.origText||'✓ Registrar Cobrança';} return false;}
+  
+  // Registra uma interação por fatura selecionada
+  let erros = 0;
+  for(const fid of ids){
+    const fd=new FormData();
+    fd.append('fn_areceber_id', fid);
+    fd.append('acao',acao); fd.append('obs',obs);
+    fd.append('pago',pago); if(dp) fd.append('data_promessa',dp);
+    fd.append('pagina', 'Fila de Cobrança');
+    const r=await fetch('/cobranca/api/registrar-cobranca',{method:'POST',body:fd});
+    const res=await r.json();
+    if(!res.ok) erros++;
+  }
+  
+  _registrando=false;
+  if(btn){btn.disabled=false; btn.textContent=btn.dataset.origText||'✓ Registrar Cobrança';}
+  if(erros>0){alert('Erro ao registrar '+erros+' fatura(s).');return false;}
+  if(!silencioso){ fecharModal(); toast(`✓ ${ids.length} cobrança(s) registrada(s)`); setTimeout(()=>location.reload(),1200); }
+  return true;
+}
+
+async function registrarEAbrirOS(){
+  // Primeiro registra a cobrança normalmente
+  const ok = await registrar(true);
+  if(!ok) return;
+
+  // Pega dados do formulário
+  const idCliente = clienteAtual;
+  const acao = document.getElementById('m-acao')?.value || '';
+  const obs  = document.getElementById('m-obs')?.value  || '';
+
+  // Abre OS de cobrança
+  const fd = new FormData();
+  fd.append('id_cliente', idCliente);
+  fd.append('acao', acao);
+  fd.append('obs', obs);
+  fd.append('fn_areceber_id', fnIdAtual || '');
+
+  try{
+    const r   = await fetch('/cobranca/api/abrir-os-cobranca', {method:'POST', body:fd});
+    const res = await r.json();
+    if(res.ok){
+      toast('✓ Cobrança registrada e OS #'+res.id_os+' aberta!');
+    } else if(res.ja_existe){
+      toast('⚠ Cobrança registrada. OS já aberta: #'+res.id_os);
+    } else {
+      toast('⚠ Cobrança registrada, mas erro na OS: '+res.msg);
+    }
+  }catch(e){
+    toast('⚠ Cobrança registrada, erro ao abrir OS.');
+  }
+  setTimeout(()=>{ fecharModal(); location.reload(); }, 1800);
+}
+
+
+async function abrirOS(idCliente,btn){
+  btn.disabled=true; btn.textContent='...';
+  const fd=new FormData(); fd.append('id_cliente',idCliente);
+  const r=await fetch('/cobranca/api/abrir-os-retirada',{method:'POST',body:fd});
+  const res=await r.json();
+  if(res.ok){ btn.textContent='✓ OS aberta'; toast('OS de retirada aberta'); }
+  else{ btn.textContent=res.msg||'Erro'; btn.disabled=false; }
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

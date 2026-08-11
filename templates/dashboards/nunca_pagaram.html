@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🚨 Nunca Pagaram — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600;color:var(--red)}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:28px;font-weight:700;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(248,81,73,.03)}
+.badge-red{background:rgba(248,81,73,.15);color:var(--red);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-amber{background:rgba(240,160,0,.15);color:var(--amber);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.btn-cobrar{padding:4px 12px;border-radius:6px;background:var(--red);color:#fff;border:none;font-size:11px;font-weight:600;cursor:pointer}
+.btn-cobrar:hover{opacity:.85}
+.alerta-banner{background:rgba(248,81,73,.1);border:1px solid var(--red);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.paginacao{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
+.paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div class="header-title">🚨 Nunca Pagaram — Atenção Imediata</div>
+    <div class="header-sub">Clientes ativados há menos de 90 dias que não pagaram nenhuma parcela</div>
+  </header>
+  <div class="content">
+
+    <div class="alerta-banner">
+      <div style="font-size:24px">🚨</div>
+      <div>
+        <div style="font-weight:700;color:var(--red)">PRIORIDADE MÁXIMA</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Estes clientes nunca pagaram. Cobrar HOJE. Se ativado há 30+ dias → OS de retirada já aberta automaticamente.</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value" style="color:var(--red)">{{ total }}</div>
+        <div class="kpi-sub">nunca pagaram</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">Valor em aberto</div>
+        <div class="kpi-value" style="color:var(--red);font-size:20px">R$ {{ "%.2f"|format(kpis.total_aberto or 0) }}</div>
+        <div class="kpi-sub">a recuperar</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">Média ativado há</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ (kpis.media_dias or 0)|int }}d</div>
+        <div class="kpi-sub">sem pagar</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">Com OS retirada</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ com_os39 }}</div>
+        <div class="kpi-sub">já em processo</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Cliente</th><th>Cidade</th><th>Vendedor</th><th>Ativado há</th><th>Atraso</th><th>Valor</th><th>Última interação</th><th>OS</th><th>Ação</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:13px">{{ r.razao }}</div>
+            <div style="font-size:11px;color:var(--muted)">{{ r.telefone or '—' }}</div>
+          </td>
+          <td style="font-size:12px;color:var(--muted)">{{ r.cidade }}</td>
+          <td style="font-size:12px;color:var(--muted)">{{ r.vendedor }}</td>
+          <td>
+            <span class="{% if r.dias_ativado >= 60 %}badge-red{% else %}badge-amber{% endif %}">
+              {{ r.dias_ativado }}d
+            </span>
+          </td>
+          <td>
+            <span class="badge-red">{{ r.maior_atraso }}d</span>
+          </td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">
+            R$ {{ "%.2f"|format(r.total_aberto or 0) }}
+          </td>
+          <td style="font-size:11px;color:var(--muted2)">
+            {% if r.ultima_inter %}
+              {{ r.ultima_inter.data_inter }}<br>{{ r.ultima_inter.acao[:30] }}
+            {% else %}
+              <span style="color:var(--red)">⚠️ Sem interação</span>
+            {% endif %}
+          </td>
+          <td>
+            {% set os39 = r.id_cliente %}
+            {% if r.dias_ativado >= 30 %}
+              <span class="badge-red">OS aberta</span>
+            {% else %}
+              <span style="color:var(--muted2);font-size:11px">{{ 30 - r.dias_ativado }}d p/ retirada</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.fn_id %}
+            <button class="btn-cobrar" onclick="abrirInteracao({{ r.id_cliente }}, {{ r.fn_id }}, '{{ r.razao|replace("'", "") }}', '{{ r.telefone }}')">
+              Cobrar
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+      {% if paginas > 1 %}
+      <div class="paginacao">
+        {% for p in range(1, paginas+1) %}
+        <a href="?pagina={{ p }}" class="{% if p == pagina %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<!-- Modal Interação -->
+<div id="modal-inter" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:440px;max-width:95vw">
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px" id="m-razao"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:16px" id="m-telefone"></div>
+
+    <input type="hidden" id="m-fn-id"/>
+    <input type="hidden" id="m-cliente-id"/>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Ação</label>
+      <select id="m-acao" onchange="togglePromessa()" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px">
+        <option value="Ligação realizada">Ligação realizada</option>
+        
+        <option value="Não atendeu">Não atendeu</option>
+        <option value="Promessa de pagamento">Promessa de pagamento</option>
+        <option value="Vai pagar">Vai pagar</option>
+        <option value="Não vai pagar">Não vai pagar</option>
+        <option value="Acordo firmado">Acordo firmado</option>
+        <option value="Material recolhido">📦 Material recolhido</option>
+        <option value="Solicitar retirada">🚛 Solicitar retirada</option>
+      </select>
+    </div>
+
+    <div id="campo-promessa" style="display:none;margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">📅 Data da Promessa</label>
+      <input type="date" id="m-data-promessa" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px"/>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Observação</label>
+      <textarea id="m-obs" rows="3" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;resize:vertical"></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="fecharModal()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px">Cancelar</button>
+      <button onclick="salvarInteracao()" style="padding:8px 16px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-weight:600;cursor:pointer;font-size:13px">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ACOES_NEGATIVAS = ['Não atendeu','Não vai pagar'];
+const ACOES_POSITIVAS = ['Promessa de pagamento','Vai pagar','Acordo firmado'];
+
+function abrirInteracao(idCliente, fnId, razao, telefone) {
+  document.getElementById('m-cliente-id').value = idCliente;
+  document.getElementById('m-fn-id').value = fnId;
+  document.getElementById('m-razao').textContent = razao;
+  document.getElementById('m-telefone').textContent = telefone || '—';
+  document.getElementById('m-acao').value = 'Ligação realizada';
+  document.getElementById('m-obs').value = '';
+  document.getElementById('m-data-promessa').value = '';
+  document.getElementById('campo-promessa').style.display = 'none';
+  document.getElementById('modal-inter').style.display = 'flex';
+}
+
+function fecharModal() {
+  document.getElementById('modal-inter').style.display = 'none';
+}
+
+function togglePromessa() {
+  const acao = document.getElementById('m-acao').value;
+  document.getElementById('campo-promessa').style.display =
+    acao === 'Promessa de pagamento' ? 'block' : 'none';
+}
+
+async function salvarInteracao() {
+  const fnId    = document.getElementById('m-fn-id').value;
+  const acao    = document.getElementById('m-acao').value;
+  const obs     = document.getElementById('m-obs').value;
+  const promessa= document.getElementById('m-data-promessa').value;
+
+  const fd = new FormData();
+  fd.append('fn_areceber_id', fnId);
+  fd.append('acao', acao);
+  fd.append('obs', obs);
+  fd.append('pago', 0);
+  fd.append('segunda_cobranca', 1);
+  if(promessa) fd.append('data_promessa', promessa);
+
+  const r = await fetch('/cobranca/api/registrar-cobranca-np', {method:'POST', body:fd});
+  const res = await r.json();
+
+  if(res.ok) {
+    fecharModal();
+    // Se ação negativa e sem interações anteriores → avisa que OS 39 será aberta
+    if(ACOES_NEGATIVAS.includes(acao) && res.abriu_os39) {
+      alert('⚠️ OS de retirada aberta automaticamente para ' + document.getElementById('m-razao').textContent);
+    }
+    location.reload();
+  }
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

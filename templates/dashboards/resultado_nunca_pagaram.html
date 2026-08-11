@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Resultado Nunca Pagaram — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center}
+input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none}
+select{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none}
+.btn{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.kpi:hover{border-color:var(--primary)}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:24px;font-weight:700;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.sit-pagou{background:rgba(0,200,160,.15);color:var(--primary)}
+.sit-retirada{background:rgba(240,160,0,.15);color:var(--amber)}
+.sit-cancelado{background:rgba(139,148,158,.15);color:var(--muted)}
+.sit-retirado_cancelado{background:rgba(137,87,229,.15);color:var(--purple)}
+.sit-pendente{background:rgba(248,81,73,.15);color:var(--red)}
+.paginacao{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
+.paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">📊 Resultado — Nunca Pagaram</div>
+      <div class="header-sub">O que aconteceu após a cobrança dos clientes que não pagaram a 1ª parcela</div>
+    </div>
+    <div class="filters">
+      <select id="sel-mes" style="background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;min-width:160px">
+        <option value="2026-01-01|2026-01-31" {% if data_ini=='2026-01-01' and data_fim=='2026-01-31' %}selected{% endif %}>Janeiro/2026</option>
+        <option value="2026-02-01|2026-02-28" {% if data_ini=='2026-02-01' %}selected{% endif %}>Fevereiro/2026</option>
+        <option value="2026-03-01|2026-03-31" {% if data_ini=='2026-03-01' %}selected{% endif %}>Março/2026</option>
+        <option value="2026-04-01|2026-04-30" {% if data_ini=='2026-04-01' %}selected{% endif %}>Abril/2026</option>
+        <option value="2026-05-01|2026-05-31" {% if data_ini=='2026-05-01' %}selected{% endif %}>Maio/2026</option>
+        <option value="2026-06-01|2026-06-30" {% if data_ini=='2026-06-01' %}selected{% endif %}>Junho/2026</option>
+        <option value="2026-07-01|2026-07-31" {% if data_ini=='2026-07-01' %}selected{% endif %}>Julho/2026</option>
+        <option value="2026-01-01|" {% if data_ini=='2026-01-01' and data_fim > '2026-01-31' %}selected{% endif %}>Todo 2026</option>
+      </select>
+      <select id="sel-sit" onchange="filtrarSit(this.value)">
+        <option value="">Todas situações</option>
+        <option value="pagou">✅ Pagou</option>
+        <option value="em_retirada">🔄 Em retirada</option>
+        <option value="retirado_cancelado">📦 Retirado+cancelado</option>
+        <option value="cancelado">❌ Cancelado</option>
+        <option value="pendente">⏳ Pendente</option>
+      </select>
+      <button class="btn" onclick="filtrar()">Filtrar</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--blue)" onclick="filtrarSit('')">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ kpis.total }}</div>
+        <div class="kpi-sub">nunca pagaram 1ª</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)" onclick="filtrarSit('pagou')">
+        <div class="kpi-label">✅ Pagou depois</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.pagou }}</div>
+        <div class="kpi-sub">{{ kpis.taxa_recuperacao }}% recuperados</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)" onclick="filtrarSit('em_retirada')">
+        <div class="kpi-label">🔄 Em retirada</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.em_retirada }}</div>
+        <div class="kpi-sub">OS aberta</div>
+      </div>
+      <div class="kpi" style="border-color:var(--purple)" onclick="filtrarSit('retirado_cancelado')">
+        <div class="kpi-label">📦 Retirado</div>
+        <div class="kpi-value" style="color:var(--purple)">{{ kpis.retirado_cancelado }}</div>
+        <div class="kpi-sub">equipamento devolvido</div>
+      </div>
+      <div class="kpi" style="border-color:var(--muted)" onclick="filtrarSit('cancelado')">
+        <div class="kpi-label">❌ Cancelado</div>
+        <div class="kpi-value" style="color:var(--muted)">{{ kpis.cancelado }}</div>
+        <div class="kpi-sub">sem retirada</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)" onclick="filtrarSit('pendente')">
+        <div class="kpi-label">⏳ Pendente</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.pendente }}</div>
+        <div class="kpi-sub">sem resolução</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto">
+      <table id="tabela">
+        <thead><tr>
+          <th>Cliente</th><th>Cidade</th><th>Vendedor</th><th>Ativação</th>
+          <th>Dias ativado</th><th>Plano</th><th>Situação</th>
+          <th>Parcelas pagas</th><th>Valor pago</th><th>Em aberto</th><th>OS 39</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr data-sit="{{ r.situacao }}">
+          <td>
+            <div style="font-weight:600">{{ r.razao }}</div>
+            <div style="font-size:10px;color:var(--muted2)">{{ r.telefone or '' }}</div>
+          </td>
+          <td style="color:var(--muted)">{{ r.cidade }}</td>
+          <td style="color:var(--muted)">{{ r.vendedor }}</td>
+          <td style="color:var(--muted2)">{{ r.data_ativacao }}</td>
+          <td style="text-align:center">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.dias_ativado > 60 %}var(--red){% elif r.dias_ativado > 30 %}var(--amber){% else %}var(--muted){% endif %}">{{ r.dias_ativado }}d</span>
+          </td>
+          <td style="font-size:11px;color:var(--muted)">{{ r.plano or '—' }}</td>
+          <td>
+            {% if r.situacao == 'pagou' %}<span class="badge sit-pagou">✅ Pagou</span>
+            {% elif r.situacao == 'em_retirada' %}<span class="badge sit-retirada">🔄 Em retirada</span>
+            {% elif r.situacao == 'retirado_cancelado' %}<span class="badge sit-retirado_cancelado">📦 Retirado</span>
+            {% elif r.situacao == 'cancelado' %}<span class="badge sit-cancelado">❌ Cancelado</span>
+            {% else %}<span class="badge sit-pendente">⏳ Pendente</span>{% endif %}
+          </td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.total_pago > 0 %}var(--primary){% else %}var(--red){% endif %}">
+            {{ r.total_pago }}
+          </td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary)">
+            {% if r.valor_pago > 0 %}R$ {{ "%.2f"|format(r.valor_pago) }}{% else %}—{% endif %}
+          </td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">
+            {% if r.total_aberto > 0 %}R$ {{ "%.2f"|format(r.total_aberto) }}{% else %}—{% endif %}
+          </td>
+          <td style="text-align:center">
+            {% if r.os39_id %}
+              <span class="badge {% if r.os39_status == 'F' %}sit-retirado_cancelado{% else %}sit-retirada{% endif %}">
+                #{{ r.os39_id }} {{ r.os39_status }}
+              </span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% if paginas > 1 %}
+      <div class="paginacao">
+        {% for p in range(1, paginas+1) %}
+        <a href="?data_ini={{ data_ini }}&pagina={{ p }}" class="{% if p == pagina %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+<script>
+function filtrar(){
+  const mes = document.getElementById('sel-mes').value.split('|');
+  const ini = mes[0];
+  const fim = mes[1] || '';
+  location.href=`/cobranca/resultado-nunca-pagaram?data_ini=${ini}&data_fim=${fim}`;
+}
+function filtrarSit(sit){
+  document.getElementById('sel-sit').value=sit;
+  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
+    tr.style.display=(!sit||tr.dataset.sit===sit)?'':'none';
+  });
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cancelamentos — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;font-family:'Inter',sans-serif}
+.btn{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:26px;font-weight:700;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-red{background:rgba(248,81,73,.15);color:var(--red)}
+.badge-amber{background:rgba(240,160,0,.15);color:var(--amber)}
+.badge-ok{background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-muted{background:rgba(139,148,158,.15);color:var(--muted)}
+.paginacao{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
+.paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">❌ Cancelamentos</div>
+      <div class="header-sub">{{ kpis.total or 0 }} cancelamentos | {{ data_ini }} a {{ data_fim }}</div>
+    </div>
+    <div class="filters">
+      <input type="date" id="data-ini" value="{{ data_ini }}"/>
+      <input type="date" id="data-fim" value="{{ data_fim }}"/>
+      <button class="btn" onclick="filtrar()">Filtrar</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">Total cancelados</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.total or 0 }}</div>
+        <div class="kpi-sub">no período</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">💸 Receita perdida</div>
+        <div class="kpi-value" style="color:var(--red);font-size:18px">R$ {{ "%.2f"|format(kpis.receita_perdida or 0) }}</div>
+        <div class="kpi-sub">por mês</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">⚠️ Sem pagar nada</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.sem_pagar or 0 }}</div>
+        <div class="kpi-sub">0 parcelas pagas</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">🔧 Com suporte</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.com_suporte or 0 }}</div>
+        <div class="kpi-sub">manutenção/sem acesso/lento</div>
+      </div>
+      <div class="kpi" style="border-color:var(--muted)">
+        <div class="kpi-label">⏱ Média na base</div>
+        <div class="kpi-value" style="color:var(--muted)">{{ kpis.media_dias or 0 }}d</div>
+        <div class="kpi-sub">antes de cancelar</div>
+      </div>
+    </div>
+
+    <!-- Filtro motivos dropdown -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">📋 Motivos de Cancelamento</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <select id="sel-motivo" onchange="filtrarMotivo(this.value)" style="background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;padding:8px 12px;min-width:280px;outline:none">
+          <option value="">— Todos os motivos —</option>
+          {% for m in motivos %}
+          <option value="{{ m.motivo }}">{{ m.motivo }} ({{ m.total }})</option>
+          {% endfor %}
+        </select>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          {% for m in motivos[:6] %}
+          <span onclick="selecionarMotivo('{{ m.motivo }}')" style="cursor:pointer;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:6px;transition:all .15s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border2)'">
+            <span style="font-weight:700;color:{% if m.total >= 20 %}var(--red){% elif m.total >= 5 %}var(--amber){% else %}var(--primary){% endif %}">{{ m.total }}</span>
+            <span>{{ m.motivo }}</span>
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards parcelas -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title">💳 Cancelamentos por Parcelas Pagas</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div onclick="filtrarParcela('zero')" style="cursor:pointer;background:rgba(248,81,73,.08);border:1px solid var(--red);border-radius:8px;padding:16px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--red)">{{ parc.zero }}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px">Não pagou nada</div>
+          <div style="font-size:11px;color:var(--muted2)">0 parcelas pagas</div>
+        </div>
+        <div onclick="filtrarParcela('um_dois')" style="cursor:pointer;background:rgba(240,160,0,.08);border:1px solid var(--amber);border-radius:8px;padding:16px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--amber)">{{ parc.um_dois }}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px">Pagou pouco</div>
+          <div style="font-size:11px;color:var(--muted2)">1 a 2 parcelas</div>
+        </div>
+        <div onclick="filtrarParcela('tres_mais')" style="cursor:pointer;background:rgba(0,200,160,.08);border:1px solid var(--primary);border-radius:8px;padding:16px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--primary)">{{ parc.tres_mais }}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px">Bom histórico</div>
+          <div style="font-size:11px;color:var(--muted2)">3+ parcelas pagas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Lista de Cancelamentos</div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Contrato</th><th>Cliente</th><th>Cidade</th><th>Vendedor</th>
+          <th>Ativação</th><th>Cancelamento</th><th>Dias base</th>
+          <th>Plano</th><th>Motivo</th><th>Observação</th>
+          <th>Parcelas pagas</th><th>Suporte 6m</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr>
+          <td style="font-family:'JetBrains Mono',monospace;color:var(--muted2)">#{{ r.contrato_id }}</td>
+          <td>
+            <div style="font-weight:600">{{ r.razao }}</div>
+            <div style="font-size:10px;color:var(--muted2)">{{ r.telefone or '' }}</div>
+          </td>
+          <td style="color:var(--muted)">{{ r.cidade }}</td>
+          <td style="color:var(--muted)">{{ r.vendedor }}</td>
+          <td style="color:var(--muted2)">{{ r.data_ativacao }}</td>
+          <td style="color:var(--muted2)">{{ r.data_cancelamento }}</td>
+          <td>
+            <span class="badge {% if r.dias_na_base < 30 %}badge-red{% elif r.dias_na_base < 90 %}badge-amber{% else %}badge-ok{% endif %}">
+              {{ r.dias_na_base or 0 }}d
+            </span>
+          </td>
+          <td style="color:var(--muted);font-size:11px">{{ r.plano or '—' }}<br><span style="color:var(--muted2);font-size:10px">R$ {{ "%.2f"|format(r.plano_valor) }}</span></td>
+          <td>
+            <span class="badge badge-muted">{{ r.motivo_desc }}</span>
+          </td>
+          <td style="font-size:11px;color:var(--muted);max-width:200px">{{ r.obs_cancelamento or '—' }}</td>
+          <td style="text-align:center">
+            {% if r.parcelas_pagas == 0 %}
+              <span class="badge badge-red">0 pagas</span>
+            {% elif r.parcelas_pagas <= 2 %}
+              <span class="badge badge-amber">{{ r.parcelas_pagas }}ª</span>
+            {% else %}
+              <span class="badge badge-ok">{{ r.parcelas_pagas }} pagas</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center">
+            {% if r.suporte_qtd > 0 %}
+              <span class="badge badge-amber" title="{{ r.suporte_tipos }}">{{ r.suporte_qtd }}x</span>
+              <div style="font-size:10px;color:var(--muted2);margin-top:2px">{{ r.suporte_tipos[:30] }}</div>
+            {% else %}
+              <span style="color:var(--muted2)">—</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center">
+            {% if r.desconexoes > 0 %}
+              <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:{% if r.lost_carrier > 10 %}var(--red){% elif r.lost_carrier > 3 %}var(--amber){% else %}var(--muted){% endif %}">{{ r.desconexoes }}</div>
+              {% if r.lost_carrier > 0 %}<div style="font-size:10px;color:var(--red)">🔴 {{ r.lost_carrier }} quedas</div>{% endif %}
+              {% if r.user_request > 0 %}<div style="font-size:10px;color:var(--muted2)">↩️ {{ r.user_request }} reinícios</div>{% endif %}
+            {% else %}
+              <span style="color:var(--muted2)">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% if paginas > 1 %}
+      <div class="paginacao">
+        {% for p in range(1, paginas+1) %}
+        <a href="?data_ini={{ data_ini }}&data_fim={{ data_fim }}&pagina={{ p }}" class="{% if p == pagina %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+<script>
+function filtrar(){
+  const ini=document.getElementById('data-ini').value;
+  const fim=document.getElementById('data-fim').value;
+  location.href=`/cobranca/cancelamentos?data_ini=${ini}&data_fim=${fim}`;
+}
+function filtrarMotivo(motivo){
+  document.getElementById('sel-motivo').value = motivo;
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    // Motivo está na coluna 9 dentro de um span badge
+    const td = tr.querySelector('td:nth-child(9)');
+    const texto = td ? td.textContent.trim() : '';
+    tr.style.display = (!motivo || texto === motivo) ? '' : 'none';
+  });
+}
+function selecionarMotivo(motivo){
+  document.getElementById('sel-motivo').value = motivo;
+  filtrarMotivo(motivo);
+}
+function filtrarParcela(tipo){
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    const td = tr.querySelector('td:nth-child(11)');
+    if(!td){return;}
+    const txt = td.textContent.trim();
+    let show = false;
+    if(tipo==='zero') show = txt.includes('0 pagas');
+    else if(tipo==='um_dois') show = txt.includes('1ª') || txt.includes('2ª');
+    else if(tipo==='tres_mais') show = !txt.includes('0 pagas') && !txt.includes('1ª') && !txt.includes('2ª');
+    tr.style.display = show ? '' : 'none';
+  });
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Equipamentos Cancelados — HubCobrança</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:15px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.content{padding:24px 28px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:22px;font-weight:700;margin-top:4px}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,0,0,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.b-ok{background:rgba(5,150,105,.1);color:#059669}
+.b-risco{background:rgba(220,38,38,.1);color:#dc2626}
+.b-avaria{background:rgba(217,119,6,.1);color:#d97706}
+.b-novo{background:rgba(37,99,235,.1);color:#2563eb}
+.b-sem{background:rgba(100,116,139,.1);color:#475569}
+.filters{display:flex;gap:8px;align-items:center}
+.filter-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);font-size:12px;cursor:pointer;background:var(--bg);color:var(--muted);text-decoration:none;transition:all .15s}
+.filter-btn.active,.filter-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.timeline-row{cursor:pointer}
+.timeline-row:hover td{background:rgba(5,150,105,.04)}
+.timeline-row.selected td{background:rgba(5,150,105,.06)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">📦 Equipamentos — Ciclo de Cancelamento</div>
+      <div class="header-sub">Rastreamento de equipamentos de contratos cancelados</div>
+    </div>
+    <div class="filters">
+      <label style="font-size:11px;color:var(--muted)">Período:</label>
+      <a href="/cobranca/equipamentos-cancelados?meses=3" class="filter-btn {% if meses==3 %}active{% endif %}">3 meses</a>
+      <a href="/cobranca/equipamentos-cancelados?meses=6" class="filter-btn {% if meses==6 %}active{% endif %}">6 meses</a>
+      <a href="/cobranca/equipamentos-cancelados?meses=12" class="filter-btn {% if meses==12 %}active{% endif %}">12 meses</a>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--blue)">
+        <div class="kpi-label">Cancelamentos</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ kpis.total_cancelamentos }}</div>
+        <div class="kpi-sub">últimos {{ meses }} meses</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">✅ Recuperados</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.recuperados }}</div>
+        <div class="kpi-sub">{{ kpis.taxa_recuperacao }}% taxa</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)">
+        <div class="kpi-label">❌ Não recuperados</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.nao_recuperado }}</div>
+        <div class="kpi-sub">R$ {{ "%.2f"|format(kpis.valor_risco) }}</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">🔧 Avarias</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.avarias }}</div>
+        <div class="kpi-sub">equipamentos danificados</div>
+      </div>
+      <div class="kpi" style="border-color:var(--blue)">
+        <div class="kpi-label">🔄 Novo cliente</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ kpis.novo_cliente }}</div>
+        <div class="kpi-sub">reutilizados</div>
+      </div>
+      <div class="kpi" style="border-color:var(--muted)">
+        <div class="kpi-label">⚠️ Sem OS</div>
+        <div class="kpi-value" style="color:var(--muted)">{{ kpis.sem_os }}</div>
+        <div class="kpi-sub">sem processo aberto</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)">
+        <div class="kpi-label">💰 Valor recuperado</div>
+        <div class="kpi-value" style="color:var(--primary);font-size:16px">R$ {{ "%.2f"|format(kpis.valor_recuperado) }}</div>
+        <div class="kpi-sub">em estoque</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 Timeline por mês <span style="font-weight:400;font-size:11px;color:var(--muted2)">Clique para filtrar</span></div>
+      <table>
+        <thead><tr>
+          <th>Mês</th><th style="text-align:center">Cancelamentos</th><th style="text-align:center">Equipamentos</th>
+          <th style="text-align:center">✅ Recuperados</th><th style="text-align:center">❌ Não recup.</th>
+          <th style="text-align:center">🔧 Avarias</th><th style="text-align:center">⚠️ Sem OS</th>
+        </tr></thead>
+        <tbody>
+        {% for t in kpis.timeline %}
+        <tr class="timeline-row {% if mes_filtro == t.mes|replace('/','-') %}selected{% endif %}"
+            onclick="filtrarMes('{{ t.mes }}')">
+          <td><b>{{ t.mes }}</b></td>
+          <td style="text-align:center">{{ t.cancelamentos }}</td>
+          <td style="text-align:center">{{ t.equip_total }}</td>
+          <td style="text-align:center;color:var(--primary)"><b>{{ t.recuperados }}</b></td>
+          <td style="text-align:center;color:var(--red)">{{ t.nao_recuperados }}</td>
+          <td style="text-align:center;color:var(--amber)">{{ t.avarias }}</td>
+          <td style="text-align:center;color:var(--muted)">{{ t.sem_os }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        🔍 Detalhe de equipamentos — {{ rows|length }} registros
+        {% if mes_filtro %}<a href="/cobranca/equipamentos-cancelados?meses={{ meses }}" style="font-size:11px;color:var(--muted);text-decoration:none;font-weight:400">✕ Limpar filtro</a>{% endif %}
+      </div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Cliente</th><th>Cancelamento</th><th>OS Retirada</th>
+          <th>ID Pat.</th><th>Equipamento</th><th>Serial/MAC</th><th>Valor</th><th>Dt. Baixa</th>
+          <th>Status</th><th>Almoxarifado</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>
+            <div style="font-weight:600">{{ r.cliente }}</div>
+            <div style="font-size:11px;color:var(--muted2)">{{ r.telefone or '—' }}</div>
+          </td>
+          <td class="mono">{{ r.data_cancelamento.strftime('%d/%m/%Y') if r.data_cancelamento else '—' }}</td>
+          <td>
+            {% if r.os_id %}
+              <span class="mono">#{{ r.os_id }}</span>
+              <span class="badge {% if r.os_status == 'F' %}b-ok{% else %}b-novo{% endif %}">{{ r.os_status }}</span>
+            {% else %}<span style="color:var(--muted2)">—</span>{% endif %}
+          </td>
+          <td class="mono" style="color:var(--blue)">{{ r.id_patrimonio or '—' }}</td>
+          <td style="font-size:11px;max-width:180px">{{ r.equipamento or '—' }}</td>
+          <td class="mono">{{ r.serial or r.id_mac or '—' }}</td>
+          <td style="font-weight:600;color:var(--primary)">
+            {% if r.valor_bem %}R$ {{ "%.2f"|format(r.valor_bem) }}{% else %}—{% endif %}
+          </td>
+          <td class="mono" style="font-size:11px;color:var(--muted2)">
+            {% if r.data_movimentacao %}{{ r.data_movimentacao.strftime('%d/%m/%Y') if r.data_movimentacao else '—' }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="badge
+              {% if r.status_equip == 'estoque' %}b-ok
+              {% elif r.status_equip in ('nao_recuperado','perdido','indefinido') %}b-risco
+              {% elif r.status_equip == 'avaria' %}b-avaria
+              {% elif r.status_equip == 'novo_cliente' %}b-novo
+              {% else %}b-sem{% endif %}">{{ r.status_label }}</span>
+          </td>
+          <td style="font-size:11px;color:var(--muted2)">
+            {{ r.almox_nome or '—' }}
+            {% if r.cliente_comodato %}
+              <div style="font-size:10px;color:var(--blue);margin-top:2px">🔄 {{ r.cliente_comodato[:30] }} #{{ r.contrato_comodato }}</div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+function filtrarMes(mes){
+  const m = mes.replace('/','-');
+  const atual = new URLSearchParams(location.search).get('mes_filtro');
+  if(atual === m) location.href='/cobranca/equipamentos-cancelados?meses={{ meses }}';
+  else location.href='/cobranca/equipamentos-cancelados?meses={{ meses }}&mes_filtro='+m;
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

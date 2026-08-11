@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cadastro — Cliquedf Cobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.box{background:#161b22;border:1px solid #21262d;border-radius:14px;padding:40px 36px;width:100%;max-width:400px}
+.logo{text-align:center;margin-bottom:28px}
+.logo-mark{font-size:22px;font-weight:700;color:#00c8a0}
+.logo-sub{font-size:11px;color:#6e7681;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+h2{font-size:16px;font-weight:600;text-align:center;margin-bottom:20px;color:#e6edf3}
+.field{margin-bottom:14px}
+label{display:block;font-size:12px;color:#8b949e;margin-bottom:5px;font-weight:500}
+input{width:100%;padding:9px 12px;background:#0d1117;border:1px solid #30363d;border-radius:7px;color:#e6edf3;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+input:focus{border-color:#00c8a0}
+.btn{width:100%;padding:10px;background:#00c8a0;color:#0d1117;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.msg{padding:10px 14px;border-radius:7px;font-size:13px;margin-bottom:16px;text-align:center}
+.msg.erro{background:rgba(248,81,73,.12);color:#f85149;border:1px solid rgba(248,81,73,.2)}
+.msg.ok{background:rgba(0,200,160,.1);color:#00c8a0;border:1px solid rgba(0,200,160,.2)}
+.link{text-align:center;margin-top:18px;font-size:12px;color:#8b949e}
+.link a{color:#00c8a0;text-decoration:none}
+.footer{text-align:center;margin-top:24px;font-size:11px;color:#6e7681}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">
+    <div class="logo-mark">Cliquedf</div>
+    <div class="logo-sub">Cobrança</div>
+  </div>
+  <h2>Criar conta</h2>
+
+  {% if msg %}
+    {% set tipo = "ok" if msg.startswith("ok:") else "erro" %}
+    {% set texto = msg[3:] %}
+    <div class="msg {{ tipo }}">{{ texto }}</div>
+  {% endif %}
+
+  <form method="post" action="/registro">
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" name="nome" required placeholder="Seu nome"/>
+    </div>
+    <div class="field">
+      <label>Login</label>
+      <input type="text" name="login" required placeholder="ex: joao.silva"/>
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" name="senha" required placeholder="Mínimo 6 caracteres"/>
+    </div>
+    <div class="field">
+      <label>Confirmar senha</label>
+      <input type="password" name="senha2" required placeholder="Repita a senha"/>
+    </div>
+    <button class="btn" type="submit">Criar conta</button>
+  </form>
+
+  <div class="link"><a href="/login">← Voltar para o login</a></div>
+  <div class="footer">Iatch Axiom · Built by Ailton</div>
+</div>
+</body>
+</html>

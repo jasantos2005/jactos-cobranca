@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cancelamentos por Inadimplência — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--purple:#7c3aed}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none}
+select.fsel{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none}
+.btn{padding:6px 14px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.kpi:hover{border-color:var(--primary)}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:24px;font-weight:700;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.saude-boa{background:rgba(0,200,160,.15);color:var(--primary)}
+.saude-irreg{background:rgba(240,160,0,.15);color:var(--amber)}
+.saude-nunca{background:rgba(248,81,73,.15);color:var(--red)}
+.causa-sup{background:rgba(137,87,229,.15);color:var(--purple)}
+.causa-fin{background:rgba(139,148,158,.15);color:var(--muted)}
+.causa-nunca{background:rgba(248,81,73,.15);color:var(--red)}
+.paginacao{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
+.paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">💔 Cancelamentos por Inadimplência</div>
+      <div class="header-sub">Saúde financeira e histórico de suporte dos clientes cancelados</div>
+    </div>
+    <div class="filters">
+      <input type="date" id="data-ini" value="{{ data_ini }}"/>
+      <input type="date" id="data-fim" value="{{ data_fim }}"/>
+      <select class="fsel" id="sel-causa" onchange="filtrarCausa(this.value)">
+        <option value="">Todas causas</option>
+        <option value="suporte">⚠️ Provável suporte</option>
+        <option value="financeira">💰 Financeira</option>
+        <option value="nunca_pagou">🔴 Nunca pagou</option>
+      </select>
+      <button class="btn" onclick="filtrar()">Filtrar</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:var(--blue)" onclick="filtrarCausa('')">
+        <div class="kpi-label">Total</div>
+        <div class="kpi-value" style="color:var(--blue)">{{ kpis.total }}</div>
+        <div class="kpi-sub">cancelados inad.</div>
+      </div>
+      <div class="kpi" style="border-color:var(--red)" onclick="filtrarCausa('nunca_pagou')">
+        <div class="kpi-label">🔴 Nunca pagou</div>
+        <div class="kpi-value" style="color:var(--red)">{{ kpis.nunca_pagou }}</div>
+        <div class="kpi-sub">0 parcelas pagas</div>
+      </div>
+      <div class="kpi" style="border-color:var(--primary)" onclick="filtrarCausa('financeira')">
+        <div class="kpi-label">🟢 Saúde boa</div>
+        <div class="kpi-value" style="color:var(--primary)">{{ kpis.saude_boa }}</div>
+        <div class="kpi-sub">pagava em dia</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">🟡 Irregular</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.saude_irregular }}</div>
+        <div class="kpi-sub">pagava com atraso</div>
+      </div>
+      <div class="kpi" style="border-color:var(--purple)" onclick="filtrarCausa('suporte')">
+        <div class="kpi-label">⚠️ Causa suporte</div>
+        <div class="kpi-value" style="color:var(--purple)">{{ kpis.causa_suporte }}</div>
+        <div class="kpi-sub">tinha OS técnica</div>
+      </div>
+      <div class="kpi" style="border-color:var(--amber)">
+        <div class="kpi-label">🔧 Com suporte</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ kpis.com_suporte }}</div>
+        <div class="kpi-sub">tiveram OS técnica</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto">
+      <table id="tabela">
+        <thead><tr>
+          <th>Cliente</th><th>Cidade</th><th>Vendedor</th>
+          <th>Ativação</th><th>Cancelamento</th><th>Base</th><th>Plano</th>
+          <th>Saúde</th><th>Causa provável</th>
+          <th>Pagas</th><th>Em dia</th><th>Atrasadas</th>
+          <th>Suporte IXC</th><th>Sem acesso</th><th>Lenta</th><th>Manutenção</th><th>OPA Suporte</th><th>OPA Financeiro</th>
+          <th>Observação</th>
+        </tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr data-causa="{{ r.causa }}">
+          <td>
+            <div style="font-weight:600">{{ r.razao }}</div>
+            <div style="font-size:10px;color:var(--muted2)">{{ r.telefone or '' }}</div>
+          </td>
+          <td style="color:var(--muted);font-size:11px">{{ r.cidade }}</td>
+          <td style="color:var(--muted);font-size:11px">{{ r.vendedor }}</td>
+          <td style="color:var(--muted2);font-size:11px">{{ r.data_ativacao }}</td>
+          <td style="color:var(--muted2);font-size:11px">{{ r.data_cancelamento }}</td>
+          <td style="text-align:center">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.dias_na_base > 365 %}var(--primary){% elif r.dias_na_base > 90 %}var(--amber){% else %}var(--red){% endif %}">{{ r.dias_na_base }}d</span>
+          </td>
+          <td style="font-size:11px;color:var(--muted)">{{ r.plano or '—' }}</td>
+          <td>
+            {% if r.saude == 'boa' %}<span class="badge saude-boa">🟢 Boa</span>
+            {% elif r.saude == 'irregular' %}<span class="badge saude-irreg">🟡 Irregular</span>
+            {% else %}<span class="badge saude-nunca">🔴 Nunca pagou</span>{% endif %}
+          </td>
+          <td>
+            {% if r.causa == 'suporte' %}<span class="badge causa-sup">⚠️ Suporte</span>
+            {% elif r.causa == 'nunca_pagou' %}<span class="badge causa-nunca">🔴 Nunca pagou</span>
+            {% else %}<span class="badge causa-fin">💰 Financeira</span>{% endif %}
+          </td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ r.parcelas_pagas }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary)">{{ r.pagas_em_dia }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.pagas_atrasadas > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.pagas_atrasadas }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.qtd_suporte > 0 %}var(--purple){% else %}var(--muted2){% endif %}">{{ r.qtd_suporte }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.sem_acesso > 0 %}var(--red){% else %}var(--muted2){% endif %}">{{ r.sem_acesso }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.lenta > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.lenta }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.manutencao > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.manutencao }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.opa_suporte > 0 %}var(--purple){% else %}var(--muted2){% endif %}">{{ r.opa_suporte or '—' }}</td>
+          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.opa_financeiro > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.opa_financeiro or '—' }}</td>
+          <td style="font-size:10px;color:var(--muted2);max-width:150px">{{ r.obs_cancelamento or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% if paginas > 1 %}
+      <div class="paginacao">
+        {% for p in range(1, paginas+1) %}
+        <a href="?data_ini={{ data_ini }}&data_fim={{ data_fim }}&pagina={{ p }}" class="{% if p == pagina %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+<script>
+function filtrar(){
+  const ini=document.getElementById('data-ini').value;
+  const fim=document.getElementById('data-fim').value;
+  location.href=`/cobranca/cancelamentos-inadimplencia?data_ini=${ini}&data_fim=${fim}`;
+}
+function filtrarCausa(causa){
+  document.getElementById('sel-causa').value=causa;
+  document.querySelectorAll('#tabela tbody tr').forEach(tr=>{
+    tr.style.display=(!causa||tr.dataset.causa===causa)?'':'none';
+  });
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

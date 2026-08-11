@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Primeira Cobrança — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.content{padding:24px 28px;flex:1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.valor{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary)}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;background:rgba(31,111,235,.15);color:#79b8ff}
+.btn-update{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:11px;cursor:pointer}
+.btn-update:hover{border-color:var(--primary);color:var(--primary)}
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:12px;color:var(--muted)}
+.pag-btns{display:flex;gap:6px}
+.pag-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;cursor:pointer}
+.pag-btn:hover:not(:disabled){background:var(--primary);color:#0d1117;border-color:var(--primary)}
+.pag-btn:disabled{opacity:.3;cursor:default}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;padding:24px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-close:hover{color:var(--red)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.form-field{margin-bottom:12px}
+.form-field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600}
+select,textarea{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;width:100%;outline:none}
+select:focus,textarea:focus{border-color:var(--primary)}
+.check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:14px}
+.btn-primary{width:100%;padding:10px;background:var(--primary);color:#0d1117;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary:hover{opacity:.85}
+.msg-ok{font-size:12px;color:var(--primary);text-align:center;margin-top:8px;display:none}
+.page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+.empty{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+<main class="main">
+  <header class="header">
+    <div>
+      <div class="header-title">Primeira Cobrança</div>
+      <div class="header-sub">{{ total }} clientes em primeira cobrança</div>
+    </div>
+  </header>
+  <div class="content">
+    <div class="card">
+      <div class="card-title">Interações em Aberto</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <input type="text" id="busca-input" placeholder="Buscar por nome ou CPF..."
+          value="{{ filtros.busca or '' }}"
+          style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;font-family:'Inter',sans-serif"
+          onkeydown="if(event.key==='Enter') buscar()"
+          oninput="buscar()"/>
+        <button onclick="buscar()" style="padding:8px 16px;border-radius:6px;background:var(--primary);color:#0d1117;border:none;font-size:13px;font-weight:600;cursor:pointer">Buscar</button>
+        <span id="busca-count" style="font-size:12px;color:var(--primary);align-self:center"></span>
+        {% if filtros.busca %}<a href="/cobranca/primeira-cobranca" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);font-size:12px;text-decoration:none;display:flex;align-items:center">✕ Limpar</a>{% endif %}
+        {% if usuario.nivel == 99 %}
+        <select onchange="location.href='/cobranca/primeira-cobranca?filtrar_operador='+this.value+'&pagina=1'"
+          style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;cursor:pointer">
+          <option value="0" {% if not filtrar_operador %}selected{% endif %}>👥 Todos os operadores</option>
+          {% for op in operadores %}
+          <option value="{{ op.id }}" {% if filtrar_operador == op.id %}selected{% endif %}>{{ op.nome }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
+        <input type="date" id="data-inicio" value="{{ data_inicio }}"
+          style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px"/>
+        <input type="date" id="data-fim" value="{{ data_fim }}"
+          style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px"/>
+        <button onclick="aplicarFiltros()" style="padding:8px 14px;border-radius:6px;background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3);font-size:12px;font-weight:600;cursor:pointer">📅 Filtrar período</button>
+        {% if data_inicio or data_fim %}<a href="/cobranca/primeira-cobranca?filtrar_operador={{ filtrar_operador }}" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);font-size:12px;text-decoration:none">✕ Limpar</a>{% endif %}
+
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Boleto</th><th>Cliente</th><th>Telefone</th>
+            <th>Valor</th><th>Status</th><th>Operador</th><th>Registrado em</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-andamento">
+          {% for row in dados %}
+          {% set f = row.fatura %}
+          <tr data-busca="{{ (f.razao or '') ~ ' ' ~ (f.cnpj_cpf or '') }}">
+            <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">#{{ row.fn_areceber_id }}</span></td>
+            <td>{% if f.paga_em_dia %}<span style="display:inline-block;background:rgba(248,81,73,.15);color:#ff6b6b;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:3px;vertical-align:middle">⚠️ Paga outras faturas</span>{% endif %}{% if f.recem_ativado %}<span style="display:inline-block;background:rgba(248,81,73,.15);color:#f85149;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:3px;vertical-align:middle">🆕 Nunca pagou</span>{% endif %}<strong>{{ f.razao or "—" }}</strong></td>
+            <td style="font-size:12px;color:var(--muted)">{{ f.telefone or '—' }}</td>
+            <td class="valor">{% if f.valor_aberto %}R$ {{ "%.2f"|format(f.valor_aberto) }}{% else %}—{% endif %}</td>
+            <td><span class="status-badge">{{ row.acao }}</span></td>
+            <td style="font-size:12px;color:var(--muted)">{{ row.operador }}</td>
+            <td style="font-size:12px;color:var(--muted2)">{{ row.criado_em }}</td>
+            <td><button class="btn-update" data-id="{{ row.id }}" data-acao="{{ row.acao|replace('"','') }}" data-obs="{{ (row.obs or '')|replace('"','') }}" onclick="abrirUpdateBtn(this)">Atualizar</button></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="empty">Nenhuma cobrança em andamento.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>{{ total }} registros · Pág. {{ filtros.pagina }}/{{ paginas }}</span>
+        <div class="pag-btns">
+          <button class="pag-btn" onclick="mudaPagina(-1)" {% if filtros.pagina<=1 %}disabled{% endif %}>‹ Anterior</button>
+          <button class="pag-btn" onclick="mudaPagina(1)" {% if filtros.pagina>=paginas %}disabled{% endif %}>Próximo ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+</main>
+
+<div class="overlay" id="modal-overlay" onclick="fecharModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Atualizar Interação</div>
+    <input type="hidden" id="m-id"/>
+    <div class="form-field">
+      <label>Novo Status</label>
+      <select id="m-acao" onchange="togglePromessa()">
+        <option value="Ligação realizada">Ligação realizada</option>
+        
+        <option value="Não atendeu">Não atendeu</option>
+        <option value="Promessa de pagamento">Promessa de pagamento</option>
+        <option value="Vai pagar">Vai pagar</option>
+        <option value="Não vai pagar">Não vai pagar</option>
+        <option value="Acordo firmado">Acordo firmado</option>
+        <option value="Material recolhido">📦 Material recolhido</option>
+        <option value="Solicitar retirada">🚛 Solicitar retirada</option>
+        <option value="Negativação">Negativação</option>
+        <option value="Material recolhido">📦 Material recolhido</option>
+        <option value="Solicitar retirada">🚛 Solicitar retirada</option>
+      </select>
+    </div>
+    <div class="form-field" id="campo-promessa" style="display:none">
+      <label>📅 Data da Promessa</label>
+      <input type="date" id="m-data-promessa" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px"/>
+    </div>
+    <div class="form-field">
+      <label>Observação</label>
+      <textarea id="m-obs" rows="3"></textarea>
+    </div>
+    <label class="check-row"><input type="checkbox" id="m-pago"/> Marcar como pago</label>
+    <button class="btn-primary" onclick="salvarUpdate()">Salvar</button>
+    <div class="msg-ok" id="m-msg">✓ Atualizado!</div>
+  </div>
+</div>
+
+<script>
+let pagAtual = {{ filtros.pagina }};
+function togglePromessa(){
+  const acao = document.getElementById('m-acao').value;
+  const campo = document.getElementById('campo-promessa');
+  campo.style.display = acao==='Promessa de pagamento' ? 'block' : 'none';
+  if(acao!=='Promessa de pagamento') document.getElementById('m-data-promessa').value='';
+}
+function aplicarFiltros(){
+  const op = document.getElementById('sel-operador')?.value || 0;
+  const di = document.getElementById('data-inicio')?.value || '';
+  const df = document.getElementById('data-fim')?.value || '';
+  window.location.href = `/cobranca/primeira-cobranca?filtrar_operador=${op}&data_inicio=${di}&data_fim=${df}&pagina=1`;
+}
+function buscar(){
+  const q = (document.getElementById('busca-input').value||'').trim().toLowerCase();
+  const rows = document.querySelectorAll('#tabela-andamento tr[data-busca]');
+  let visiveis = 0;
+  rows.forEach(tr => {
+    const txt = (tr.getAttribute('data-busca')||'').toLowerCase();
+    const show = !q || txt.includes(q);
+    tr.style.display = show ? '' : 'none';
+    if(show) visiveis++;
+  });
+  const cnt = document.getElementById('busca-count');
+  if(cnt) cnt.textContent = q ? `${visiveis} resultado(s)` : '';
+}
+function mudaPagina(d){ window.location.href=`/cobranca/primeira-cobranca?pagina=${pagAtual+d}`; }
+
+function abrirUpdateBtn(btn){
+  abrirUpdate(btn.dataset.id, btn.dataset.acao, btn.dataset.obs);
+}
+function abrirUpdate(id, acao, obs){
+  document.getElementById('m-id').value = id;
+  document.getElementById('m-acao').value = acao;
+  document.getElementById('m-obs').value = obs;
+  document.getElementById('m-pago').checked = false;
+  document.getElementById('m-msg').style.display='none';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function salvarUpdate(){
+  const fd = new FormData();
+  fd.append('interacao_id',  document.getElementById('m-id').value);
+  fd.append('acao',          document.getElementById('m-acao').value);
+  fd.append('obs',           document.getElementById('m-obs').value);
+  fd.append('data_promessa', document.getElementById('m-data-promessa')?.value || '');
+  const pago = document.getElementById('m-pago')?.checked ? 1 : 0;
+  fd.append('pago', pago);
+  if(pago == 1){
+    // Cliente pagou — apenas atualiza
+    await fetch('/cobranca/api/atualizar-interacao', {method:'POST', body:fd});
+  } else {
+    // Não pagou — move para Segunda Cobrança
+    await fetch('/cobranca/api/mover-segunda-cobranca', {method:'POST', body:fd});
+  }
+  document.getElementById('m-msg').style.display='block';
+  setTimeout(()=>{ closeModal(); window.location.reload(); }, 1000);
+}
+
+function fecharModal(e){ if(e.target===document.getElementById('modal-overlay')) closeModal(); }
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

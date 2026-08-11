@@ -1,0 +1,24 @@
+# Ambiente virtual
+venv/
+
+# Banco local
+*.db
+*.db-shm
+*.db-wal
+
+# Variáveis de ambiente
+.env
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/

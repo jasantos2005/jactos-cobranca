@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Desempenho da Equipe — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f1f5f9;--card:#161b22;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#58a6ff}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-main{font-size:15px;font-weight:700}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-user{padding:14px 18px;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user span{font-size:11px;color:var(--muted2)}
+.btn-sair{font-size:11px;color:var(--red);text-decoration:none;padding:4px 8px;border-radius:4px;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.08);white-space:nowrap}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+header{padding:20px 28px 16px;border-bottom:1px solid var(--border);background:var(--card);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.header-title{font-size:20px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.filters{display:flex;gap:8px;align-items:center}
+.filters input[type=date]{padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:12px}
+.btn{padding:7px 14px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--primary);color:#0d1117}
+.btn-blue{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.kpi-label{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
+.kpi-nome{font-size:13px;font-weight:700;margin-bottom:8px}
+.kpi-value{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--primary)}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chart-wrap{padding:20px;height:340px;position:relative}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-blue{background:rgba(88,166,255,.15);color:var(--blue)}
+.meta-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:6px}
+.meta-fill{height:100%;border-radius:3px;background:var(--primary)}
+.sig{font-size:10px;color:var(--muted2);text-align:right;padding:12px 28px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<div class="main">
+  <header>
+    <div>
+      <div class="header-title">📊 Desempenho da Equipe</div>
+      <div class="header-sub">Cobranças por operador · {{ data_ini }} a {{ data_fim }}</div>
+    </div>
+    <div class="filters">
+      <input type="date" id="data-ini" value="{{ data_ini }}"/>
+      <input type="date" id="data-fim" value="{{ data_fim }}"/>
+      <button class="btn btn-primary" onclick="filtrar()">Filtrar</button>
+      <button class="btn btn-blue" onclick="setMes()">Este mês</button>
+    </div>
+  </header>
+  <div class="content">
+
+    <!-- KPIs por operador -->
+    <div class="kpi-grid">
+      {% for t in totais %}
+      {% set efic = ((t.pagos / t.total * 100)|int) if t.total > 0 else 0 %}
+      {% set pct_meta = ((t.total / (150 * 17) * 100)|int) if t.total > 0 else 0 %}
+      <div class="kpi-card">
+        <div class="kpi-label">Operador</div>
+        <div class="kpi-nome">{{ t.nome }}</div>
+        <div class="kpi-value">{{ t.total }}</div>
+        <div class="kpi-sub">cobranças · {{ t.pagos }} pagos · {{ efic }}% efic.</div>
+        <div class="meta-bar"><div class="meta-fill" style="width:{{ [pct_meta,100]|min }}%"></div></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Gráfico comparativo por dia -->
+    <div class="card">
+      <div class="card-title">Cobranças por Dia — Comparativo</div>
+      <div class="chart-wrap"><canvas id="chart-equipe"></canvas></div>
+    </div>
+
+    <!-- Tabela detalhada -->
+    <div class="card">
+      <div class="card-title">Detalhamento por Dia</div>
+      <table>
+        <thead>
+          <tr><th>Data</th>
+          {% for t in totais %}<th>{{ t.nome.split()[0] }}</th>{% endfor %}
+          <th>Total Dia</th></tr>
+        </thead>
+        <tbody id="tabela-body">
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  <div class="sig">Iatch Axiom · Built by Ailton</div>
+</div>
+
+<script>
+const rawDados = {{ dados|tojson }};
+const totais   = {{ totais|tojson }};
+const operadores = totais.map(t=>t.nome);
+const dias       = [...new Set(rawDados.map(d=>d.dia))].sort();
+
+// Monta mapa: dia -> operador -> total
+const mapa = {};
+rawDados.forEach(d=>{
+  if(!mapa[d.dia]) mapa[d.dia]={};
+  mapa[d.dia][d.nome] = d.total;
+});
+
+// Cores por operador
+const cores = ['#00c8a0','#58a6ff','#f0a000','#f85149','#c792ea','#39c5cf'];
+
+// Gráfico
+const ctx = document.getElementById('chart-equipe').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: dias.map(d=>d.substring(5)),
+    datasets: operadores.map((op,i)=>({
+      label: op,
+      data: dias.map(dia=> mapa[dia]?.[op] || 0),
+      backgroundColor: cores[i]+'99',
+      borderColor: cores[i],
+      borderWidth: 1,
+      borderRadius: 4,
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ labels:{ color:'#8b949e', font:{size:11} } },
+      tooltip:{ callbacks:{ label: ctx=>`${ctx.dataset.label}: ${ctx.parsed.y} cobranças` } }
+    },
+    scales:{
+      x:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#8b949e' } },
+      y:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#8b949e' }, beginAtZero:true }
+    }
+  }
+});
+
+// Tabela
+const tbody = document.getElementById('tabela-body');
+tbody.innerHTML = dias.map(dia=>{
+  const tots = operadores.map(op=> mapa[dia]?.[op]||0);
+  const total = tots.reduce((a,b)=>a+b,0);
+  return `<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">${dia}</td>
+    ${tots.map((v,i)=>`<td><span style="font-weight:600;color:${cores[i]}">${v||'—'}</span></td>`).join('')}
+    <td><span class="badge badge-blue">${total}</span></td>
+  </tr>`;
+}).join('');
+
+function filtrar(){
+  const ini = document.getElementById('data-ini').value;
+  const fim = document.getElementById('data-fim').value;
+  window.location.href = `/cobranca/desempenho-equipe?data_ini=${ini}&data_fim=${fim}`;
+}
+function setMes(){
+  const hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('data-ini').value = hoje.substring(0,7)+'-01';
+  document.getElementById('data-fim').value = hoje;
+  filtrar();
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

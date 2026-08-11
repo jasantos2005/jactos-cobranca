@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Técnicos de Retirada</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f1f5f9;--card:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-main{font-size:15px;font-weight:700}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-user{padding:14px 18px;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user span{font-size:11px;color:var(--muted2)}
+.btn-sair{font-size:11px;color:var(--red);text-decoration:none;padding:4px 8px;border-radius:4px;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.08);white-space:nowrap}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+header{padding:20px 28px 16px;border-bottom:1px solid var(--border);background:var(--card)}
+.header-title{font-size:20px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.content{padding:24px 28px;flex:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.btn{padding:7px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--primary);color:#0d1117}
+.btn-amber{background:rgba(240,160,0,.15);color:var(--amber);border:1px solid rgba(240,160,0,.3)}
+.btn-red{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.badge-green{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-red{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:rgba(248,81,73,.15);color:var(--red)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:12px;width:420px;max-width:95vw}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-size:15px;font-weight:700}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.form-field{margin-bottom:16px}
+.form-field label{display:block;font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.form-field input{width:100%;padding:9px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px}
+.form-field input:focus{outline:none;border-color:var(--primary)}
+.hint{font-size:11px;color:var(--muted2);margin-top:4px}
+.sig{font-size:10px;color:var(--muted2);text-align:right;padding:12px 28px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<div class="main">
+  <header>
+    <div class="header-title">👷 Técnicos de Retirada</div>
+    <div class="header-sub">Gerencie os técnicos disponíveis para agendamento de OS</div>
+  </header>
+  <div class="content">
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="abrirModal()">+ Novo Técnico</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Técnicos Cadastrados</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>ID IXC</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in tecnicos %}
+        <tr>
+          <td><strong>{{ t.nome }}</strong></td>
+          <td>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">
+              {{ t.ixc_login_id }}
+            </span>
+          </td>
+          <td>
+            {% if t.ativo %}
+            <span class="badge-green">● Ativo</span>
+            {% else %}
+            <span class="badge-red">● Inativo</span>
+            {% endif %}
+          </td>
+          <td style="display:flex;gap:8px">
+            <button class="btn btn-amber"
+              onclick="editarTecnico({{ t.id }},'{{ t.nome|replace("'","") }}',{{ t.ixc_login_id }})">
+              ✏ Editar
+            </button>
+            {% if t.ativo %}
+            <button class="btn btn-red" onclick="desativar({{ t.id }}, '{{ t.nome|replace("'","") }}')">
+              Desativar
+            </button>
+            {% else %}
+            <button class="btn btn-outline" onclick="ativar({{ t.id }})">
+              Ativar
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" style="text-align:center;color:var(--muted2);padding:32px">
+            Nenhum técnico cadastrado. Clique em <strong>+ Novo Técnico</strong> para começar.
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="sig">Iatch Axiom · Built by Ailton</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Novo Técnico</div>
+      <button onclick="fecharModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id"/>
+      <div class="form-field">
+        <label>Nome do Técnico</label>
+        <input type="text" id="m-nome" placeholder="Ex: João da Silva"/>
+      </div>
+      <div class="form-field">
+        <label>ID de Login no IXC</label>
+        <input type="number" id="m-ixc" placeholder="Ex: 27"/>
+        <div class="hint">Consulte o ID em Cadastros → Funcionários no IXC</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar" onclick="salvar()">✓ Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModal(){
+  document.getElementById('modal-title').textContent = 'Novo Técnico';
+  document.getElementById('m-id').value   = '';
+  document.getElementById('m-nome').value = '';
+  document.getElementById('m-ixc').value  = '';
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('m-nome').focus(), 100);
+}
+function editarTecnico(id, nome, ixc){
+  document.getElementById('modal-title').textContent = 'Editar Técnico';
+  document.getElementById('m-id').value   = id;
+  document.getElementById('m-nome').value = nome;
+  document.getElementById('m-ixc').value  = ixc;
+  document.getElementById('overlay').classList.add('open');
+}
+function fecharModal(){
+  document.getElementById('overlay').classList.remove('open');
+}
+async function salvar(){
+  const nome = document.getElementById('m-nome').value.trim();
+  const ixc  = document.getElementById('m-ixc').value;
+  if(!nome){ alert('Informe o nome do técnico'); return; }
+  if(!ixc)  { alert('Informe o ID IXC'); return; }
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const fd = new FormData();
+  fd.append('id',           document.getElementById('m-id').value);
+  fd.append('nome',         nome);
+  fd.append('ixc_login_id', ixc);
+  fd.append('telefone',     '');
+  const r   = await fetch('/retiradas/admin/tecnicos/salvar', {method:'POST', body:fd});
+  const res = await r.json();
+  if(res.ok){ fecharModal(); location.reload(); }
+  else{ alert('Erro: ' + res.msg); btn.disabled=false; btn.textContent='✓ Salvar'; }
+}
+async function desativar(id, nome){
+  if(!confirm(`Desativar técnico "${nome}"?`)) return;
+  const fd = new FormData();
+  fd.append('id', id);
+  const r = await fetch('/retiradas/admin/tecnicos/desativar', {method:'POST', body:fd});
+  const res = await r.json();
+  if(res.ok) location.reload();
+}
+async function ativar(id){
+  const fd = new FormData();
+  fd.append('id', id);
+  const r = await fetch('/retiradas/admin/tecnicos/ativar', {method:'POST', body:fd});
+  const res = await r.json();
+  if(res.ok) location.reload();
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-main">⚡ HubCobrança</div>
+    <div class="sb-logo-sub">ISP · Cobrança</div>
+  </div>
+
+  {% set secao_atual = namespace(nome='') %}
+  {% for menu in usuario.menus %}
+    {% if menu.secao != secao_atual.nome %}
+      {% set secao_atual.nome = menu.secao %}
+      <div class="sb-section">{{ menu.secao }}</div>
+    {% endif %}
+    <a class="sb-item {% if request.url.path == menu.rota or request.url.path.startswith(menu.rota) and menu.rota != '/' %}active{% endif %}"
+       href="{{ menu.rota }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        {% if menu.codigo == 'COB_GERAL' %}<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        {% elif menu.codigo == 'COB_FILA' %}<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        {% elif menu.codigo == 'COB_PRIMEIRA' %}<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+        {% elif menu.codigo == 'COB_SEGUNDA' %}<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4"/>
+        {% elif menu.codigo == 'COB_PROMESSAS' %}<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        {% elif menu.codigo == 'COB_PAGOS' %}<path d="M20 6L9 17l-5-5"/>
+        {% elif menu.codigo == 'COB_DESEMPENHO' %}<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        {% elif menu.codigo == 'NUNCA_PAGARAM' %}<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        {% elif menu.codigo == 'QUALIDADE_VENDAS' %}<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+        {% elif menu.codigo == 'REPROVADOS_SERASA' %}<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        {% elif menu.codigo == 'CANCELAMENTOS' %}<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        {% elif menu.codigo == 'RESULTADO_NP' %}<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        {% elif menu.codigo == 'CANCEL_INAD' %}<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        {% elif menu.codigo == 'RET_AUDITORIA' %}<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        {% elif menu.codigo == 'RET_DASHBOARD' %}<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        {% elif menu.codigo == 'RET_SEM_AGENDA' %}<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        {% elif menu.codigo == 'RET_AGENDADAS' %}<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        {% elif menu.codigo == 'RET_MONITOR' %}<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        {% elif menu.codigo == 'RET_TECNICOS' %}<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        {% elif menu.codigo == 'GES_EQUIPE' %}<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+        {% elif menu.codigo == 'GES_DESEMP_EQ' %}<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+        {% elif menu.codigo == 'GES_ADMIN' %}<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+        {% elif menu.codigo == 'GES_PERMISSOES' %}<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        {% elif menu.codigo == 'RETENCAO' %}<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        {% elif menu.codigo == 'GERENCIAL' %}<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+        {% else %}<circle cx="12" cy="12" r="10"/>
+        {% endif %}
+      </svg>
+      {{ menu.nome }}
+    </a>
+  {% endfor %}
+
+  <div class="sb-user" style="padding:14px 18px;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <strong style="color:var(--text);display:block;font-size:13px">{{ usuario.nome }}</strong>
+      <span style="font-size:11px;color:var(--muted2)">{{ usuario.setor or 'Sistema' }}</span>
+    </div>
+    <a href="/logout" style="font-size:11px;color:var(--red);text-decoration:none;padding:4px 8px;border-radius:4px;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.08);white-space:nowrap">Sair</a>
+  </div>
+</nav>

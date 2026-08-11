@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Segunda Cobrança — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f1f5f9;--card:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#58a6ff}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-main{font-size:15px;font-weight:700}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-user{padding:14px 18px;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user span{font-size:11px;color:var(--muted2)}
+.btn-sair{font-size:11px;color:var(--red);text-decoration:none;padding:4px 8px;border-radius:4px;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.08);white-space:nowrap}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+header{padding:20px 28px 16px;border-bottom:1px solid var(--border);background:var(--card)}
+.header-title{font-size:20px;font-weight:700}
+.header-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.content{padding:24px 28px;flex:1}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.filters select,.filters input[type=date]{padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px}
+.btn{padding:7px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--primary);color:#0d1117}
+.btn-amber{background:rgba(240,160,0,.15);color:var(--amber);border:1px solid rgba(240,160,0,.3)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.s-promessa{background:rgba(88,166,255,.15);color:var(--blue)}
+.s-whatsapp{background:rgba(0,200,160,.15);color:var(--primary)}
+.s-outros{background:rgba(255,255,255,.08);color:var(--muted)}
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:12px;color:var(--muted);padding:0 4px}
+.pag-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text);font-size:12px;cursor:pointer}
+.pag-btn:disabled{opacity:.3;cursor:not-allowed}
+.sig{font-size:10px;color:var(--muted2);text-align:right;padding:12px 28px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:12px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-size:15px;font-weight:700}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.form-field{margin-bottom:14px}
+.form-field label{display:block;font-size:10px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase}
+.form-field select,.form-field textarea{width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+<div class="main">
+  <header>
+    <div class="header-title">🔄 Segunda Cobrança</div>
+    <div class="header-sub">{{ total }} clientes aguardando segundo contato</div>
+  </header>
+  <div class="content">
+    <div class="filters">
+      {% if usuario.nivel == 99 %}
+      <select id="sel-operador" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px">
+        <option value="0" {% if not filtrar_operador %}selected{% endif %}>👥 Todos os operadores</option>
+        {% for op in operadores %}
+        <option value="{{ op.id }}" {% if filtrar_operador==op.id %}selected{% endif %}>{{ op.nome }}</option>
+        {% endfor %}
+      </select>
+      {% endif %}
+      <input type="date" id="data-inicio" value="{{ data_inicio }}" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px"/>
+      <input type="date" id="data-fim" value="{{ data_fim }}" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px"/>
+      <button onclick="aplicarFiltros()" style="padding:8px 14px;border-radius:6px;background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3);font-size:12px;font-weight:600;cursor:pointer">📅 Filtrar</button>
+      {% if data_inicio or data_fim %}<a href="/cobranca/segunda-cobranca" style="padding:8px 12px;border-radius:6px;border:1px solid var(--border2);color:var(--muted);font-size:12px;text-decoration:none">✕ Limpar</a>{% endif %}
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>Clientes em Segunda Cobrança</span>
+        <span style="color:var(--amber);font-family:'JetBrains Mono',monospace">{{ total }}</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Boleto</th><th>Cliente</th><th>Telefone</th><th>Valor</th><th>Status</th><th>Operador</th><th>Registrado em</th><th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for row in dados %}
+        <tr>
+          <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">#{{ row.fn_areceber_id }}</span></td>
+          <td>{% if row.get("retirada_iminente", False) %}<span style="display:inline-block;background:rgba(248,81,73,.2);color:#ff6b6b;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:4px;vertical-align:middle">🔴 Retirada iminente</span>{% elif row.get("dias_atraso", 0) > 0 %}<span style="display:inline-block;background:rgba(240,160,0,.15);color:var(--amber);font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:4px;vertical-align:middle">⏳ Retirada em {{ row.get("faltam_retirada", 60) }}d</span>{% endif %}<strong>{{ row.fatura.razao or '—' }}</strong><div style="font-size:11px;color:var(--muted2)">{{ row.fatura.cnpj_cpf or '' }}</div></td>
+          <td style="font-size:12px">{{ row.fatura.telefone or '—' }}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--amber)">
+            {% if row.fatura.valor_aberto %}R$ {{ "%.2f"|format(row.fatura.valor_aberto|float) }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="status-badge {% if 'Promessa' in row.acao %}s-promessa{% elif 'WhatsApp' in row.acao %}s-whatsapp{% else %}s-outros{% endif %}">
+              {{ row.acao }}
+            </span>
+          </td>
+          <td style="font-size:12px">{{ row.operador or '—' }}</td>
+          <td style="font-size:11px;color:var(--muted)">{{ row.criado_em }}</td>
+          <td>
+            <button class="btn btn-amber" 
+              data-id="{{ row.id }}"
+              data-acao="{{ row.acao or '' }}"
+              data-obs="{{ (row.obs or '')|replace('"','') }}"
+              onclick="abrirUpdate(this)">Atualizar</button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--muted2);padding:24px">✅ Nenhum cliente em segunda cobrança.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span>{{ total }} registros · Pág. {{ pagina }}/{{ paginas }}</span>
+        <div style="display:flex;gap:8px">
+          <button class="pag-btn" onclick="mudaPagina(-1)" {% if pagina<=1 %}disabled{% endif %}>‹ Anterior</button>
+          <button class="pag-btn" onclick="mudaPagina(1)" {% if pagina>=paginas %}disabled{% endif %}>Próximo ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sig">Iatch Axiom · Built by Ailton</div>
+</div>
+
+<!-- Modal Atualizar -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Atualizar Segunda Cobrança</div>
+      <button onclick="fecharModal()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-id"/>
+      <div class="form-field">
+        <label>Ação</label>
+        <select id="m-acao" onchange="togglePromessa()">
+          <option>Tentativa sem contato</option>
+          
+          <option>Promessa de pagamento</option>
+          <option>Cliente negou pagamento</option>
+          
+          <option>Outros</option>
+          <option>📦 Material recolhido</option>
+          <option>🚛 Solicitar retirada</option>
+        </select>
+      </div>
+      <div class="form-field" id="campo-promessa" style="display:none">
+        <label>Data da Promessa</label>
+        <input type="date" id="m-data-promessa" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px"/>
+      </div>
+      <div class="form-field">
+        <label>Observação</label>
+        <textarea id="m-obs" rows="3" placeholder="Detalhe o contato..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar" onclick="salvarUpdate()">✓ Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let pagAtual = {{ pagina }};
+
+function aplicarFiltros(){
+  const op = document.getElementById('sel-operador')?.value || 0;
+  const di = document.getElementById('data-inicio').value;
+  const df = document.getElementById('data-fim').value;
+  window.location.href = `/cobranca/segunda-cobranca?filtrar_operador=${op}&data_inicio=${di}&data_fim=${df}&pagina=1`;
+}
+function mudaPagina(d){
+  const op = document.getElementById('sel-operador')?.value || 0;
+  const di = document.getElementById('data-inicio').value;
+  const df = document.getElementById('data-fim').value;
+  window.location.href = `/cobranca/segunda-cobranca?filtrar_operador=${op}&data_inicio=${di}&data_fim=${df}&pagina=${pagAtual+d}`;
+}
+function abrirUpdate(btn){
+  const id  = btn.dataset.id;
+  const acao = btn.dataset.acao;
+  const obs  = btn.dataset.obs;
+  document.getElementById('m-id').value   = id;
+  document.getElementById('m-acao').value = acao;
+  document.getElementById('m-obs').value  = obs;
+  document.getElementById('m-data-promessa').value = '';
+  togglePromessa();
+  document.getElementById('overlay').classList.add('open');
+}
+function fecharModal(){ document.getElementById('overlay').classList.remove('open'); }
+function togglePromessa(){
+  const v = document.getElementById('m-acao').value;
+  document.getElementById('campo-promessa').style.display = v === 'Promessa de pagamento' ? 'block' : 'none';
+}
+async function salvarUpdate(){
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const fd = new FormData();
+  fd.append('interacao_id',  document.getElementById('m-id').value);
+  fd.append('acao',          document.getElementById('m-acao').value);
+  fd.append('obs',           document.getElementById('m-obs').value);
+  fd.append('data_promessa', document.getElementById('m-data-promessa').value);
+  const r   = await fetch('/cobranca/api/atualizar-interacao', {method:'POST', body:fd});
+  const res = await r.json();
+  if(res.ok){ fecharModal(); location.reload(); }
+  else{ alert('Erro ao salvar'); btn.disabled=false; btn.textContent='✓ Salvar'; }
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Meu Desempenho — HubCobrança</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--muted:#475569;--muted2:#64748b;--primary:#059669;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--cyan:#39c5cf}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{font-size:20px;font-weight:700;color:var(--primary)}
+.sb-logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sb-nav{padding:12px 0;flex:1}
+.sb-section{font-size:10px;color:var(--muted2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px 4px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;color:var(--muted);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.sb-item.active{color:var(--primary);border-left-color:var(--primary);background:rgba(5,150,105,.08)}
+.sb-item svg{width:20px;height:20px;flex-shrink:0}
+.sb-footer{padding:14px 18px;border-top:1px solid var(--border)}
+.sb-user strong{color:var(--text);display:block;font-size:13px}
+.sb-user{font-size:12px;color:var(--muted)}
+.sb-logout{display:block;margin-top:10px;font-size:12px;color:var(--muted2);text-decoration:none}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.header{padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.header-left{}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.filters{display:flex;gap:8px;align-items:center}
+input[type=date]{background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;padding:6px 10px;outline:none;font-family:'Inter',sans-serif}
+input[type=date]:focus{border-color:var(--primary)}
+.btn{padding:6px 14px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-green{background:var(--primary);color:#0d1117}
+.btn-blue{background:var(--blue);color:#fff}
+.btn:hover{opacity:.85}
+.content{padding:24px 28px;flex:1}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.kpi-value{font-size:26px;font-weight:700;margin-top:8px;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:4px}
+.kpi-accent{position:absolute;bottom:0;left:0;right:0;height:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.chart-wrap{height:200px;position:relative}
+.efic-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px}
+.efic-circle{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;border:8px solid var(--border2);position:relative}
+.efic-value{font-size:32px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--primary)}
+.efic-label{font-size:11px;color:var(--muted2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-pago{background:rgba(0,200,160,.15);color:var(--primary)}
+.badge-pend{background:rgba(139,148,158,.1);color:var(--muted)}
+.badge-prom{background:rgba(31,111,235,.15);color:#79b8ff}
+.badge-qued{background:rgba(248,81,73,.15);color:var(--red)}
+.valor{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary)}
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+.empty{text-align:center;padding:30px;color:var(--muted2);font-size:13px}
+.page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+
+<main class="main">
+  <header class="header">
+    <div class="header-left">
+      <div class="header-title">📊 Meu Desempenho</div>
+      <div class="header-sub" id="header-sub">Carregando métricas...</div>
+    </div>
+    <div class="filters">
+      <input type="date" id="data-ini"/>
+      <input type="date" id="data-fim"/>
+      <button class="btn btn-green" onclick="carregar()">Filtrar</button>
+      <button class="btn btn-blue" onclick="setMes()">Este mês</button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Valor Recuperado</div>
+        <div class="kpi-value" id="kpi-valor" style="color:var(--primary)">—</div>
+        <div class="kpi-sub">faturas pagas após contato</div>
+        <div class="kpi-accent" style="background:var(--primary)"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cobranças</div>
+        <div class="kpi-value" id="kpi-cob" style="color:var(--cyan)">—</div>
+        <div class="kpi-sub">interações realizadas</div>
+        <div class="kpi-accent" style="background:var(--cyan)"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Pagamentos</div>
+        <div class="kpi-value" id="kpi-pag" style="color:var(--amber)">—</div>
+        <div class="kpi-sub">confirmados no período</div>
+        <div class="kpi-accent" style="background:var(--amber)"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Promessas</div>
+        <div class="kpi-value" id="kpi-prom" style="color:var(--blue)">—</div>
+        <div class="kpi-sub">registradas</div>
+        <div class="kpi-accent" style="background:var(--blue)"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Quebradas</div>
+        <div class="kpi-value" id="kpi-qued" style="color:var(--red)">—</div>
+        <div class="kpi-sub">promessas não cumpridas</div>
+        <div class="kpi-accent" style="background:var(--red)"></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">Ações por Tipo</div>
+        <div class="chart-wrap"><canvas id="chart-acoes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Taxa de Eficiência</div>
+        <div class="efic-container">
+          <div class="efic-circle" id="efic-circle">
+            <div class="efic-value" id="efic-val">—</div>
+            <div class="efic-label">eficiência</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);text-align:center">
+            Cobranças que resultaram em pagamento
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Histórico de Interações</div>
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Cliente</th><th>Documento</th><th>Valor</th><th>Ação</th><th>Promessa</th><th>Status</th></tr>
+        </thead>
+        <tbody id="tabela-corpo">
+          <tr><td colspan="7" class="loading">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+</main>
+
+<script>
+let chartAcoes = null;
+function fmtBRL(v){return 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+window.addEventListener('load', ()=>{ setMes(); });
+
+function setMes(){
+  const hoje = new Date().toISOString().split('T')[0];
+  const ini  = hoje.substring(0,7)+'-01';
+  document.getElementById('data-ini').value = ini;
+  document.getElementById('data-fim').value = hoje;
+  carregar();
+}
+
+async function carregar(){
+  const ini = document.getElementById('data-ini').value;
+  const fim = document.getElementById('data-fim').value;
+  const p   = new URLSearchParams();
+  if(ini) p.append('data_ini',ini);
+  if(fim) p.append('data_fim',fim);
+  const r   = await fetch('/cobranca/api/desempenho?'+p);
+  const res = await r.json();
+  const d   = res.desempenho || {};
+  const hist= res.historico  || [];
+  document.getElementById('kpi-valor').textContent = fmtBRL(d.valor_recuperado);
+  document.getElementById('kpi-cob').textContent   = d.cobrancas || 0;
+  document.getElementById('kpi-pag').textContent   = d.pagos_diretos || 0;
+  document.getElementById('kpi-prom').textContent  = d.promessas || 0;
+  document.getElementById('kpi-qued').textContent  = d.promessas_quebradas || 0;
+  document.getElementById('header-sub').textContent = `${d.cobrancas||0} interações · ${ini} a ${fim}`;
+  const efic = d.eficiencia || 0;
+  document.getElementById('efic-val').textContent = efic+'%';
+  const circle = document.getElementById('efic-circle');
+  circle.style.borderColor = efic >= 70 ? 'var(--primary)' : efic >= 40 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('efic-val').style.color = efic >= 70 ? 'var(--primary)' : efic >= 40 ? 'var(--amber)' : 'var(--red)';
+
+  // Gráfico de ações
+  const acoes = {};
+  hist.forEach(h=>{ acoes[h.acao] = (acoes[h.acao]||0)+1; });
+  const labels = Object.keys(acoes);
+  const values = Object.values(acoes);
+  const colors = ['#00c8a0','#1f6feb','#f0a000','#39c5cf','#f85149','#c792ea','#79b8ff'];
+
+  if(chartAcoes) chartAcoes.destroy();
+  const ctx = document.getElementById('chart-acoes').getContext('2d');
+  chartAcoes = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets:[{ data: values, backgroundColor: colors.slice(0,labels.length), borderWidth:0 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'right', labels:{ color:'#8b949e', font:{size:11}, boxWidth:12 } } }
+    }
+  });
+
+  // Tabela
+  const tbody = document.getElementById('tabela-corpo');
+  if(!hist.length){
+    tbody.innerHTML='<tr><td colspan="7" class="empty">Nenhuma interação no período.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = hist.map(h=>{
+    const f = h.fatura || {};
+    let statusBadge = '';
+    if(f.status==='R' || h.pago) statusBadge = '<span class="badge badge-pago">✓ Pago</span>';
+    else if(h.data_promessa) statusBadge = `<span class="badge badge-prom">Promessa ${h.data_promessa}</span>`;
+    else statusBadge = '<span class="badge badge-pend">Pendente</span>';
+    return `<tr>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${h.criado_em||'—'}</td>
+      <td><strong style="font-size:12px">${f.razao||'—'}</strong></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${f.documento||'—'}</td>
+      <td class="valor" style="font-size:12px">${fmtBRL(f.valor_aberto||f.valor_recebido)}</td>
+      <td style="font-size:12px">${h.acao||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${h.data_promessa||'—'}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+{% include '_briefing.html' %}
+{% include '_inatividade.html' %}
+</body>
+</html>
