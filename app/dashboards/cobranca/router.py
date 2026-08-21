@@ -216,6 +216,24 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
     else:
         pass
 
+    # Abre OS 190 (cobranca) automaticamente se nao existir
+    if acao not in ["Pagamento realizado", "Pago", "💰 Pagamento realizado"]:
+        from app.core.db import query_one as _qo, execute as _ex
+        _fat190 = _qo("SELECT id_cliente, data_vencimento, valor_aberto FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
+        if _fat190:
+            _id_cli190 = _fat190["id_cliente"]
+            _os190 = _qo("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=190 AND status NOT IN ('F') LIMIT 1", (_id_cli190,))
+            if not _os190:
+                _cli190 = _qo("SELECT razao, filial_id FROM ixcprovedor.cliente WHERE id=%s", (_id_cli190,))
+                _razao190 = _cli190["razao"] if _cli190 else ""
+                _filial190 = int(_cli190["filial_id"] or 1) if _cli190 else 1
+                _venc190 = str(_fat190["data_vencimento"])[:10] if _fat190.get("data_vencimento") else ""
+                _valor190 = float(_fat190["valor_aberto"] or 0)
+                _msg190 = (f"OS de cobranca aberta automaticamente — {_razao190}\n"
+                           f"Boleto: #{fn_id} | Vencimento: {_venc190} | Valor: R$ {_valor190:.2f}\n"
+                           f"Acao: {acao}.")
+                _ex("INSERT INTO ixcprovedor.su_oss_chamado (id_cliente, id_assunto, mensagem, data_abertura, status, setor, id_filial) VALUES (%s, 190, %s, NOW(), 'A', 7, %s)",
+                    (_id_cli190, _msg190, _filial190))
     # Ações especiais
     if acao in ["🚛 Solicitar retirada", "Solicitar retirada", "📦 Material recolhido", "Material recolhido"]:
         from app.core.db import query_one, execute
@@ -241,15 +259,23 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
                         VALUES (%s, 38, %s, NOW(), 'A', 9)
                     """, (id_cliente, f"Devolução ao estoque — {razao}. Material recolhido informado pelo operador de cobrança."))
             else:
-                # Solicitar retirada — abre OS 39 se não existir
-                os39 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
-                if not os39:
+                # Solicitar retirada — abre OS 34 se não existir
+                os34 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
+                if not os34:
                     obs_text = fd.get("obs", "")
+                    _cli_ret = query_one("SELECT filial_id FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
+                    _filial_ret = int(_cli_ret["filial_id"] or 1) if _cli_ret else 1
+                    _fat_ret = query_one("SELECT id, data_vencimento, valor_aberto FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
+                    _venc_ret = str(_fat_ret["data_vencimento"])[:10] if _fat_ret and _fat_ret.get("data_vencimento") else ""
+                    _valor_ret = float(_fat_ret["valor_aberto"] or 0) if _fat_ret else 0
+                    _msg_ret = (f"Retirada solicitada pelo operador — {razao}\n"
+                                f"Boleto: #{fn_id} | Vencimento: {_venc_ret} | Valor: R$ {_valor_ret:.2f}\n"
+                                f"{obs_text}")
                     execute("""
                         INSERT INTO ixcprovedor.su_oss_chamado
-                            (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                        VALUES (%s, 39, %s, NOW(), 'A', 8)
-                    """, (id_cliente, f"Retirada solicitada pelo operador — {razao}. {obs_text}"))
+                            (id_cliente, id_assunto, mensagem, data_abertura, status, setor, id_filial)
+                        VALUES (%s, 34, %s, NOW(), 'A', 27, %s)
+                    """, (id_cliente, _msg_ret, _filial_ret))
 
     return {"ok": True}
 
@@ -709,7 +735,7 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
                     execute("""
                         INSERT INTO ixcprovedor.su_oss_chamado
                             (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                        VALUES (%s, 39, %s, NOW(), 'A', 8)
+                        VALUES (%s, 34, %s, NOW(), 'A', 27)
                     """, (id_cliente, f"RETIRADA — {razao} nunca pagou. Ação: {acao}. {obs}"))
                     abriu_os39 = True
 

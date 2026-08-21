@@ -36,11 +36,11 @@ def abrir_os_retirada(id_cliente: int, mensagem: str = "") -> dict:
 
     data = {
         "tipo":                      "C",
-        "id_assunto":                "39",
+        "id_assunto":                "34",
         "id_cliente":                str(id_cliente),
         "id_filial":                 "1",
         "id_login":                  "0",
-        "setor":                     "8",
+        "setor":                     "27",
         "origem_endereco":           "C",
         "origem_endereco_estrutura": "E",
         "prioridade":                "B",
@@ -78,14 +78,14 @@ def abrir_os_retirada(id_cliente: int, mensagem: str = "") -> dict:
         return {"ok": False, "msg": str(e)}
 
 def abrir_os_cobranca(id_cliente: int, acao: str, obs: str = "", id_login: int = 0, id_cidade: int = 0, fn_areceber_id: int = 0) -> dict:
-    """Abre OS de cobrança (assunto 246, setor 13) no IXC.
+    """Abre OS de cobrança (assunto 190, setor 7) no IXC.
     Só abre se não houver OS aberta com esse assunto para o cliente.
     Mensagem = acao + obs combinados, com o ID da fatura sendo cobrada.
     """
     # Verifica OS já aberta
     existente = query_one("""
         SELECT id FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente = %s AND id_assunto = 246 AND status <> 'F'
+        WHERE id_cliente = %s AND id_assunto = 190 AND status <> 'F'
         LIMIT 1
     """, (id_cliente,))
     if existente:
@@ -99,12 +99,12 @@ def abrir_os_cobranca(id_cliente: int, acao: str, obs: str = "", id_login: int =
     url = f"{IXC_API_URL}/webservice/v1/su_oss_chamado"
     data = {
         "tipo":                   "C",
-        "id_assunto":             "246",
+        "id_assunto":             "190",
         "id_cliente":             str(id_cliente),
         "id_filial":              "1",
         "id_login":               str(id_login) if id_login else "0",
         "id_tecnico":             str(id_login) if id_login else "0",
-        "setor":                  "13",
+        "setor":                  "7",
         "mensagem":               mensagem,
         "status":                 "A",
         "prioridade":             "B",
@@ -128,14 +128,14 @@ def abrir_os_cobranca(id_cliente: int, acao: str, obs: str = "", id_login: int =
         return {"ok": False, "ja_existe": False, "msg": str(e)}
 
 def abrir_os_cobranca(id_cliente: int, acao: str, obs: str = "", id_login: int = 0, id_cidade: int = 0, fn_areceber_id: int = 0) -> dict:
-    """Abre OS de cobrança (assunto 246, setor 13) no IXC.
+    """Abre OS de cobrança (assunto 190, setor 7) no IXC.
     Só abre se não houver OS aberta com esse assunto para o cliente.
     Mensagem = acao + obs combinados, com o ID da fatura sendo cobrada.
     """
     # Verifica OS já aberta
     existente = query_one("""
         SELECT id FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente = %s AND id_assunto = 246 AND status <> 'F'
+        WHERE id_cliente = %s AND id_assunto = 190 AND status <> 'F'
         LIMIT 1
     """, (id_cliente,))
     if existente:
@@ -149,12 +149,12 @@ def abrir_os_cobranca(id_cliente: int, acao: str, obs: str = "", id_login: int =
     url = f"{IXC_API_URL}/webservice/v1/su_oss_chamado"
     data = {
         "tipo":                   "C",
-        "id_assunto":             "246",
+        "id_assunto":             "190",
         "id_cliente":             str(id_cliente),
         "id_filial":              "1",
         "id_login":               str(id_login) if id_login else "0",
         "id_tecnico":             str(id_login) if id_login else "0",
-        "setor":                  "13",
+        "setor":                  "7",
         "mensagem":               mensagem,
         "status":                 "A",
         "prioridade":             "B",

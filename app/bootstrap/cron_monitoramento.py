@@ -146,7 +146,7 @@ def main():
             COUNT(f.id) AS qtd_faturas
         FROM ixcprovedor.cliente c
         INNER JOIN ixcprovedor.su_oss_chamado o ON o.id_cliente=c.id
-            AND o.id_assunto IN (246,39) AND o.status<>'F'
+            AND o.id_assunto IN (190,34) AND o.status<>'F'
         LEFT JOIN ixcprovedor.fn_areceber f ON f.id_cliente=c.id
             AND f.status='A' AND f.data_vencimento < CURDATE()
         LEFT JOIN ixcprovedor.cliente_contrato cc ON cc.id=f.id_contrato

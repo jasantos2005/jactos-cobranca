@@ -367,9 +367,7 @@ def reabrir_os_fatura_aberta():
             SET status='A', data_fechamento=NULL,
                 mensagem=CONCAT(COALESCE(mensagem,''), %s)
             WHERE id=%s
-        """, ('
-
-OS reaberta automaticamente — cliente ainda tem fatura em aberto.', c["id"]))
+        """, ('\nOS reaberta automaticamente - cliente ainda tem fatura em aberto.', c["id"]))
         log(f"  ✅ OS #{c['id']} reaberta — {c['razao']}")
 
 if __name__ == "__main__":
