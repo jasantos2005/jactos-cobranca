@@ -21,7 +21,7 @@ def get_os_sem_agendamento(busca="", cidade=0, pagina=1, por_pagina=30):
     off   = int((pagina - 1) * por_pagina)
     # IDs já agendados
     agendados = [r["id_os"] for r in local_query("SELECT id_os FROM cob_retiradas_agendamentos WHERE status='agendado'", ())]
-    where = "WHERE o.id_assunto=34 AND o.status NOT IN ('F')"
+    where = "WHERE o.id_assunto=34 AND o.status='A'"
     if agendados:
         ids = ",".join(str(i) for i in agendados)
         where += f" AND o.id NOT IN ({ids})"
@@ -53,7 +53,7 @@ def get_os_sem_agendamento(busca="", cidade=0, pagina=1, por_pagina=30):
 
 def count_os_sem_agendamento(busca="", cidade=0):
     agendados = [r["id_os"] for r in local_query("SELECT id_os FROM cob_retiradas_agendamentos WHERE status='agendado'", ())]
-    where = "WHERE o.id_assunto=34 AND o.status NOT IN ('F')"
+    where = "WHERE o.id_assunto=34 AND o.status='A'"
     if agendados:
         ids = ",".join(str(i) for i in agendados)
         where += f" AND o.id NOT IN ({ids})"
