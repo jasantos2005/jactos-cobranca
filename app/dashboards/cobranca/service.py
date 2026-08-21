@@ -206,6 +206,13 @@ def count_inadimplentes(filtros: FiltrosGlobais):
 
 # ─── FILA DE COBRANÇA ────────────────────────────────────────────────────────
 
+def _sem_negativados():
+    """Retorna cláusula SQL para excluir clientes com OS 63 (negativação) aberta."""
+    return """AND f.id_cliente NOT IN (
+        SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
+        WHERE id_assunto=63 AND status NOT IN ('F','AN')
+    )"""
+
 def get_fila(filtros: FiltrosGlobais):
     faixa    = _faixa_sql(filtros.faixa)
     limit    = int(filtros.por_pagina)
