@@ -3,7 +3,7 @@
 Migration v3 — Automação de Cobrança via WhatsApp
 Adiciona: cob_whatsapp_optout, cob_whatsapp_sessao, usuário de sistema bot_whatsapp
 
-Execute UMA VEZ, de dentro de /opt/automacoes/cliquedf/cobranca:
+Execute UMA VEZ, de dentro de /opt/automacoes/jactos/cobranca:
     python3 -m app.bootstrap.migrate_v3_whatsapp
 
 Este script NÃO altera nenhuma tabela existente (cob_interacoes, cob_usuarios, etc.),

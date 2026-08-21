@@ -5,8 +5,8 @@ Corrige data de cancelamento por inadimplência para a data do último pagamento
 quando o atraso for superior a 60 dias (erro operacional)
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 from datetime import datetime, timezone, timedelta
 from app.core.db import execute, query
 

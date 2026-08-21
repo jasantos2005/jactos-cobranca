@@ -4,8 +4,8 @@ Cron de Auditoria e Auto-Correção — executa a cada 2h
 Filosofia: corrige silenciosamente, alerta só quando não consegue.
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))

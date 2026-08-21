@@ -76,13 +76,8 @@ def count_os_sem_agendamento(busca="", cidade=0):
 def get_os_agendadas(busca="", cidade=0, tecnico=0, pagina=1, por_pagina=30):
     limit = int(por_pagina)
     off   = int((pagina - 1) * por_pagina)
-    ags   = local_query("SELECT * FROM cob_retiradas_agendamentos WHERE status='agendado' ORDER BY agendado_em DESC", ())
-    if not ags:
-        return []
-    ids_map = {a["id_os"]: dict(a) for a in ags}
-    ids_str = ",".join(str(i) for i in ids_map.keys())
-    where   = f"WHERE o.id IN ({ids_str})"
-    params  = []
+    where = "WHERE o.id_assunto=34 AND o.status IN ('AG','RAG','EN')"
+    params = []
     if busca:
         where += " AND (c.razao LIKE %s OR c.cnpj_cpf LIKE %s)"
         b = f"%{busca}%"
@@ -91,28 +86,31 @@ def get_os_agendadas(busca="", cidade=0, tecnico=0, pagina=1, por_pagina=30):
         where += " AND c.cidade=%s"
         params.append(cidade)
     if tecnico:
-        ids_tec = [str(a["id_os"]) for a in ags if a["id_tecnico_ixc"] == tecnico]
-        if ids_tec:
-            where += f" AND o.id IN ({','.join(ids_tec)})"
-        else:
-            return []
+        where += " AND o.id_tecnico=%s"
+        params.append(tecnico)
     params += [limit, off]
     rows = query(f"""
-        SELECT o.id AS id_os, o.id_cliente,
+        SELECT o.id AS id_os, o.id_cliente, o.status,
                DATE_FORMAT(o.data_abertura,'%%d/%%m/%%Y') AS data_abertura,
+               DATE_FORMAT(o.data_agenda,'%%d/%%m/%%Y') AS data_agendada,
+               f.funcionario AS tecnico_nome,
                c.razao, c.endereco, c.numero, c.bairro,
                COALESCE(cid.nome, c.cidade) AS cidade_nome, c.cidade AS id_cidade,
                COALESCE(c.whatsapp, c.telefone_celular, c.fone,'') AS telefone
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id=c.cidade
+        LEFT  JOIN ixcprovedor.funcionarios f ON f.id=o.id_tecnico
         {where}
-        ORDER BY o.data_abertura ASC
+        ORDER BY o.data_agenda ASC, o.data_abertura ASC
         LIMIT %s OFFSET %s
     """, params)
     for row in rows:
         row["equipamentos"] = get_equipamentos_cliente(row["id_cliente"])
-        row["agendamento"]  = ids_map.get(row["id_os"], {})
+        row["agendamento"]  = {
+            "tecnico_nome": row.get("tecnico_nome") or "—",
+            "data_agendada": row.get("data_agendada") or "—"
+        }
     return rows
 
 def count_os_agendadas(busca="", cidade=0, tecnico=0):

@@ -12,8 +12,8 @@ excepcionalmente (liberação de supervisor/admin).
 - Grupo: GESTÃO | COMERCIAL
 """
 import sys, os, time
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 import requests

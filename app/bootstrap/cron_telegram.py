@@ -3,8 +3,8 @@
 Cron Telegram — relatórios horários, ranking e resumo semanal
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta, date
 TZ_BR = timezone(timedelta(hours=-3))

@@ -7,8 +7,8 @@ Regras:
 - OS 246 aberta → segunda_cobranca=1 (move para 2ª cobrança)
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))
 def now_br(): return datetime.now(TZ_BR)

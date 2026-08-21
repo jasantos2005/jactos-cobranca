@@ -4,8 +4,8 @@ Cron Qualidade de Vendas — roda todo dia às 18h seg-sab
 Alerta no Telegram quando vendedor ultrapassar 15% de inadimplência
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))

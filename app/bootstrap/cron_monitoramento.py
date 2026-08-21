@@ -8,8 +8,8 @@ Regras:
 - OS 39 (qualquer status) + cliente pagou → fecha OS 39
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))
@@ -41,7 +41,7 @@ def abrir_os_retirada_ixc(id_cliente: int, mensagem: str) -> int:
         WHERE id_cliente=%s AND id_assunto=34 AND status<>'F' LIMIT 1
     """, (id_cliente,))
     if existente:
-        log(f"  OS 39 já existe para cliente {id_cliente}: #{existente['id']}")
+        log(f"  OS 34 já existe para cliente {id_cliente}: #{existente['id']}")
         return existente["id"]
     try:
         from app.core.db import execute as db_execute
@@ -114,7 +114,7 @@ def retirada_acelerada_nunca_pagou():
                     (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
                 VALUES (%s, 39, %s, NOW(), 'A', 8)
             """, (c["id_cliente"], msg))
-            log(f"  ✅ OS 39 aberta — {c['razao']} ({c['dias_ativado']}d sem pagar)")
+            log(f"  ✅ OS 34 aberta — {c['razao']} ({c['dias_ativado']}d sem pagar)")
             abertas += 1
         except Exception as e:
             log(f"  ❌ ERRO — {c['razao']}: {e}")
@@ -124,7 +124,7 @@ def retirada_acelerada_nunca_pagou():
         requests.post(
             f"https://api.telegram.org/bot8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY/sendMessage",
             data={"chat_id": "-4989557189",
-                  "text": f"🚨 <b>Retirada Acelerada</b>\n{abertas} OS 39 abertas para clientes que nunca pagaram (30+ dias)\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>",
+                  "text": f"🚨 <b>Retirada Acelerada</b>\n{abertas} OS 34 abertas para clientes que nunca pagaram (30+ dias)\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>",
                   "parse_mode": "HTML"}, timeout=10)
     log(f"Retirada acelerada concluída — {abertas} OS abertas")
     return abertas

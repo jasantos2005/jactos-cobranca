@@ -4,7 +4,7 @@ Cron: resolve interações/promessas quebradas cujas faturas já foram pagas no 
 Roda com frequência alta para tirar rapidamente da tela quem já pagou.
 """
 import sys
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))

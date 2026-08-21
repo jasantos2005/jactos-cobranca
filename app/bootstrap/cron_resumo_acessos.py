@@ -3,8 +3,8 @@
    Duração somada considera apenas expediente: 08:00-12:00 e 14:00-18:00
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 from datetime import datetime, timezone, timedelta, time as dtime
 import requests, sqlite3
 
@@ -13,7 +13,7 @@ def now_br(): return datetime.now(TZ_BR)
 
 TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
 TELEGRAM_CHATS = ["2135602169", "2135602169"]
-DB_PATH = "/opt/automacoes/cliquedf/cobranca/cobranca_local.db"
+DB_PATH = "/opt/automacoes/jactos/cobranca/cobranca_local.db"
 
 # Janelas de expediente consideradas no cálculo
 WORK_WINDOWS = [(dtime(8, 0), dtime(12, 0)), (dtime(14, 0), dtime(18, 0))]

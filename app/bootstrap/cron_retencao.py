@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Cron Retenção — toda segunda 8h — top 10 em risco no Telegram privado"""
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))
 def now_br(): return datetime.now(TZ_BR)

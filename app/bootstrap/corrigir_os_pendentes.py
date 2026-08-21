@@ -2,8 +2,8 @@
 Corrige clientes com >60 dias sem OS — exclui entidades públicas/escolares
 """
 import sys, os
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
-os.chdir('/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
+os.chdir('/opt/automacoes/jactos/cobranca')
 
 from app.core.db import query, query_one
 from app.core.ixc_api import IXC_API_URL, _auth

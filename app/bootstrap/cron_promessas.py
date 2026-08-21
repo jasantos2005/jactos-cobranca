@@ -4,7 +4,7 @@ Cron: Detecta promessas quebradas e resolve interações pagas
 Executa diariamente às 08:00
 """
 import sys
-sys.path.insert(0, '/opt/automacoes/cliquedf/cobranca')
+sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
 
 from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))
