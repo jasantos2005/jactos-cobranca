@@ -227,11 +227,11 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
 
             if "recolhido" in acao.lower() or "Material" in acao:
                 # Material recolhido — fecha OS 246 + fecha OS 39 + abre OS 38 estoque
-                os246 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=246 AND status='A' LIMIT 1", (id_cliente,))
+                os246 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1", (id_cliente,))
                 if os246:
                     execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os246["id"],))
                 # Verifica OS 39 finalizada recentemente
-                os39_fin = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=39 AND status='F' ORDER BY data_fechamento DESC LIMIT 1", (id_cliente,))
+                os39_fin = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status='F' ORDER BY data_fechamento DESC LIMIT 1", (id_cliente,))
                 # Abre OS 38 se não existir
                 os38 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=38 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
                 if not os38:
@@ -242,7 +242,7 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
                     """, (id_cliente, f"Devolução ao estoque — {razao}. Material recolhido informado pelo operador de cobrança."))
             else:
                 # Solicitar retirada — abre OS 39 se não existir
-                os39 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=39 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
+                os39 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
                 if not os39:
                     obs_text = fd.get("obs", "")
                     execute("""
@@ -563,7 +563,7 @@ async def api_check_os_cobranca(id_cliente: int, request: Request, usuario=Depen
     r = query_one("""
         SELECT id, DATE_FORMAT(data_abertura,'%%d/%%m/%%Y') AS data_abertura
         FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto=246 AND status<>'F'
+        WHERE id_cliente=%s AND id_assunto=190 AND status<>'F'
         ORDER BY data_abertura DESC LIMIT 1
     """, (id_cliente,))
     if r:
@@ -637,7 +637,7 @@ async def nunca_pagaram(request: Request, pagina: int = 1, usuario=Depends(get_u
         INNER JOIN ixcprovedor.fn_areceber f ON f.id_cliente=cc.id_cliente
             AND f.status='A' AND f.data_vencimento < CURDATE()
         INNER JOIN ixcprovedor.su_oss_chamado o ON o.id_cliente=cc.id_cliente
-            AND o.id_assunto=39 AND o.status NOT IN ('F')
+            AND o.id_assunto=34 AND o.status NOT IN ('F')
         WHERE cc.status='A'
           AND DATEDIFF(CURDATE(), cc.data_ativacao) <= 90
           AND cc.id_cliente NOT IN (
@@ -701,7 +701,7 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
                 id_cliente = fat["id_cliente"]
                 os_existe = query_one("""
                     SELECT id FROM ixcprovedor.su_oss_chamado
-                    WHERE id_cliente=%s AND id_assunto=39 AND status NOT IN ('F') LIMIT 1
+                    WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1
                 """, (id_cliente,))
                 if not os_existe:
                     cli = query_one("SELECT razao FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
@@ -882,7 +882,7 @@ async def check_os_retirada(fn_id: int, request: Request, usuario=Depends(get_us
     id_cliente = fat["id_cliente"]
     os_ret = query_one("""
         SELECT id FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto IN (22,39)
+        WHERE id_cliente=%s AND id_assunto IN (34)
         AND status NOT IN ('F')
         ORDER BY data_abertura DESC LIMIT 1
     """, (id_cliente,))

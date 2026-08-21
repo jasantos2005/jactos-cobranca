@@ -49,14 +49,14 @@ def limpar():
         ph2 = ",".join(["%s"]*len(id_clientes))
         ret = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=39 AND status IN ('A','EN','AG','REG','RAG')
+            WHERE id_assunto=34 AND status IN ('A','EN','AG','REG','RAG')
             AND id_cliente IN ({ph2})
         """, tuple(id_clientes))
         clientes_com_retirada = {r["id_cliente"] for r in ret}
 
         os246 = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=246 AND status='A'
+            WHERE id_assunto=190 AND status='A'
             AND id_cliente IN ({ph2})
         """, tuple(id_clientes))
         clientes_com_os246 = {r["id_cliente"] for r in os246}

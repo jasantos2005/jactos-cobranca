@@ -125,7 +125,7 @@ def get_dashboard_gerencial():
 
     os39_abertas = query_one("""
         SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado
-        WHERE id_assunto=39 AND status NOT IN ('F')
+        WHERE id_assunto=34 AND status NOT IN ('F')
     """, ())
 
     os38_pendentes = query_one("""

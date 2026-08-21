@@ -164,7 +164,7 @@ textarea{resize:vertical;min-height:70px}
           <tr>
             <th>ID Cliente</th><th>Cliente</th><th>Telefone</th>
             <th>Vencimento</th><th>Valor</th><th>Atraso</th>
-            <th>OS Retirada</th><th>Ação</th>
+            <th>Ação</th>
           </tr>
         </thead>
         <tbody>
@@ -188,10 +188,7 @@ textarea{resize:vertical;min-height:70px}
               {% elif d <= 90 %}<span class="badge-atraso badge-90">{{ d }}d</span>
               {% else %}<span class="badge-atraso badge-90p">{{ d }}d</span>{% endif %}
             </td>
-            <td>
-              {% if row.tem_os %}<span style="font-size:11px;color:var(--amber)">⚠ OS aberta</span>
-              {% else %}<button class="btn btn-outline" onclick="abrirOS({{ row.id_cliente }},this)">+ Abrir OS</button>{% endif %}
-            </td>
+
             <td><button class="btn btn-blue" onclick="abrirModal({{ row.id_cliente }}, {{ row.id_fatura }})">Cobrar</button></td>
           </tr>
           {% else %}

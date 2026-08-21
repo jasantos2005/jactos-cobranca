@@ -38,7 +38,7 @@ def abrir_os_retirada_ixc(id_cliente: int, mensagem: str) -> int:
     """Abre OS 39 diretamente no banco MySQL."""
     existente = query_one("""
         SELECT id FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto=39 AND status<>'F' LIMIT 1
+        WHERE id_cliente=%s AND id_assunto=34 AND status<>'F' LIMIT 1
     """, (id_cliente,))
     if existente:
         log(f"  OS 39 já existe para cliente {id_cliente}: #{existente['id']}")
@@ -52,7 +52,7 @@ def abrir_os_retirada_ixc(id_cliente: int, mensagem: str) -> int:
         """, (id_cliente, mensagem))
         nova = query_one("""
             SELECT id FROM ixcprovedor.su_oss_chamado
-            WHERE id_cliente=%s AND id_assunto=39 AND status='A'
+            WHERE id_cliente=%s AND id_assunto=34 AND status='A'
             ORDER BY data_abertura DESC LIMIT 1
         """, (id_cliente,))
         return nova["id"] if nova else 1
@@ -92,7 +92,7 @@ def retirada_acelerada_nunca_pagou():
           )
           AND cc.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=39 AND status NOT IN ('F')
+            WHERE id_assunto=34 AND status NOT IN ('F')
           )
         GROUP BY cc.id_cliente, c.razao, cc.data_ativacao
     """, ())
@@ -139,8 +139,8 @@ def main():
         SELECT
             c.id AS id_cliente,
             c.razao,
-            MAX(CASE WHEN o.id_assunto=246 AND o.status='A' THEN o.id END) AS os246_id,
-            MAX(CASE WHEN o.id_assunto=39  AND o.status<>'F' THEN o.id END) AS os39_id,
+            MAX(CASE WHEN o.id_assunto=190 AND o.status='A' THEN o.id END) AS os246_id,
+            MAX(CASE WHEN o.id_assunto=34  AND o.status<>'F' THEN o.id END) AS os39_id,
             MAX(DATEDIFF(CURDATE(), f.data_vencimento)) AS maior_atraso,
             SUM(f.valor_aberto) AS total_aberto,
             COUNT(f.id) AS qtd_faturas
@@ -166,7 +166,7 @@ def main():
             COUNT(f.id) AS qtd_faturas
         FROM ixcprovedor.cliente c
         INNER JOIN ixcprovedor.su_oss_chamado o ON o.id_cliente=c.id
-            AND o.id_assunto=39 AND o.status NOT IN ('F')
+            AND o.id_assunto=34 AND o.status NOT IN ('F')
         LEFT JOIN ixcprovedor.fn_areceber f ON f.id_cliente=c.id
             AND f.status='A' AND f.data_vencimento < CURDATE()
         LEFT JOIN ixcprovedor.cliente_contrato cc ON cc.id=f.id_contrato
@@ -174,7 +174,7 @@ def main():
         WHERE c.ativo='S'
         AND c.id NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=246 AND status='A'
+            WHERE id_assunto=190 AND status='A'
         )
         GROUP BY c.id, c.razao
     """, ())
@@ -221,7 +221,7 @@ def main():
                     from app.core.db import query_one as qo
                     os39_recente = qo("""
                         SELECT id FROM ixcprovedor.su_oss_chamado
-                        WHERE id_cliente=%s AND id_assunto=39
+                        WHERE id_cliente=%s AND id_assunto=34
                         AND (status NOT IN ('F') OR DATE(data_fechamento) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY))
                         ORDER BY data_abertura DESC LIMIT 1
                     """, (id_cli,))

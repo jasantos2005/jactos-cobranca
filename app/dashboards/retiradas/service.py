@@ -4,9 +4,9 @@ from decimal import Decimal
 
 # ─── KPIs ─────────────────────────────────────────────────────────────────────
 def get_kpis_retiradas():
-    abertas    = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=39 AND status='A'", ())
-    agendadas  = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=39 AND status IN ('AG','RAG')", ())
-    concluidas = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=39 AND status='F' AND DATE(data_fechamento)=CURDATE()", ())
+    abertas    = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=34 AND status='A'", ())
+    agendadas  = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=34 AND status IN ('AG','RAG')", ())
+    concluidas = query_one("SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado WHERE id_assunto=34 AND status='F' AND DATE(data_fechamento)=CURDATE()", ())
     sem_agenda = (abertas["total"] if abertas else 0) - (agendadas["total"] if agendadas else 0)
     return {
         "abertas":    abertas["total"] if abertas else 0,
@@ -21,7 +21,7 @@ def get_os_sem_agendamento(busca="", cidade=0, pagina=1, por_pagina=30):
     off   = int((pagina - 1) * por_pagina)
     # IDs já agendados
     agendados = [r["id_os"] for r in local_query("SELECT id_os FROM cob_retiradas_agendamentos WHERE status='agendado'", ())]
-    where = "WHERE o.id_assunto=39 AND o.status NOT IN ('F')"
+    where = "WHERE o.id_assunto=34 AND o.status NOT IN ('F')"
     if agendados:
         ids = ",".join(str(i) for i in agendados)
         where += f" AND o.id NOT IN ({ids})"
@@ -53,7 +53,7 @@ def get_os_sem_agendamento(busca="", cidade=0, pagina=1, por_pagina=30):
 
 def count_os_sem_agendamento(busca="", cidade=0):
     agendados = [r["id_os"] for r in local_query("SELECT id_os FROM cob_retiradas_agendamentos WHERE status='agendado'", ())]
-    where = "WHERE o.id_assunto=39 AND o.status NOT IN ('F')"
+    where = "WHERE o.id_assunto=34 AND o.status NOT IN ('F')"
     if agendados:
         ids = ",".join(str(i) for i in agendados)
         where += f" AND o.id NOT IN ({ids})"
@@ -159,7 +159,7 @@ def get_cidades_retiradas():
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id=c.cidade
-        WHERE o.id_assunto=39 AND o.status NOT IN ('F')
+        WHERE o.id_assunto=34 AND o.status NOT IN ('F')
         GROUP BY c.cidade, cidade_nome
         ORDER BY total DESC
     """, ())

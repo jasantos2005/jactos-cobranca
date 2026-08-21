@@ -65,7 +65,7 @@ def fila_cobranca(x_api_key: str = Header(None, alias="X-API-Key")):
     Lista faturas vencidas elegíveis para cobrança automática via WhatsApp.
 
     Exclui automaticamente:
-      - Faturas com OS de cobrança já aberta no IXC (id_assunto=246, status<>'F')
+      - Faturas com OS de cobrança já aberta no IXC (id_assunto=190, status<>'F')
         -> mesma regra que o time humano já usa (abrir_os_cobranca)
       - Faturas/telefones em opt-out (cob_whatsapp_optout)
       - Clientes sem telefone cadastrado
@@ -357,7 +357,7 @@ class AbrirOSRequest(BaseModel):
 
 @router.post("/abrir-os")
 def abrir_os_whatsapp(req: AbrirOSRequest, x_api_key: str = Header(None, alias="X-API-Key")):
-    """Abre a OS de cobrança (id_assunto=246) no IXC, reaproveitando a função já usada pelo hub."""
+    """Abre a OS de cobrança (id_assunto=190) no IXC, reaproveitando a função já usada pelo hub."""
     _verifica_key(x_api_key)
     resultado = abrir_os_cobranca(req.id_cliente, req.acao, req.obs)
     return {"ok": True, "resultado": resultado}

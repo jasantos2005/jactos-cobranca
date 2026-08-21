@@ -25,7 +25,7 @@ def get_ranking_tecnicos(data_ini=None, data_fim=None):
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.funcionarios f ON f.id=o.id_tecnico
         LEFT JOIN ixcprovedor.su_oss_chamado_arquivos a ON a.id_oss_chamado=o.id AND a.nome_arquivo NOT LIKE '%%.pdf' AND a.descricao NOT LIKE '%%Assinatura%%' AND a.descricao NOT LIKE '%%Ordem%%'
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND o.id_tecnico IN ({ph})
           AND o.mensagem NOT LIKE 'Retirada automática%%' {filtro}
         GROUP BY f.id, f.funcionario
@@ -49,7 +49,7 @@ def get_os_pendentes_auditoria():
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT JOIN ixcprovedor.funcionarios f ON f.id=o.id_tecnico
         LEFT JOIN ixcprovedor.su_oss_chamado_arquivos a ON a.id_oss_chamado=o.id AND a.nome_arquivo NOT LIKE '%%.pdf' AND a.descricao NOT LIKE '%%Assinatura%%' AND a.descricao NOT LIKE '%%Ordem%%'
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND DATE(o.data_fechamento) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
           AND o.mensagem NOT LIKE 'Retirada automática%%'
           AND (o.id_tecnico IN ({ph}) OR o.id_tecnico IS NULL OR o.id_tecnico=0)
@@ -66,7 +66,7 @@ def get_kpis_auditoria():
                COUNT(a.id) AS qtd_fotos
         FROM ixcprovedor.su_oss_chamado o
         LEFT JOIN ixcprovedor.su_oss_chamado_arquivos a ON a.id_oss_chamado=o.id AND (a.nome_arquivo LIKE '%%.jpg' OR a.nome_arquivo LIKE '%%.jpeg' OR a.nome_arquivo LIKE '%%.png' OR a.nome_arquivo LIKE '%%.gif' OR a.nome_arquivo LIKE '%%.webp') AND a.nome_arquivo != '/' AND a.nome_arquivo != '' AND a.descricao NOT LIKE '%%Assinatura%%'
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND DATE(o.data_fechamento) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
           AND o.mensagem NOT LIKE 'Retirada automática%%'
         GROUP BY o.id, o.id_tecnico

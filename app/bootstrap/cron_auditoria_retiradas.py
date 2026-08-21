@@ -142,7 +142,7 @@ def retirada_imediata_nunca_pagou():
           )
           AND cc.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=39 AND status NOT IN ('F')
+            WHERE id_assunto=34 AND status NOT IN ('F')
           )
         GROUP BY cc.id_cliente, c.razao, cc.data_ativacao
         HAVING maior_atraso >= 30
@@ -159,7 +159,7 @@ def retirada_imediata_nunca_pagou():
             # Fecha OS 246 se existir
             os246 = query_one("""
                 SELECT id FROM ixcprovedor.su_oss_chamado
-                WHERE id_cliente=%s AND id_assunto=246 AND status='A' LIMIT 1
+                WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
             """, (c["id_cliente"],))
             if os246:
                 execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os246["id"],))
@@ -229,7 +229,7 @@ def main():
         INNER JOIN ixcprovedor.usuarios u ON u.id=o.id_tecnico
         INNER JOIN ixcprovedor.su_oss_chamado_arquivos a ON a.id_oss_chamado=o.id
         AND (a.nome_arquivo LIKE '%%.jpg' OR a.nome_arquivo LIKE '%%.jpeg' OR a.nome_arquivo LIKE '%%.png' OR a.nome_arquivo LIKE '%%.gif' OR a.nome_arquivo LIKE '%%.webp') AND a.nome_arquivo != '/' AND a.nome_arquivo != '' AND a.descricao NOT LIKE '%%Assinatura%%'
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND DATE(o.data_fechamento) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
           AND o.id_tecnico IN ({ph})
           AND o.id_cliente NOT IN (
@@ -271,7 +271,7 @@ def main():
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT JOIN ixcprovedor.funcionarios u ON u.id=o.id_tecnico
         LEFT JOIN ixcprovedor.su_oss_chamado_arquivos a ON a.id_oss_chamado=o.id
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND DATE(o.data_fechamento) = CURDATE()
           AND a.id IS NULL
           AND o.mensagem NOT LIKE 'Retirada automática%%'
@@ -282,7 +282,7 @@ def main():
         SELECT o.id, c.razao, o.data_fechamento
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
-        WHERE o.id_assunto=39 AND o.status='F'
+        WHERE o.id_assunto=34 AND o.status='F'
           AND DATE(o.data_fechamento) = CURDATE()
           AND o.mensagem NOT LIKE 'Retirada automática%%'
           AND (o.id_tecnico IS NULL OR o.id_tecnico=0

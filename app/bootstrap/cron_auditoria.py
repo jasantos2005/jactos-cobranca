@@ -63,7 +63,7 @@ def corrigir_os39_pagos():
         SELECT DISTINCT c.id, c.razao, o.id AS os39_id
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
-        WHERE o.id_assunto=39 AND o.status NOT IN ('F')
+        WHERE o.id_assunto=34 AND o.status NOT IN ('F')
         AND NOT EXISTS (
             SELECT 1 FROM ixcprovedor.fn_areceber f2
             INNER JOIN ixcprovedor.cliente_contrato cc ON cc.id=f2.id_contrato
@@ -101,7 +101,7 @@ def corrigir_os39_faltantes():
         WHERE f.id IN ({ph})
         AND f.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=39 AND status NOT IN ('F')
+            WHERE id_assunto=34 AND status NOT IN ('F')
         )
         GROUP BY f.id_cliente, c.razao
         HAVING maior_atraso >= 45
@@ -216,7 +216,7 @@ def fechar_os_sem_fatura():
     candidatos = query("""
         SELECT DISTINCT o.id_cliente, o.id AS os_id
         FROM ixcprovedor.su_oss_chamado o
-        WHERE o.id_assunto=246 AND o.status='A'
+        WHERE o.id_assunto=190 AND o.status='A'
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.fn_areceber
             WHERE status='A' AND data_vencimento < CURDATE()
@@ -246,7 +246,7 @@ def limpar_segunda_cobranca_com_retirada():
         SELECT DISTINCT f.id AS fn_id
         FROM ixcprovedor.fn_areceber f
         INNER JOIN ixcprovedor.su_oss_chamado o ON o.id_cliente=f.id_cliente
-        WHERE o.id_assunto IN (22,39) AND o.status NOT IN ('F') AND f.status='A'
+        WHERE o.id_assunto IN (34) AND o.status NOT IN ('F') AND f.status='A'
     """, ())
     fn_ids = tuple(r["fn_id"] for r in clientes)
     if not fn_ids:
@@ -273,7 +273,7 @@ def fechar_os_clientes_pagos():
         FROM su_oss_chamado o
         INNER JOIN cliente c ON c.id=o.id_cliente
         LEFT JOIN fn_areceber f ON f.id_cliente=o.id_cliente AND f.status='R'
-        WHERE o.id_assunto=246 AND o.status='A'
+        WHERE o.id_assunto=190 AND o.status='A'
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM fn_areceber
             WHERE status='A' AND data_vencimento < CURDATE()
@@ -345,14 +345,14 @@ def reabrir_os_fatura_aberta():
         INNER JOIN ixcprovedor.cliente_contrato cc ON cc.id_cliente=o.id_cliente AND cc.status='A'
         INNER JOIN ixcprovedor.fn_areceber f ON f.id_cliente=o.id_cliente
             AND f.status='A' AND f.data_vencimento < CURDATE()
-        WHERE o.id_assunto IN (22,39) AND o.status='F'
+        WHERE o.id_assunto IN (34) AND o.status='F'
           AND DATEDIFF(CURDATE(), cc.data_ativacao) <= 90
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.fn_areceber WHERE status='R'
           )
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto IN (22,39) AND status NOT IN ('F')
+            WHERE id_assunto IN (34) AND status NOT IN ('F')
           )
     """, ())
 

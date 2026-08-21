@@ -10,6 +10,7 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), ".
 
 TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
 TELEGRAM_CHATS = ["2135602169", "2135602169"]
+_tg_login_cache = {}  # cooldown boas-vindas
 
 def _telegram(msg):
     try:
@@ -58,7 +59,13 @@ def _log_acesso(usuario_id, login, acao, request: Request, duracao_min=None, mot
             msg_bv = f"🔄 <b>{nome_display}</b> retornou ao HubCobrança\n{saudacao}! Bem-vindo(a) de volta 👋\n🕐 {agora[11:16]} | 🌐 {ip}"
         else:
             msg_bv = f"🟢 {saudacao}, <b>{nome_display}</b>! 👋\nBem-vindo(a) ao HubCobrança\n🕐 {agora[11:16]} | 🌐 {ip}"
-        _telegram(msg_bv)
+        # Cooldown 60s para evitar duplicidade
+        import time
+        chave = f"bv_{usuario_id}"
+        agora_ts = time.time()
+        if chave not in _tg_login_cache or agora_ts - _tg_login_cache[chave] > 60:
+            _tg_login_cache[chave] = agora_ts
+            _telegram(msg_bv)
     elif acao == "LOGOUT":
         # Fecha sessão aberta
         sessao = local_query_one(

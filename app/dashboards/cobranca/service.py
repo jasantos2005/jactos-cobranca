@@ -324,7 +324,7 @@ def count_fila(filtros: FiltrosGlobais):
 def check_os_aberta(id_cliente: int):
     r = query_one("""
         SELECT id FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente = %s AND id_assunto IN (22, 39) AND status = 'A' LIMIT 1
+        WHERE id_cliente = %s AND id_assunto IN (34) AND status = 'A' LIMIT 1
     """, (id_cliente,))
     return r["id"] if r else None
 
@@ -637,7 +637,7 @@ def resolver_interacoes_pagas():
             if fat_cli:
                 os_aberta_pg = query_one("""
                     SELECT id, mensagem FROM ixcprovedor.su_oss_chamado
-                    WHERE id_cliente=%s AND id_assunto=246 AND status='A' LIMIT 1
+                    WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
                 """, (fat_cli["id_cliente"],))
                 if os_aberta_pg:
                     msg_atual_pg = os_aberta_pg["mensagem"] or ""
@@ -1254,7 +1254,7 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
     # Verifica se existe OS 246 aberta
     os_aberta = query_one("""
         SELECT id, mensagem FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto=246 AND status='A' LIMIT 1
+        WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
     """, (id_cliente,))
 
     if os_aberta:
@@ -1381,7 +1381,7 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
     # Verifica se existe OS 246 aberta
     os_aberta = query_one("""
         SELECT id, mensagem FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto=246 AND status='A' LIMIT 1
+        WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
     """, (id_cliente,))
 
     if os_aberta:

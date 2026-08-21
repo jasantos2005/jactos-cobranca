@@ -41,8 +41,8 @@ def get_kpis_resultado(data_ini="2026-01-01", data_fim=None):
             SUM(CASE WHEN cc.status='A' AND pag.id_cliente IS NULL AND os39.id_cliente IS NULL THEN 1 ELSE 0 END) AS pendente
         FROM ixcprovedor.cliente_contrato cc
         LEFT JOIN (SELECT DISTINCT id_cliente FROM ixcprovedor.fn_areceber WHERE status='R') pag ON pag.id_cliente=cc.id_cliente
-        LEFT JOIN (SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado WHERE id_assunto=39 AND status NOT IN ('F')) os39 ON os39.id_cliente=cc.id_cliente
-        LEFT JOIN (SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado WHERE id_assunto=39 AND status='F') os39f ON os39f.id_cliente=cc.id_cliente
+        LEFT JOIN (SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado WHERE id_assunto=34 AND status NOT IN ('F')) os39 ON os39.id_cliente=cc.id_cliente
+        LEFT JOIN (SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado WHERE id_assunto=34 AND status='F') os39f ON os39f.id_cliente=cc.id_cliente
         WHERE {filtro} AND {nunca}
     """, ())
     total = int(r["total"] or 0)
@@ -80,8 +80,8 @@ def get_resultado_nunca_pagaram(data_ini="2026-01-01", data_fim=None, pagina=1, 
                cc.descricao_aux_plano_venda AS plano,
                (SELECT COUNT(*) FROM ixcprovedor.fn_areceber f WHERE f.id_cliente=cc.id_cliente AND f.status='R') AS total_pago,
                (SELECT SUM(f.valor) FROM ixcprovedor.fn_areceber f WHERE f.id_cliente=cc.id_cliente AND f.status='R') AS valor_pago,
-               (SELECT o.id FROM ixcprovedor.su_oss_chamado o WHERE o.id_cliente=cc.id_cliente AND o.id_assunto=39 ORDER BY o.data_abertura DESC LIMIT 1) AS os39_id,
-               (SELECT o.status FROM ixcprovedor.su_oss_chamado o WHERE o.id_cliente=cc.id_cliente AND o.id_assunto=39 ORDER BY o.data_abertura DESC LIMIT 1) AS os39_status,
+               (SELECT o.id FROM ixcprovedor.su_oss_chamado o WHERE o.id_cliente=cc.id_cliente AND o.id_assunto=34 ORDER BY o.data_abertura DESC LIMIT 1) AS os39_id,
+               (SELECT o.status FROM ixcprovedor.su_oss_chamado o WHERE o.id_cliente=cc.id_cliente AND o.id_assunto=34 ORDER BY o.data_abertura DESC LIMIT 1) AS os39_status,
                (SELECT SUM(f.valor_aberto) FROM ixcprovedor.fn_areceber f WHERE f.id_cliente=cc.id_cliente AND f.status='A' AND f.data_vencimento < CURDATE()) AS total_aberto
         FROM ixcprovedor.cliente_contrato cc
         INNER JOIN ixcprovedor.cliente c ON c.id=cc.id_cliente
