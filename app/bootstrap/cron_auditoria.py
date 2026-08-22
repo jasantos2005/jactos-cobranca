@@ -216,7 +216,7 @@ def fechar_os_sem_fatura():
     candidatos = query("""
         SELECT DISTINCT o.id_cliente, o.id AS os_id
         FROM ixcprovedor.su_oss_chamado o
-        WHERE o.id_assunto=190 AND o.status='A'
+        WHERE o.id_assunto IN (190,163) AND o.status NOT IN ('F')
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.fn_areceber
             WHERE status='A' AND data_vencimento < CURDATE()
@@ -273,7 +273,7 @@ def fechar_os_clientes_pagos():
         FROM su_oss_chamado o
         INNER JOIN cliente c ON c.id=o.id_cliente
         LEFT JOIN fn_areceber f ON f.id_cliente=o.id_cliente AND f.status='R'
-        WHERE o.id_assunto=190 AND o.status='A'
+        WHERE o.id_assunto IN (190,163) AND o.status NOT IN ('F')
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM fn_areceber
             WHERE status='A' AND data_vencimento < CURDATE()

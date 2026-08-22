@@ -15,10 +15,7 @@ def get_degrau_liberado() -> str:
 def set_degrau_liberado(degrau: str):
     """Define o degrau liberado manualmente (override admin)."""
     from app.core.db_local import local_execute as _le
-    _le("""
-        INSERT OR REPLACE INTO cob_config (chave, valor, atualizado_em)
-        VALUES ('fila_degrau', ?, datetime('now','-3 hours'))
-    """, (degrau,))
+    _le("UPDATE cob_config SET valor=? WHERE chave='fila_degrau'", (degrau,))
 
 def avancar_degrau_se_vazio():
     """
@@ -98,7 +95,7 @@ def get_kpis():
         FROM ixcprovedor.fn_areceber f
         INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
     """)
 
@@ -117,7 +114,7 @@ def get_top10_devedores():
         INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id = c.cidade
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
         GROUP BY c.id, c.razao, c.cnpj_cpf, c.fone, cid.nome
         ORDER BY total_aberto DESC LIMIT 10
@@ -133,7 +130,7 @@ def get_inadimplencia_por_cidade():
         INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id = c.cidade
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND cid.nome IS NOT NULL
         GROUP BY cid.id, cid.nome
@@ -151,7 +148,7 @@ def get_clientes_por_cidade(id_cidade: int):
         FROM ixcprovedor.fn_areceber f
         INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND c.cidade = %s
         GROUP BY c.id, c.razao, c.cnpj_cpf, c.whatsapp, c.telefone_celular, c.fone
@@ -178,7 +175,7 @@ def get_inadimplentes(filtros: FiltrosGlobais):
         FROM ixcprovedor.fn_areceber f
         INNER JOIN ixcprovedor.cliente c           ON c.id  = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND DATEDIFF(CURDATE(), f.data_vencimento) {faixa} {busca_sql}
         ORDER BY f.valor_aberto DESC LIMIT {limit} OFFSET {off}
@@ -197,7 +194,7 @@ def count_inadimplentes(filtros: FiltrosGlobais):
         SELECT COUNT(*) AS total FROM ixcprovedor.fn_areceber f
         INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE()
+        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND DATEDIFF(CURDATE(), f.data_vencimento) {faixa} {busca_sql}
     """
@@ -239,9 +236,10 @@ def get_fila(filtros: FiltrosGlobais):
                 SELECT id_cliente, MIN(data_vencimento) AS venc_min
                 FROM ixcprovedor.fn_areceber
                 WHERE status = 'A' AND data_vencimento < CURDATE()
+                  AND valor_aberto IS NOT NULL AND valor_aberto > 0
                 GROUP BY id_cliente
             ) m ON m.id_cliente = f3.id_cliente AND f3.data_vencimento = m.venc_min
-            WHERE f3.status = 'A'
+            WHERE f3.status = 'A' AND f3.liberado = 'S'
             GROUP BY f3.id_cliente
         ) fa
         INNER JOIN ixcprovedor.fn_areceber f       ON f.id  = fa.id_fatura_antiga
@@ -311,9 +309,10 @@ def count_fila(filtros: FiltrosGlobais):
                 SELECT id_cliente, MIN(data_vencimento) AS venc_min
                 FROM ixcprovedor.fn_areceber
                 WHERE status = 'A' AND data_vencimento < CURDATE()
+                  AND valor_aberto IS NOT NULL AND valor_aberto > 0
                 GROUP BY id_cliente
             ) m ON m.id_cliente = f3.id_cliente AND f3.data_vencimento = m.venc_min
-            WHERE f3.status = 'A'
+            WHERE f3.status = 'A' AND f3.liberado = 'S'
             GROUP BY f3.id_cliente
         ) fa
         INNER JOIN ixcprovedor.fn_areceber f       ON f.id  = fa.id_fatura_antiga
