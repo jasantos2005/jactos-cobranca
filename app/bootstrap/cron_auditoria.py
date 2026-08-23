@@ -138,9 +138,8 @@ def verificar_crons():
     import subprocess
     alertas = []
     crons = [
-        ("/var/log/cob_limpeza.log", 2, "Limpeza interações"),
-        ("/var/log/cob_resolver_pagas.log", 1, "Resolver pagas"),
-        ("/var/log/cob_monitoramento.log", 25, "Monitoramento OS"),
+        ("/var/log/jactos_cob_auditoria.log", 13, "Auditoria OS"),
+        ("/var/log/jactos_cob_monitor.log", 30, "Monitoramento OS"),
     ]
     agora = now_br()
     for logfile, max_horas, nome in crons:
@@ -208,10 +207,10 @@ def main():
     log(f"=== AUDITORIA CONCLUÍDA — alertas={len(alertas)} correções={len(correcoes)} ===")
 
 def fechar_os_sem_fatura():
-    """Fecha OS 246 e resolve interações de clientes sem faturas vencidas."""
+    """Fecha OS 190 e resolve interações de clientes sem faturas vencidas."""
     from app.core.db import query, execute
     from app.core.db_local import local_query, local_execute
-    log("=== LIMPEZA OS 246 SEM FATURA ===")
+    log("=== LIMPEZA OS 190 SEM FATURA ===")
 
     candidatos = query("""
         SELECT DISTINCT o.id_cliente, o.id AS os_id
@@ -224,10 +223,10 @@ def fechar_os_sem_fatura():
     """, ())
 
     if not candidatos:
-        log("Nenhuma OS 246 para fechar")
+        log("Nenhuma OS 190 para fechar")
         return
 
-    log(f"OS 246 a fechar: {len(candidatos)}")
+    log(f"OS 190 a fechar: {len(candidatos)}")
     for c in candidatos:
         execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (c["os_id"],))
         faturas = query("SELECT id FROM ixcprovedor.fn_areceber WHERE id_cliente=%s", (c["id_cliente"],))
@@ -264,9 +263,9 @@ def limpar_segunda_cobranca_com_retirada():
 
 
 def fechar_os_clientes_pagos():
-    """Fecha OS 246 de clientes que pagaram, adicionando data/hora do pagamento."""
+    """Fecha OS 190 de clientes que pagaram, adicionando data/hora do pagamento."""
     from app.core.db import query, execute
-    log("=== FECHA OS 246 CLIENTES QUE PAGARAM ===")
+    log("=== FECHA OS 190 CLIENTES QUE PAGARAM ===")
     candidatos = query("""
         SELECT o.id AS os_id, o.id_cliente, c.razao,
                MAX(f.baixa_data) AS ultimo_pagamento
@@ -276,14 +275,14 @@ def fechar_os_clientes_pagos():
         WHERE o.id_assunto IN (190,163) AND o.status NOT IN ('F')
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM fn_areceber
-            WHERE status='A' AND data_vencimento < CURDATE()
+            WHERE status='A' AND data_vencimento < CURDATE() AND liberado='S'
           )
         GROUP BY o.id, o.id_cliente, c.razao
     """, ())
     if not candidatos:
-        log("Nenhuma OS 246 para fechar por pagamento")
+        log("Nenhuma OS 190 para fechar por pagamento")
         return
-    log(f"OS 246 a fechar por pagamento: {len(candidatos)}")
+    log(f"OS 190 a fechar por pagamento: {len(candidatos)}")
     for c in candidatos:
         try:
             from datetime import datetime
