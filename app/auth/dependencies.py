@@ -14,7 +14,7 @@ def get_usuario(request: Request):
     if not payload:
         raise HTTPException(status_code=302, headers={"Location": "/login"})
     u = local_query_one(
-        "SELECT id, nome, login, setor, nivel, aprovado, ativo FROM cob_usuarios WHERE id=?",
+        "SELECT id, nome, login, setor, nivel, aprovado, ativo, filial_id FROM cob_usuarios WHERE id=?",
         (int(payload["sub"]),)
     )
     if not u or not u["ativo"] or not u["aprovado"]:
@@ -25,6 +25,12 @@ def get_usuario(request: Request):
     menus = get_menus_usuario(u["nivel"])
     u["menus_codigos"] = [m["codigo"] for m in menus]
     u["menus"] = [dict(m) for m in menus]
+    # Filial: usa a da sessão (cookie) se gestor+, senão usa a do cadastro
+    filial_sessao = request.cookies.get("filial_id")
+    if u["nivel"] >= 3 and filial_sessao:
+        u["filial_id"] = int(filial_sessao)
+    else:
+        u["filial_id"] = int(u.get("filial_id") or 0)
     return u
 
 def requer_nivel(nivel_minimo: int):

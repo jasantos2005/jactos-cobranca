@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Request, Form, Response
+from fastapi import APIRouter, Request, Form, Response, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.core.db_local import local_query_one, local_execute
 from app.core.security import verificar_senha, criar_token
+from app.auth.dependencies import get_usuario
 import os
 
 router = APIRouter()
@@ -96,7 +97,7 @@ async def login_get(request: Request, erro: str = ""):
 async def login_post(request: Request, response: Response,
                      login: str = Form(...), senha: str = Form(...)):
     u = local_query_one(
-        "SELECT id, nome, senha_hash, setor, nivel, aprovado, ativo FROM cob_usuarios WHERE login=?",
+        "SELECT id, nome, senha_hash, setor, nivel, aprovado, ativo, filial_id FROM cob_usuarios WHERE login=?",
         (login,)
     )
     if not u:
@@ -108,7 +109,8 @@ async def login_post(request: Request, response: Response,
     if not verificar_senha(senha, u["senha_hash"]):
         return templates.TemplateResponse("login.html", {"request": request, "erro": "Senha incorreta."})
 
-    token = criar_token({"sub": str(u["id"]), "login": login, "nome": u["nome"], "setor": u["setor"], "nivel": u["nivel"]})
+    filial_id = int(u.get("filial_id") or 0)
+    token = criar_token({"sub": str(u["id"]), "login": login, "nome": u["nome"], "setor": u["setor"], "nivel": u["nivel"], "filial_id": filial_id})
     _log_acesso(u["id"], login, "LOGIN", request, nome=u["nome"])
     destino = "/cobranca/admin/" if u["nivel"] == 99 else "/cobranca/fila" if u["nivel"] == 1 else "/cobranca/"
     from datetime import datetime, timezone, timedelta
@@ -180,3 +182,12 @@ async def registro_post(request: Request,
         (nome, login, h, "Cobrança", 0, 0, 1)
     )
     return templates.TemplateResponse("registro.html", {"request": request, "msg": "ok:Cadastro realizado! Aguarde aprovação do administrador."})
+
+@router.post("/trocar-filial")
+async def trocar_filial(request: Request, response: Response, filial_id: int = Form(...), usuario=Depends(get_usuario)):
+    from fastapi.responses import RedirectResponse
+    referer = request.headers.get("referer", "/cobranca/")
+    resp = RedirectResponse(referer, status_code=302)
+    if usuario["nivel"] >= 3:
+        resp.set_cookie("filial_id", str(filial_id), httponly=False, samesite="lax", max_age=86400)
+    return resp

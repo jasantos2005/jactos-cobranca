@@ -10,6 +10,7 @@ class FiltrosGlobais:
     pagina:             int  = 1
     por_pagina:         int  = 50
     ocultar_cancelados: bool = False
+    filial_id:          int  = 0
 
 def parse_filtros(
     faixa:              str  = "all",
@@ -18,7 +19,8 @@ def parse_filtros(
     busca:              str  = "",
     pagina:             int  = 1,
     por_pagina:         int  = 50,
-    ocultar_cancelados: bool = False
+    ocultar_cancelados: bool = False,
+    filial_id:          int  = 0
 ) -> FiltrosGlobais:
     return FiltrosGlobais(
         faixa=faixa,
@@ -27,5 +29,6 @@ def parse_filtros(
         busca=busca,
         pagina=max(1, pagina),
         por_pagina=min(max(1, por_pagina), 200),
-        ocultar_cancelados=ocultar_cancelados
+        ocultar_cancelados=ocultar_cancelados,
+        filial_id=filial_id
     )

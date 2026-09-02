@@ -69,12 +69,12 @@ async def painel(request: Request, usuario=Depends(get_usuario)):
 @router.get("/api/kpis")
 async def api_kpis(request: Request, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 2)
-    return jsonify(sv.get_kpis())
+    return jsonify(sv.get_kpis(filial_id=usuario.get("filial_id", 0)))
 
 @router.get("/api/lista")
 async def api_lista(request: Request, faixa: str = "all", busca: str = "", pagina: int = 1, por_pagina: int = 50, ocultar_cancelados: bool = True, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 2)
-    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, por_pagina=por_pagina, ocultar_cancelados=ocultar_cancelados)
+    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, por_pagina=por_pagina, ocultar_cancelados=ocultar_cancelados, filial_id=usuario.get("filial_id",0))
     return jsonify({"dados": sv.get_inadimplentes(filtros), "total": sv.count_inadimplentes(filtros)})
 
 @router.get("/api/evolucao")
@@ -155,7 +155,7 @@ async def fila(request: Request, faixa: str = "30", busca: str = "", pagina: int
             degrau = sv.get_degrau_liberado()
             return RedirectResponse(f"/cobranca/fila?faixa={degrau}&pagina=1")
 
-    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, ocultar_cancelados=ocultar_cancelados)
+    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, ocultar_cancelados=ocultar_cancelados, filial_id=usuario.get("filial_id",0))
     dados   = sv.get_fila(filtros)
     total   = sv.count_fila(filtros)
     degrau_liberado = sv.get_degrau_liberado()
@@ -300,7 +300,7 @@ async def andamento(request: Request, faixa: str = "all", busca: str = "", pagin
                     filtrar_operador: int = 0, data_inicio: str = "", data_fim: str = "",
                     usuario=Depends(get_usuario)):
     checar_nivel(usuario, 1)
-    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina)
+    filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, filial_id=usuario.get("filial_id",0))
     if usuario["nivel"] == 99:
         uid = filtrar_operador if filtrar_operador else None
     else:
@@ -530,7 +530,7 @@ async def api_top10(request: Request, usuario=Depends(get_usuario)):
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
-    return JSONResponse([fix(r) for r in sv.get_top10_devedores()])
+    return JSONResponse([fix(r) for r in sv.get_top10_devedores(filial_id=usuario.get("filial_id",0))])
 
 @router.get("/api/inadimplencia-por-cidade")
 async def api_por_cidade(request: Request, usuario=Depends(get_usuario)):
@@ -538,7 +538,7 @@ async def api_por_cidade(request: Request, usuario=Depends(get_usuario)):
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
-    return JSONResponse([fix(r) for r in sv.get_inadimplencia_por_cidade()])
+    return JSONResponse([fix(r) for r in sv.get_inadimplencia_por_cidade(filial_id=usuario.get("filial_id",0))])
 
 @router.get("/api/clientes-por-cidade/{id_cidade}")
 async def api_clientes_cidade(id_cidade: int, request: Request, usuario=Depends(get_usuario)):

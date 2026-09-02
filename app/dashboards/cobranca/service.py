@@ -84,8 +84,9 @@ def _ids_cobrados_hoje():
 def _sem_cancelados(filtros):
     return "AND (cc.status IS NULL OR cc.status = 'A')" if filtros.ocultar_cancelados else ""
 
-def get_kpis():
-    return query_one("""
+def get_kpis(filial_id: int = 0):
+    filtro = f"AND f.filial_id={filial_id}" if filial_id else ""
+    return query_one(f"""
         SELECT COUNT(*) AS total_faturas, SUM(f.valor_aberto) AS total_valor,
             SUM(CASE WHEN DATEDIFF(CURDATE(),f.data_vencimento) BETWEEN 1  AND 30  THEN f.valor_aberto ELSE 0 END) AS faixa_30,
             SUM(CASE WHEN DATEDIFF(CURDATE(),f.data_vencimento) BETWEEN 31 AND 60  THEN f.valor_aberto ELSE 0 END) AS faixa_60,
@@ -97,14 +98,16 @@ def get_kpis():
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
         WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
+          {filtro}
     """)
 
 # ─── INADIMPLÊNCIA ───────────────────────────────────────────────────────────
 
 
-def get_top10_devedores():
+def get_top10_devedores(filial_id: int = 0):
     """Top 10 clientes com maior valor em aberto."""
-    return query("""
+    filtro = f"AND f.filial_id={filial_id}" if filial_id else ""
+    return query(f"""
         SELECT c.id AS id_cliente, c.razao, c.cnpj_cpf, c.fone,
                COUNT(f.id) AS qtd_faturas,
                SUM(f.valor_aberto) AS total_aberto,
@@ -116,13 +119,15 @@ def get_top10_devedores():
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id = c.cidade
         WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
+          {filtro}
         GROUP BY c.id, c.razao, c.cnpj_cpf, c.fone, cid.nome
         ORDER BY total_aberto DESC LIMIT 10
     """, ())
 
-def get_inadimplencia_por_cidade():
+def get_inadimplencia_por_cidade(filial_id: int = 0):
     """Inadimplência agrupada por cidade."""
-    return query("""
+    filtro = f"AND f.filial_id={filial_id}" if filial_id else ""
+    return query(f"""
         SELECT cid.nome AS cidade, cid.id AS id_cidade,
                COUNT(DISTINCT c.id) AS qtd_clientes,
                SUM(f.valor_aberto) AS total_aberto
@@ -133,6 +138,7 @@ def get_inadimplencia_por_cidade():
         WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND cid.nome IS NOT NULL
+          {filtro}
         GROUP BY cid.id, cid.nome
         ORDER BY total_aberto DESC LIMIT 15
     """, ())
@@ -178,8 +184,13 @@ def get_inadimplentes(filtros: FiltrosGlobais):
         WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
           AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
           AND DATEDIFF(CURDATE(), f.data_vencimento) {faixa} {busca_sql}
+          {filtro_filial}
+          AND f.id_cliente NOT IN (
+              SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
+              WHERE id_assunto=63 AND status NOT IN ('F','AN')
+          )
         ORDER BY f.valor_aberto DESC LIMIT {limit} OFFSET {off}
-    """
+    """.format(faixa=faixa, busca_sql=busca_sql, limit=limit, off=off, filtro_filial=_filtro_filial(filtros.filial_id))
     return query(sql, params if params else None)
 
 def count_inadimplentes(filtros: FiltrosGlobais):
@@ -202,6 +213,11 @@ def count_inadimplentes(filtros: FiltrosGlobais):
     return r["total"] if r else 0
 
 # ─── FILA DE COBRANÇA ────────────────────────────────────────────────────────
+
+def _filtro_filial(filial_id: int) -> str:
+    if filial_id and filial_id > 0:
+        return f"AND f.filial_id={filial_id}"
+    return ""
 
 def _sem_negativados():
     """Retorna cláusula SQL para excluir clientes com OS 63 (negativação) aberta."""
