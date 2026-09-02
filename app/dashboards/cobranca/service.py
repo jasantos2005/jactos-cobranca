@@ -297,8 +297,22 @@ def get_fila(filtros: FiltrosGlobais):
         """, tuple(id_clientes_fila))
         clientes_paga_em_dia = {r["id_cliente"] for r in pagantes}
 
+    # Busca OS abertas em batch (evita N queries)
+    os_abertas_map = {}
+    if id_clientes_fila:
+        ph_os = ",".join(["%s"] * len(id_clientes_fila))
+        os_rows = query(f"""
+            SELECT id_cliente, MIN(id) AS os_id
+            FROM ixcprovedor.su_oss_chamado
+            WHERE id_assunto IN (34) AND status='A'
+              AND id_cliente IN ({ph_os})
+            GROUP BY id_cliente
+        """, tuple(id_clientes_fila))
+        for r in os_rows:
+            os_abertas_map[r["id_cliente"]] = r["os_id"]
+
     for row in rows:
-        row["os_aberta"] = check_os_aberta(row["id_cliente"])
+        row["os_aberta"] = os_abertas_map.get(row["id_cliente"])
         row["cobrado_hoje"] = row["id_fatura"] in cobrados_hoje
         ult = recorrentes_map.get(row["id_cliente"])
         row["recorrente"] = ult is not None
