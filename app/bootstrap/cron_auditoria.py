@@ -229,11 +229,17 @@ def fechar_os_sem_fatura():
     log(f"OS 190 a fechar: {len(candidatos)}")
     for c in candidatos:
         execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (c["os_id"],))
-        faturas = query("SELECT id FROM ixcprovedor.fn_areceber WHERE id_cliente=%s", (c["id_cliente"],))
-        fn_ids = tuple(f["id"] for f in faturas)
-        if fn_ids:
-            ph = ",".join(["?"]*len(fn_ids))
-            local_execute(f"UPDATE cob_interacoes SET resolvido=1 WHERE fn_areceber_id IN ({ph}) AND pago=0 AND resolvido=0", fn_ids)
+        # Só marca resolvido se cliente não tem mais faturas vencidas em aberto
+        faturas_abertas = query("""
+            SELECT id FROM ixcprovedor.fn_areceber 
+            WHERE id_cliente=%s AND status='A' AND data_vencimento < CURDATE() AND liberado='S'
+        """, (c["id_cliente"],))
+        if not faturas_abertas:
+            faturas = query("SELECT id FROM ixcprovedor.fn_areceber WHERE id_cliente=%s", (c["id_cliente"],))
+            fn_ids = tuple(f["id"] for f in faturas)
+            if fn_ids:
+                ph = ",".join(["?"]*len(fn_ids))
+                local_execute(f"UPDATE cob_interacoes SET resolvido=1 WHERE fn_areceber_id IN ({ph}) AND pago=0 AND resolvido=0", fn_ids)
     log(f"Concluído — {len(candidatos)} OS fechadas")
 
 def limpar_segunda_cobranca_com_retirada():
