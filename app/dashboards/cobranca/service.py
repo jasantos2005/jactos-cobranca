@@ -118,7 +118,7 @@ def get_top10_devedores(filial_id: int = 0):
         LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
         LEFT  JOIN ixcprovedor.cidade cid ON cid.id = c.cidade
         WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
-          AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
+          AND c.ativo = 'S' AND cc.status = 'A'
           {filtro}
         GROUP BY c.id, c.razao, c.cnpj_cpf, c.fone, cid.nome
         ORDER BY total_aberto DESC LIMIT 10
@@ -216,7 +216,7 @@ def count_inadimplentes(filtros: FiltrosGlobais):
 
 def _filtro_filial(filial_id: int) -> str:
     if filial_id and filial_id > 0:
-        return f"AND f.filial_id={filial_id}"
+        return f"AND cc.id_filial={filial_id}"
     return ""
 
 def _sem_negativados():
@@ -248,12 +248,14 @@ def get_fila(filtros: FiltrosGlobais):
         FROM (
             SELECT f3.id_cliente, MIN(f3.id) AS id_fatura_antiga
             FROM ixcprovedor.fn_areceber f3
+            INNER JOIN ixcprovedor.cliente_contrato cc3 ON cc3.id=f3.id_contrato AND cc3.status='A'
             INNER JOIN (
-                SELECT id_cliente, MIN(data_vencimento) AS venc_min
-                FROM ixcprovedor.fn_areceber
-                WHERE status = 'A' AND data_vencimento < CURDATE()
-                  AND valor_aberto IS NOT NULL AND valor_aberto > 0
-                GROUP BY id_cliente
+                SELECT f4.id_cliente, MIN(f4.data_vencimento) AS venc_min
+                FROM ixcprovedor.fn_areceber f4
+                INNER JOIN ixcprovedor.cliente_contrato cc4 ON cc4.id=f4.id_contrato AND cc4.status='A'
+                WHERE f4.status = 'A' AND f4.data_vencimento < CURDATE()
+                  AND f4.valor_aberto IS NOT NULL AND f4.valor_aberto > 0
+                GROUP BY f4.id_cliente
             ) m ON m.id_cliente = f3.id_cliente AND f3.data_vencimento = m.venc_min
             WHERE f3.status = 'A' AND f3.liberado = 'S'
             GROUP BY f3.id_cliente
@@ -263,9 +265,9 @@ def get_fila(filtros: FiltrosGlobais):
         INNER JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
         WHERE c.ativo = 'S' AND cc.status = 'A'
           AND DATEDIFF(CURDATE(), f.data_vencimento) {faixa}
-          AND f.id NOT IN ({{ph}}) {{busca_sql}} {{filtro_cc}}
+          AND f.id NOT IN ({{ph}}) {{busca_sql}} {{filtro_cc}} {{filtro_filial}}
         ORDER BY dias_atraso DESC LIMIT {{limit}} OFFSET {{off}}
-    """.format(faixa=faixa,ph=ph,busca_sql=busca_sql,limit=limit,off=off,filtro_cc=_sem_cancelados(filtros))
+    """.format(faixa=faixa,ph=ph,busca_sql=busca_sql,limit=limit,off=off,filtro_cc=_sem_cancelados(filtros),filtro_filial=_filtro_filial(filtros.filial_id))
     rows = query(sql, params)
     cobrados_hoje = _ids_cobrados_hoje()
 
