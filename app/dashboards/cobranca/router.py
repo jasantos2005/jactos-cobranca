@@ -203,7 +203,7 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
         data_promessa=fd.get("data_promessa") or None,
         # Toda interacao feita na 1a cobranca ja escala para a 2a cobranca,
         # a nao ser que o caso ja tenha sido resolvido com pagamento agora
-        segunda_cobranca=0 if pago_i == 1 else 1
+        segunda_cobranca=0 if pago_i == 1 else 0
     )
 
     # Alerta Telegram
@@ -303,12 +303,14 @@ async def andamento(request: Request, faixa: str = "all", busca: str = "", pagin
     filtros = parse_filtros(faixa=faixa, busca=busca, pagina=pagina, filial_id=usuario.get("filial_id",0))
     if usuario["nivel"] == 99:
         uid = filtrar_operador if filtrar_operador else None
+    elif usuario["nivel"] >= 3:
+        uid = None  # Gestores veem todas interações da filial
     else:
         uid = usuario["id"]
     di = data_inicio or None
     df = data_fim or None
     dados = sv.get_andamento(filtros, usuario_id=uid, data_inicio=di, data_fim=df)
-    total = sv.count_andamento(usuario_id=uid, data_inicio=di, data_fim=df)
+    total = sv.count_andamento(usuario_id=uid, data_inicio=di, data_fim=df, filtros=filtros)
     return templates.TemplateResponse("dashboards/primeira_cobranca.html", {
         "request": request, "usuario": usuario,
         "dados": dados, "total": total, "filtros": filtros,
