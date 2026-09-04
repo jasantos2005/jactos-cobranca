@@ -13,14 +13,15 @@ def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=T
 
 from app.core.db import query, query_one, execute
 import requests, os as _os
+from app.core.telegram import TELEGRAM_CHAT, telegram_url
 
 TECNICOS_IDS = (15,31,16,13,10,42,11,36,18,14,41,47,67,17,12,55,49,50,32,60,4,59,48,66,46)
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-4989557189"
+
+
 
 def telegram(msg):
     try:
-        requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        requests.post(telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=10)
     except: pass
 

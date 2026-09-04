@@ -11,8 +11,7 @@ import json, os
 
 router = APIRouter(prefix="/cobranca")
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-4989557189"
+from app.core.telegram import telegram_url, TELEGRAM_CHAT
 
 _tg_cache = {}  # controle de duplicidade
 
@@ -41,7 +40,7 @@ def _tg_acao(usuario_nome, acao, cliente_nome, obs="", pagina=""):
     obs_txt = f"\n💬 _{obs}_" if obs else ""
     msg = f"{emoji} <b>{usuario_nome}</b> → <b>{cliente_nome}</b>\n📋 {acao}{pag}{obs_txt}\n🕐 {agora}"
     try:
-        requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        requests.post(telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=5)
     except: pass
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "../../../templates"))
@@ -1367,15 +1366,13 @@ async def api_briefing_ciencia(request: Request, usuario=Depends(get_usuario)):
         (usuario["id"], hoje, agora)
     )
     # Alerta Telegram
-    TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-    TELEGRAM_CHAT  = "-4989557189"
     try:
         import requests as req
         nome = usuario["nome"]
         hora = agora[11:16]
         msg = (f"✅ <b>{nome}</b> logou e está ciente das atividades do dia\n"
                f"🕐 {hora} | Pronto para iniciar atendimento!")
-        req.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        req.post(telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=5)
     except: pass
     return {"ok": True}

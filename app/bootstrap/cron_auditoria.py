@@ -15,14 +15,15 @@ def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=T
 from app.core.db import query, query_one, execute
 from app.core.db_local import local_query, local_query_one, local_execute
 import requests
+from app.core.telegram import TELEGRAM_CHAT, telegram_url
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-4989557189"
+
+
 
 def telegram(msg: str):
     try:
         requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+            telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"},
             timeout=10
         )

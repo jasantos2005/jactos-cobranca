@@ -11,8 +11,7 @@ import requests, sqlite3
 TZ_BR = timezone(timedelta(hours=-3))
 def now_br(): return datetime.now(TZ_BR)
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHATS = ["2135602169", "2135602169"]
+from app.core.telegram import telegram_url, TELEGRAM_CHATS_PRIVADOS
 DB_PATH = "/opt/automacoes/jactos/cobranca/cobranca_local.db"
 
 # Janelas de expediente consideradas no cálculo
@@ -20,9 +19,9 @@ WORK_WINDOWS = [(dtime(8, 0), dtime(12, 0)), (dtime(14, 0), dtime(18, 0))]
 
 
 def telegram(msg):
-    for chat in TELEGRAM_CHATS:
+    for chat in TELEGRAM_CHATS_PRIVADOS:
         try:
-            requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+            requests.post(telegram_url(),
                 data={"chat_id": chat, "text": msg, "parse_mode": "HTML"}, timeout=10)
         except Exception as e:
             print(f"Telegram erro ({chat}): {e}")

@@ -13,13 +13,14 @@ def now_br(): return datetime.now(TZ_BR)
 def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=True)
 import requests
 from app.core.db import query, query_one
+from app.core.telegram import TELEGRAM_CHAT, telegram_url
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "2135602169"
+
+
 
 def telegram(msg):
     try:
-        requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        requests.post(telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=10)
     except Exception as e:
         log(f"[TELEGRAM ERRO] {e}")

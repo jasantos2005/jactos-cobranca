@@ -1,6 +1,7 @@
 from app.core.db import query, query_one, execute
 from app.core.db_local import local_query, local_query_one, local_execute
 from app.core.filters import FiltrosGlobais
+from app.core.telegram import telegram_url, TELEGRAM_CHAT
 
 # ─── DEGRAU DE COBRANÇA (controle global de faixa liberada) ─────────────────
 # Ordem de degraus: 120 (+90d) → 90 (61-90d) → 60 (31-60d) → 30 (1-30d)
@@ -586,8 +587,8 @@ def detectar_promessas_quebradas():
                         f"📞 Por favor, <b>{oper['nome']}</b>, entre em contato com o cliente hoje ({hoje_fmt})."
                     )
                     requests.post(
-                        "https://api.telegram.org/bot8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY/sendMessage",
-                        data={"chat_id": "-4989557189", "text": msg, "parse_mode": "HTML"},
+                        telegram_url(),
+                        data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"},
                         timeout=10,
                     )
             except Exception:
@@ -750,8 +751,8 @@ def resolver_interacoes_pagas():
                         "💵 Pagamento da fatura confirmado."
                     )
                     requests.post(
-                        "https://api.telegram.org/bot8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY/sendMessage",
-                        data={"chat_id": "-4989557189", "text": msg, "parse_mode": "HTML"},
+                        telegram_url(),
+                        data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"},
                         timeout=10,
                     )
             except Exception:

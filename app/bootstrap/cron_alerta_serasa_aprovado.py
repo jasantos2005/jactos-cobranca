@@ -28,8 +28,7 @@ def now_br():
 def log(msg):
     print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=True)
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-5142280642"  # GESTÃO | COMERCIAL
+from app.core.telegram import telegram_url, TELEGRAM_CHAT_SERASA
 
 STATUS_INFO = {
     "inadimplente": ("🔴", "Inadimplente"),
@@ -40,8 +39,8 @@ STATUS_INFO = {
 def telegram(msg):
     try:
         r = requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-            data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"},
+            telegram_url(),
+            data={"chat_id": TELEGRAM_CHAT_SERASA, "text": msg, "parse_mode": "HTML"},
             timeout=10,
         )
         if r.status_code != 200:

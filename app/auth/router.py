@@ -9,15 +9,14 @@ import os
 router = APIRouter()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "../../templates"))
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHATS = ["2135602169", "2135602169"]
+from app.core.telegram import telegram_url, TELEGRAM_CHATS_PRIVADOS
 _tg_login_cache = {}  # cooldown boas-vindas
 
 def _telegram(msg):
     try:
         import requests
-        for chat in TELEGRAM_CHATS:
-            requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        for chat in TELEGRAM_CHATS_PRIVADOS:
+            requests.post(telegram_url(),
                 data={"chat_id": chat, "text": msg, "parse_mode": "HTML"}, timeout=5)
     except: pass
 

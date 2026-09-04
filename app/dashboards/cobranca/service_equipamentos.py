@@ -151,8 +151,7 @@ def alertar_equipamentos_criticos():
     """Envia alerta Telegram com equipamentos perdidos ou sem OS de retirada."""
     import requests
     from datetime import datetime, timezone, timedelta
-    TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-    CHATS = ["2135602169", "2135602169"]
+    from app.core.telegram import telegram_url, TELEGRAM_CHATS_PRIVADOS
     agora = datetime.now(timezone(timedelta(hours=-3)))
 
     rows = get_equipamentos_cancelados(meses=3)
@@ -179,9 +178,9 @@ def alertar_equipamentos_criticos():
         linhas.append("")
 
     msg = "\n".join(linhas)
-    for chat in CHATS:
+    for chat in TELEGRAM_CHATS_PRIVADOS:
         try:
-            requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+            requests.post(telegram_url(),
                 data={"chat_id": chat, "text": msg, "parse_mode": "HTML"}, timeout=10)
         except: pass
 

@@ -10,13 +10,12 @@ def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=T
 import requests
 from app.dashboards.cobranca.service_retencao import get_retencao, get_kpis_retencao
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHATS = ["2135602169", "2135602169"]
+from app.core.telegram import telegram_url, TELEGRAM_CHATS_PRIVADOS
 
 def telegram(msg):
-    for chat in TELEGRAM_CHATS:
+    for chat in TELEGRAM_CHATS_PRIVADOS:
         try:
-            requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+            requests.post(telegram_url(),
                 data={"chat_id": chat, "text": msg, "parse_mode": "HTML"}, timeout=10)
         except Exception as e:
             log(f"[TELEGRAM ERRO] {e}")

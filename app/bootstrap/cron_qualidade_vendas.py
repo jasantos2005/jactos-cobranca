@@ -13,10 +13,8 @@ def now_br(): return datetime.now(TZ_BR)
 def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=True)
 
 import requests
+from app.core.telegram import telegram_url, TELEGRAM_CHAT, TELEGRAM_CHAT_PRIVADO
 from app.dashboards.cobranca.service_qualidade import get_kpis_qualidade, get_ranking_planos, get_qualidade_vendas
-
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-4989557189"
 LIMITE_PCT     = 15
 MINIMO_VENDAS  = 3
 COMISSAO_POR_VENDA = 50  # R$ estimado por ativação
@@ -24,7 +22,7 @@ COMISSAO_POR_VENDA = 50  # R$ estimado por ativação
 def telegram(msg):
     try:
         requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+            telegram_url(),
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"},
             timeout=10
         )
@@ -144,8 +142,6 @@ if __name__ == "__main__":
     # Envia resumo prejuizo para bot privado
     import requests
     from app.dashboards.cobranca.service_qualidade import get_kpis_qualidade, get_score_vendedores
-    TOKEN_PRIV = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-    CHAT_PRIV  = "2135602169"
     agora2 = now_br()
     mes_ant2 = (agora2.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
     mes_atu2 = agora2.strftime("%Y-%m")
@@ -164,6 +160,6 @@ if __name__ == "__main__":
             if v.get("prejuizo", 0) > 0:
                 linhas.append(f"  - {v['vendedor']}: R$ {v['prejuizo']:.2f} ({v['inadimplentes']} inad/{v['total']} vendas)")
         linhas.append(f"IaTechHub - {agora2.strftime('%d/%m/%Y %H:%M')}")
-        requests.post(f"https://api.telegram.org/bot{TOKEN_PRIV}/sendMessage",
-            data={"chat_id": CHAT_PRIV, "text": "\n".join(linhas), "parse_mode": "HTML"}, timeout=10)
+        requests.post(telegram_url(),
+            data={"chat_id": TELEGRAM_CHAT_PRIVADO, "text": "\n".join(linhas), "parse_mode": "HTML"}, timeout=10)
     log("Resumo prejuizo enviado ao bot privado")

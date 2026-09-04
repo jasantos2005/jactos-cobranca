@@ -13,14 +13,15 @@ def now_br(): return datetime.now(TZ_BR)
 from app.core.db_local import local_query, local_query_one
 from app.core.db import query_one
 import requests
+from app.core.telegram import TELEGRAM_CHAT, telegram_url
 
-TELEGRAM_TOKEN = "8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY"
-TELEGRAM_CHAT  = "-4989557189"
+
+
 META_DIA       = 150
 META_MEIO_DIA  = 75
 
 def enviar(msg: str):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url = telegram_url()
     requests.post(url, data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=10)
 
 def fmt_valor(v):

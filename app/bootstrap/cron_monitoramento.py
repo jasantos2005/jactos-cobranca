@@ -19,6 +19,7 @@ from app.core.db import query, query_one, execute
 from app.core.db_local import local_execute
 import requests
 from app.core.ixc_api import IXC_API_URL, _auth
+from app.core.telegram import telegram_url, TELEGRAM_CHAT
 
 def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=True)
 
@@ -194,8 +195,8 @@ def retirada_acelerada_nunca_pagou():
     if abertas > 0:
         import requests
         requests.post(
-            f"https://api.telegram.org/bot8027006096:AAHiJEdtFyPresI81tWgs-Je2PKdaYAyWtY/sendMessage",
-            data={"chat_id": "-4989557189",
+            telegram_url(),
+            data={"chat_id": TELEGRAM_CHAT,
                   "text": f"🚨 <b>Retirada Acelerada</b>\n{abertas} OS 34 abertas para clientes que nunca pagaram (30+ dias)\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>",
                   "parse_mode": "HTML"}, timeout=10)
     log(f"Retirada acelerada concluída — {abertas} OS abertas")
