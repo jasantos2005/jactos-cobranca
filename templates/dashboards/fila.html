@@ -546,6 +546,7 @@ async function abrirOS(idCliente,btn){
   else{ btn.textContent=res.msg||'Erro'; btn.disabled=false; }
 }
 </script>
+{% include 'dashboards/_central_demandas.html' %}
 {% include '_briefing.html' %}
 {% include '_inatividade.html' %}
 </body>

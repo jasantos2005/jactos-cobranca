@@ -66,6 +66,32 @@ async def painel(request: Request, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 2)
     return templates.TemplateResponse("dashboards/cobranca.html", {"request": request, "usuario": usuario})
 
+@router.get("/api/minhas-demandas")
+async def api_minhas_demandas(request: Request, usuario=Depends(get_usuario)):
+    """
+    Retorna somente as demandas do usuário autenticado.
+    O usuario_id nunca é recebido do frontend.
+    """
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Não autenticado")
+
+    demandas = sv.get_minhas_demandas(
+        int(usuario["id"]),
+        int(usuario.get("filial_id") or 0),
+    )
+
+    return {
+        "ok": True,
+        "usuario": {
+            "id": int(usuario["id"]),
+            "nome": usuario.get("nome") or "",
+            "nivel": int(usuario.get("nivel") or 0),
+            "filial_id": int(usuario.get("filial_id") or 0),
+        },
+        "demandas": demandas,
+    }
+
+
 @router.get("/api/kpis")
 async def api_kpis(request: Request, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 2)

@@ -124,6 +124,91 @@ def _ids_com_promessa():
     clientes = query(f"SELECT DISTINCT id_cliente FROM ixcprovedor.fn_areceber WHERE id IN ({ph})", fn_ids_t)
     return {r["id_cliente"] for r in clientes}
 
+def count_nunca_pagaram_filial(filial_id: int) -> int:
+    """
+    Conta clientes que nunca pagaram dentro da filial efetiva.
+
+    Esta função é específica para a Central de Demandas.
+    Não altera o comportamento da tela /nunca-pagaram.
+    """
+    if not filial_id:
+        return 0
+
+    # Mesma regra funcional de get_nunca_pagaram(), porém:
+    # - filtrada pela filial do contrato;
+    # - sem paginação;
+    # - sem consultas adicionais por cliente.
+    from datetime import date
+
+    hoje = date.today().isoformat()
+
+    fn_com_promessa = local_query("""
+        SELECT DISTINCT fn_areceber_id
+        FROM cob_interacoes
+        WHERE data_promessa >= ?
+          AND pago=0
+          AND (resolvido IS NULL OR resolvido=0)
+    """, (hoje,))
+
+    fn_ids_promessa = tuple(
+        r["fn_areceber_id"]
+        for r in fn_com_promessa
+        if r["fn_areceber_id"]
+    )
+
+    ids_com_promessa = set()
+
+    if fn_ids_promessa:
+        ph = ",".join(["%s"] * len(fn_ids_promessa))
+        clientes_promessa = query(
+            f"""
+            SELECT DISTINCT id_cliente
+            FROM ixcprovedor.fn_areceber
+            WHERE id IN ({ph})
+            """,
+            fn_ids_promessa,
+        )
+        ids_com_promessa = {
+            r["id_cliente"] for r in clientes_promessa
+        }
+
+    rows = query("""
+        SELECT cc.id_cliente
+        FROM ixcprovedor.cliente_contrato cc
+        INNER JOIN ixcprovedor.fn_areceber f
+            ON f.id_cliente=cc.id_cliente
+           AND f.status='A'
+           AND f.data_vencimento < CURDATE()
+        WHERE cc.status='A'
+          AND cc.id_filial=%s
+          AND DATEDIFF(CURDATE(), cc.data_ativacao) <= 90
+          AND cc.id_cliente NOT IN (
+              SELECT DISTINCT id_cliente
+              FROM ixcprovedor.fn_areceber
+              WHERE status='R'
+          )
+          AND EXISTS (
+              SELECT 1
+              FROM ixcprovedor.fn_areceber f2
+              WHERE f2.id_cliente=cc.id_cliente
+                AND f2.status='A'
+                AND f2.data_vencimento < CURDATE()
+                AND f2.data_vencimento >= cc.data_ativacao
+          )
+        GROUP BY cc.id_cliente
+    """, (int(filial_id),))
+
+    if not rows:
+        return 0
+
+    if ids_com_promessa:
+        rows = [
+            r for r in rows
+            if r["id_cliente"] not in ids_com_promessa
+        ]
+
+    return len(rows)
+
 def count_nunca_pagaram():
     rows = get_nunca_pagaram(pagina=1, por_pagina=9999)
     return len(rows)

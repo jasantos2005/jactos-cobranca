@@ -405,6 +405,7 @@ def get_andamento(filtros: FiltrosGlobais, usuario_id: int = None, data_inicio: 
         _filial_and = f"AND cc.id_filial={filtros.filial_id}" if filtros.filial_id else ""
         faturas = query(f"""
             SELECT f.id, f.valor_aberto, f.documento, f.status AS fatura_status,
+                   f.data_vencimento,
                    c.id AS id_cliente, c.razao, c.cnpj_cpf,
                    COALESCE(c.whatsapp, c.telefone_celular, c.fone,'') AS telefone,
                    cc.status AS contrato_status
@@ -465,18 +466,37 @@ def get_andamento(filtros: FiltrosGlobais, usuario_id: int = None, data_inicio: 
         """, tuple(id_clientes_and))
         clientes_recem_ativados = {r["id_cliente"] for r in recem}
 
-    result = []
+    # Uma demanda operacional por fatura.
+    # Mantém no banco todas as interações; para a tela, quando existem
+    # várias interações abertas para a mesma fatura, usa a mais recente.
+    por_fatura = {}
+
     for row in rows:
         row = dict(row)
         fn_id = str(row.get("fn_areceber_id") or "")
         fat = faturas_map.get(fn_id, {})
+
         # Pula interações sem fatura (filial diferente ou fatura não encontrada)
         if not fat:
             continue
+
         row["fatura"] = fat
-        row["paga_em_dia"]      = fat.get("id_cliente") in clientes_paga_em_dia if fat else False
-        row["recem_ativado"]    = fat.get("id_cliente") in clientes_recem_ativados if fat else False
-        result.append(row)
+        row["paga_em_dia"]   = fat.get("id_cliente") in clientes_paga_em_dia if fat else False
+        row["recem_ativado"] = fat.get("id_cliente") in clientes_recem_ativados if fat else False
+
+        # rows está em criado_em ASC; sobrescrever mantém a última
+        # interação aberta como representante da demanda.
+        por_fatura[fn_id] = row
+
+    result = list(por_fatura.values())
+
+    # Primeira cobrança: clientes/faturas mais antigas primeiro.
+    result.sort(
+        key=lambda row: str(
+            (row.get("fatura") or {}).get("data_vencimento") or "9999-12-31"
+        )
+    )
+
     return result
 
 
@@ -1467,3 +1487,329 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
         except: pass
 
     return True
+
+
+# ─── CENTRAL DE DEMANDAS ────────────────────────────────────────────────────
+
+def get_minhas_demandas(usuario_id: int, filial_id: int = 0):
+    """
+    Central de Demandas.
+
+    As quatro prioridades são entradas operacionais já existentes:
+      P1 - Nunca pagaram
+      P2 - Promessas quebradas
+      P3 - Segunda cobrança
+      P4 - Primeira cobrança
+
+    A classificação é exclusiva por prioridade:
+      P1 > P2 > P3 > P4
+
+    Não cria tabela, tarefa ou estado paralelo.
+    """
+    if not usuario_id:
+        return {
+            "total": 0,
+            "prioridade": None,
+            "andamento": 0,
+            "promessas": 0,
+            "quebradas": 0,
+            "segunda_cobranca": 0,
+            "primeira_cobranca": 0,
+            "prioridades": [],
+        }
+
+    usuario_id = int(usuario_id)
+    filial_id = int(filial_id or 0)
+
+    # ------------------------------------------------------------
+    # P1 — NUNCA PAGARAM
+    #
+    # Mantém a mesma regra funcional do módulo Nunca Pagaram,
+    # mas também recupera os IDs dos clientes para impedir que
+    # eles reapareçam na P4.
+    # ------------------------------------------------------------
+    from datetime import date
+    from app.core.db import query
+
+    p1_clientes = set()
+
+    if filial_id:
+        hoje = date.today().isoformat()
+
+        fn_com_promessa = local_query("""
+            SELECT DISTINCT fn_areceber_id
+            FROM cob_interacoes
+            WHERE data_promessa >= ?
+              AND pago=0
+              AND (resolvido IS NULL OR resolvido=0)
+        """, (hoje,))
+
+        fn_ids_promessa = tuple(
+            int(r["fn_areceber_id"])
+            for r in fn_com_promessa
+            if r["fn_areceber_id"]
+        )
+
+        ids_com_promessa = set()
+
+        if fn_ids_promessa:
+            ph = ",".join(["%s"] * len(fn_ids_promessa))
+            clientes_promessa = query(
+                f"""
+                SELECT DISTINCT id_cliente
+                FROM ixcprovedor.fn_areceber
+                WHERE id IN ({ph})
+                """,
+                fn_ids_promessa,
+            )
+            ids_com_promessa = {
+                int(r["id_cliente"])
+                for r in clientes_promessa
+                if r["id_cliente"]
+            }
+
+        rows_p1 = query("""
+            SELECT cc.id_cliente
+            FROM ixcprovedor.cliente_contrato cc
+            INNER JOIN ixcprovedor.fn_areceber f
+                ON f.id_cliente=cc.id_cliente
+               AND f.status='A'
+               AND f.data_vencimento < CURDATE()
+            WHERE cc.status='A'
+              AND cc.id_filial=%s
+              AND DATEDIFF(CURDATE(), cc.data_ativacao) <= 90
+              AND cc.id_cliente NOT IN (
+                  SELECT DISTINCT id_cliente
+                  FROM ixcprovedor.fn_areceber
+                  WHERE status='R'
+              )
+              AND EXISTS (
+                  SELECT 1
+                  FROM ixcprovedor.fn_areceber f2
+                  WHERE f2.id_cliente=cc.id_cliente
+                    AND f2.status='A'
+                    AND f2.data_vencimento < CURDATE()
+                    AND f2.data_vencimento >= cc.data_ativacao
+              )
+            GROUP BY cc.id_cliente
+        """, (filial_id,))
+
+        p1_clientes = {
+            int(r["id_cliente"])
+            for r in rows_p1
+            if r["id_cliente"]
+        }
+
+    p1 = len(p1_clientes)
+
+    # ------------------------------------------------------------
+    # P2 — PROMESSAS QUEBRADAS
+    # Mantém a regra existente: usuário autenticado.
+    # ------------------------------------------------------------
+    rows_p2 = local_query("""
+        SELECT DISTINCT
+               pq.interacao_id,
+               i.fn_areceber_id
+        FROM cob_promessas_quebradas pq
+        LEFT JOIN cob_interacoes i
+               ON i.id=pq.interacao_id
+        WHERE pq.usuario_id=?
+          AND pq.resolvido=0
+    """, (usuario_id,))
+
+    p2_fn = {
+        int(r["fn_areceber_id"])
+        for r in rows_p2
+        if r["fn_areceber_id"]
+    }
+
+    # ------------------------------------------------------------
+    # P3 — SEGUNDA COBRANÇA
+    # Considera somente a última interação aberta por fatura.
+    # ------------------------------------------------------------
+    rows_p3 = local_query("""
+        SELECT DISTINCT i.fn_areceber_id
+        FROM cob_interacoes i
+        WHERE i.usuario_id=?
+          AND i.segunda_cobranca=1
+          AND i.pago=0
+          AND (i.resolvido IS NULL OR i.resolvido=0)
+          AND i.id = (
+              SELECT MAX(i2.id)
+              FROM cob_interacoes i2
+              WHERE i2.fn_areceber_id=i.fn_areceber_id
+                AND i2.segunda_cobranca=1
+                AND i2.pago=0
+                AND (i2.resolvido IS NULL OR i2.resolvido=0)
+          )
+    """, (usuario_id,))
+
+    p3_fn = {
+        int(r["fn_areceber_id"])
+        for r in rows_p3
+        if r["fn_areceber_id"]
+    }
+
+    # ------------------------------------------------------------
+    # Mapeia P2/P3 para clientes em uma única consulta remota.
+    # ------------------------------------------------------------
+    prioridade_fn = tuple(p2_fn | p3_fn)
+    fn_cliente = {}
+
+    if prioridade_fn:
+        ph = ",".join(["%s"] * len(prioridade_fn))
+        rows_clientes = query(
+            f"""
+            SELECT id, id_cliente
+            FROM ixcprovedor.fn_areceber
+            WHERE id IN ({ph})
+            """,
+            prioridade_fn,
+        )
+
+        fn_cliente = {
+            int(r["id"]): int(r["id_cliente"])
+            for r in rows_clientes
+            if r["id"] and r["id_cliente"]
+        }
+
+    p2_clientes = {
+        fn_cliente[fn]
+        for fn in p2_fn
+        if fn in fn_cliente
+    }
+
+    p3_clientes = {
+        fn_cliente[fn]
+        for fn in p3_fn
+        if fn in fn_cliente
+    }
+
+    p2 = len(p2_fn)
+    p3 = len(p3_fn)
+
+    # Clientes que já possuem uma prioridade superior não devem
+    # reaparecer na primeira cobrança.
+    clientes_prioridade_superior = (
+        p1_clientes
+        | p2_clientes
+        | p3_clientes
+    )
+
+    # ------------------------------------------------------------
+    # P4 — PRIMEIRA COBRANÇA
+    #
+    # A lista continua vindo das interações operacionais existentes.
+    # A filial é validada no contrato do IXC.
+    # Depois removemos clientes que já pertencem a P1/P2/P3.
+    # ------------------------------------------------------------
+    rows_p4 = local_query("""
+        SELECT i.id, i.fn_areceber_id
+        FROM cob_interacoes i
+        WHERE i.usuario_id=?
+          AND i.pago=0
+          AND (i.resolvido IS NULL OR i.resolvido=0)
+          AND (i.segunda_cobranca IS NULL OR i.segunda_cobranca=0)
+    """, (usuario_id,))
+
+    p4_fn = {
+        int(r["fn_areceber_id"])
+        for r in rows_p4
+        if r["fn_areceber_id"]
+    }
+
+    p4_exclusivo = set()
+
+    if p4_fn:
+        ph = ",".join(["%s"] * len(p4_fn))
+        params = list(p4_fn)
+
+        filial_and = ""
+        if filial_id:
+            filial_and = "AND cc.id_filial=%s"
+            params.append(filial_id)
+
+        rows_p4_remote = query(
+            f"""
+            SELECT f.id, f.id_cliente
+            FROM ixcprovedor.fn_areceber f
+            LEFT JOIN ixcprovedor.cliente_contrato cc
+                   ON cc.id=f.id_contrato
+            WHERE f.id IN ({ph})
+              AND f.status='A'
+              AND (cc.status='A' OR cc.status IS NULL)
+              {filial_and}
+            """,
+            tuple(params),
+        )
+
+        p4_map = {
+            int(r["id"]): int(r["id_cliente"])
+            for r in rows_p4_remote
+            if r["id"] and r["id_cliente"]
+        }
+
+        p4_exclusivo = {
+            fn
+            for fn, cliente_id in p4_map.items()
+            if cliente_id not in clientes_prioridade_superior
+        }
+
+    p4 = len(p4_exclusivo)
+
+    prioridades = [
+        {
+            "ordem": 1,
+            "codigo": "nunca_pagaram",
+            "titulo": "Nunca pagaram",
+            "descricao": "Cobrar clientes da sua filial que nunca realizaram pagamento.",
+            "total": p1,
+            "cor": "red",
+            "rota": "/cobranca/nunca-pagaram",
+        },
+        {
+            "ordem": 2,
+            "codigo": "promessas_quebradas",
+            "titulo": "Promessas quebradas",
+            "descricao": "Promessas vencidas que precisam de nova atuação.",
+            "total": p2,
+            "cor": "amber",
+            "rota": "/cobranca/promessas",
+        },
+        {
+            "ordem": 3,
+            "codigo": "segunda_cobranca",
+            "titulo": "Segunda cobrança",
+            "descricao": "Clientes que já passaram para a segunda cobrança.",
+            "total": p3,
+            "cor": "blue",
+            "rota": "/cobranca/segunda-cobranca",
+        },
+        {
+            "ordem": 4,
+            "codigo": "primeira_cobranca",
+            "titulo": "Primeira cobrança",
+            "descricao": "Primeiras cobranças, começando pelos vencimentos mais antigos.",
+            "total": p4,
+            "cor": "green",
+            "rota": "/cobranca/primeira-cobranca",
+        },
+    ]
+
+    primeira_disponivel = next(
+        (item for item in prioridades if int(item["total"]) > 0),
+        None,
+    )
+
+    total = sum(int(item["total"]) for item in prioridades)
+
+    return {
+        "total": total,
+        "prioridade": primeira_disponivel,
+        "andamento": p4,
+        "promessas": 0,
+        "quebradas": p2,
+        "segunda_cobranca": p3,
+        "primeira_cobranca": p4,
+        "prioridades": prioridades,
+    }

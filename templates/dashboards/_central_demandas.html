@@ -1,0 +1,395 @@
+<!-- hubcobranca-central-demandas -->
+<div id="demandas-overlay"
+     class="demandas-overlay"
+     style="display:none"
+     aria-hidden="true">
+
+  <div class="demandas-modal"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="demandas-title">
+
+    <button type="button"
+            class="demandas-close"
+            onclick="fecharCentralDemandas()"
+            aria-label="Fechar">×</button>
+
+    <div class="demandas-icon">📋</div>
+
+    <div class="demandas-title" id="demandas-title">
+      Central de Demandas
+    </div>
+
+    <div class="demandas-sub" id="demandas-sub">
+      Carregando suas demandas...
+    </div>
+
+    <div id="demandas-lista" class="demandas-lista"></div>
+
+    <div class="demandas-actions">
+      <button type="button"
+              class="demandas-btn demandas-btn-primary"
+              id="demandas-btn-principal"
+              onclick="abrirMinhasDemandas()">
+        Ver minhas demandas
+      </button>
+
+      <button type="button"
+              class="demandas-btn demandas-btn-secondary"
+              onclick="fecharCentralDemandas()">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.demandas-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(15,23,42,.58);
+}
+
+.demandas-modal{
+  position:relative;
+  width:100%;
+  max-width:560px;
+  padding:28px;
+  border:1px solid var(--border,#e2e8f0);
+  border-radius:16px;
+  background:var(--surface,#fff);
+  color:var(--text,#1e293b);
+  box-shadow:0 24px 70px rgba(15,23,42,.22);
+}
+
+.demandas-close{
+  position:absolute;
+  top:12px;
+  right:14px;
+  border:0;
+  background:transparent;
+  color:var(--muted2,#64748b);
+  font-size:24px;
+  cursor:pointer;
+}
+
+.demandas-close:hover{color:var(--red,#dc2626)}
+
+.demandas-icon{
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  background:#ecfdf5;
+  font-size:22px;
+  margin-bottom:14px;
+}
+
+.demandas-title{
+  font-size:20px;
+  font-weight:700;
+}
+
+.demandas-sub{
+  margin-top:5px;
+  color:var(--muted2,#64748b);
+  font-size:13px;
+}
+
+.demandas-lista{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin-top:20px;
+}
+
+.demanda-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px 14px;
+  border:1px solid var(--border,#e2e8f0);
+  border-radius:10px;
+  background:#fff;
+}
+
+.demanda-item-main{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.demanda-item-prio{
+  width:27px;
+  height:27px;
+  flex:0 0 27px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:#f1f5f9;
+  color:#475569;
+  font-size:12px;
+  font-weight:800;
+}
+
+.demanda-item-text{
+  min-width:0;
+}
+
+.demanda-item-title{
+  color:var(--text,#1e293b);
+  font-size:13px;
+  font-weight:700;
+}
+
+.demanda-item-desc{
+  margin-top:2px;
+  color:var(--muted2,#64748b);
+  font-size:11px;
+}
+
+.demanda-item-count{
+  min-width:34px;
+  height:30px;
+  padding:0 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  font-weight:700;
+  background:#f1f5f9;
+  color:#475569;
+}
+
+.demanda-red .demanda-item-prio,
+.demanda-red .demanda-item-count{
+  background:#fef2f2;
+  color:#dc2626;
+}
+
+.demanda-amber .demanda-item-prio,
+.demanda-amber .demanda-item-count{
+  background:#fffbeb;
+  color:#d97706;
+}
+
+.demanda-blue .demanda-item-prio,
+.demanda-blue .demanda-item-count{
+  background:#eff6ff;
+  color:#2563eb;
+}
+
+.demanda-green .demanda-item-prio,
+.demanda-green .demanda-item-count{
+  background:#ecfdf5;
+  color:#059669;
+}
+
+.demanda-item.disponivel{
+  border-color:#cbd5e1;
+}
+
+.demandas-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:22px;
+}
+
+.demandas-btn{
+  border-radius:8px;
+  padding:9px 14px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.demandas-btn-primary{
+  border:1px solid var(--primary,#059669);
+  background:var(--primary,#059669);
+  color:#fff;
+}
+
+.demandas-btn-secondary{
+  border:1px solid var(--border2,#cbd5e1);
+  background:#fff;
+  color:var(--text,#1e293b);
+}
+
+@media(max-width:600px){
+  .demandas-modal{padding:22px}
+  .demandas-actions{flex-direction:column}
+  .demandas-btn{width:100%}
+}
+</style>
+
+<script>
+(function(){
+
+  let proximaRota = '/cobranca/';
+
+  function fechar(){
+    const overlay = document.getElementById('demandas-overlay');
+    if(!overlay) return;
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  window.fecharCentralDemandas = fechar;
+
+  window.abrirMinhasDemandas = function(){
+    window.location.href = proximaRota || '/cobranca/';
+  };
+
+  function render(data){
+    const sub = document.getElementById('demandas-sub');
+    const lista = document.getElementById('demandas-lista');
+    const btn = document.getElementById('demandas-btn-principal');
+
+    if(!sub || !lista) return;
+
+    const demandas = data.demandas || {};
+    const prioridades = Array.isArray(demandas.prioridades)
+      ? demandas.prioridades
+      : [];
+
+    const total = Number(demandas.total || 0);
+    const nome = ((data.usuario || {}).nome || '')
+      .trim()
+      .split(/\s+/)[0];
+
+    if(total <= 0){
+      sub.textContent =
+        (nome ? 'Olá, ' + nome + '. ' : '') +
+        'Você não possui demandas pendentes no momento.';
+
+      lista.innerHTML = `
+        <div class="demanda-item">
+          <div class="demanda-item-main">
+            <div class="demanda-item-prio">✓</div>
+            <div class="demanda-item-text">
+              <div class="demanda-item-title">Nenhuma demanda pendente</div>
+              <div class="demanda-item-desc">Sua fila está em dia.</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if(btn){
+        btn.style.display = 'none';
+      }
+      return;
+    }
+
+    sub.textContent =
+      (nome ? 'Olá, ' + nome + '. ' : '') +
+      'Você tem ' + total +
+      ' demanda' + (total === 1 ? '' : 's') +
+      ' pendente' + (total === 1 ? '' : 's') + '.';
+
+    const primeira = prioridades.find(
+      item => Number(item.total || 0) > 0
+    );
+
+    if(primeira && primeira.rota){
+      proximaRota = primeira.rota;
+    }
+
+    if(btn){
+      btn.style.display = '';
+      btn.textContent = primeira
+        ? 'Ver ' + primeira.titulo.toLowerCase()
+        : 'Ver minhas demandas';
+    }
+
+    lista.innerHTML = prioridades.map(item => {
+      const qtd = Number(item.total || 0);
+      const classe = item.cor
+        ? 'demanda-' + item.cor
+        : '';
+      const ativa = qtd > 0 ? ' disponivel' : '';
+
+      return `
+        <div class="demanda-item ${classe}${ativa}">
+          <div class="demanda-item-main">
+            <div class="demanda-item-prio">${item.ordem}</div>
+            <div class="demanda-item-text">
+              <div class="demanda-item-title">
+                ${item.titulo}
+              </div>
+              <div class="demanda-item-desc">
+                ${item.descricao}
+              </div>
+            </div>
+          </div>
+          <div class="demanda-item-count">${qtd}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function carregar(){
+    try{
+      const resp = await fetch('/cobranca/api/minhas-demandas', {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+
+      if(!resp.ok){
+        throw new Error('Falha ao carregar demandas');
+      }
+
+      const data = await resp.json();
+      render(data);
+    }catch(err){
+      const sub = document.getElementById('demandas-sub');
+      const lista = document.getElementById('demandas-lista');
+      if(sub){
+        sub.textContent =
+          'Não foi possível carregar suas demandas agora.';
+      }
+      if(lista){
+        lista.innerHTML = `
+          <div class="demanda-item">
+            <div class="demanda-item-main">
+              <div class="demanda-item-prio">!</div>
+              <div class="demanda-item-text">
+                <div class="demanda-item-title">Central indisponível</div>
+                <div class="demanda-item-desc">
+                  Tente novamente em instantes.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  function abrir(){
+    const overlay = document.getElementById('demandas-overlay');
+    if(!overlay) return;
+
+    overlay.style.display = 'flex';
+    overlay.setAttribute('aria-hidden', 'false');
+    carregar();
+  }
+
+  window.abrirCentralDemandas = abrir;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    abrir();
+  });
+
+})();
+</script>
