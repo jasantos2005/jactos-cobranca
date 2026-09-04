@@ -32,7 +32,7 @@ def get_ranking_tecnicos(data_ini=None, data_fim=None):
     """, tuple(params))
 
 def get_os_pendentes_auditoria():
-    """OS 39 finalizadas hoje sem foto ou sem técnico válido."""
+    """OS 34 finalizadas hoje sem foto ou sem técnico válido."""
     ph = ",".join(["%s"]*len(TECNICOS_IDS))
     return query(f"""
         SELECT o.id AS os_id, c.id AS id_cliente, c.razao,

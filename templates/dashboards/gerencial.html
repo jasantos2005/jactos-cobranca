@@ -101,9 +101,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <div class="card-sub">clientes ativos sem 1ª parcela</div>
         <div class="card-icon">🆕</div>
       </a>
-      <a href="/cobranca/retiradas/auditoria" class="card {% if d.os39_abertas > 20 %}alerta{% else %}aviso{% endif %}">
-        <div class="card-label">OS Retirada (39)</div>
-        <div class="card-value" style="color:var(--amber)">{{ d.os39_abertas }}</div>
+      <a href="/cobranca/retiradas/auditoria" class="card {% if d.os34_abertas > 20 %}alerta{% else %}aviso{% endif %}">
+        <div class="card-label">OS Retirada (34)</div>
+        <div class="card-value" style="color:var(--amber)">{{ d.os34_abertas }}</div>
         <div class="card-sub">equipamentos a retirar</div>
         <div class="card-icon">🚛</div>
       </a>

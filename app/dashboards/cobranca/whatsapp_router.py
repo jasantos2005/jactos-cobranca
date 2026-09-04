@@ -85,7 +85,7 @@ def fila_cobranca(x_api_key: str = Header(None, alias="X-API-Key")):
             ON f.id_cliente = c.id AND f.status = 'A' AND f.data_vencimento < CURDATE()
         WHERE NOT EXISTS (
             SELECT 1 FROM ixcprovedor.su_oss_chamado o
-            WHERE o.id_cliente = c.id AND o.id_assunto = 246 AND o.status <> 'F'
+            WHERE o.id_cliente = c.id AND o.id_assunto = 190 AND o.status <> 'F'
         )
         GROUP BY c.id, f.id
         HAVING dias_atraso BETWEEN 1 AND 30
@@ -121,7 +121,7 @@ def fila_reenvio(dias_desde_1a_msg: int = 7, x_api_key: str = Header(None, alias
     ainda não foram pagas, ainda não tiveram reenvio, e ainda não tiveram
     nenhuma resposta do cliente (etapa de sessão nunca avançou).
 
-    Diferente de /fila: aqui o cliente NECESSARIAMENTE já tem OS 246 aberta
+    Diferente de /fila: aqui o cliente NECESSARIAMENTE já tem OS 190 aberta
     (foi aberta na 1ª mensagem) — por isso precisa de query própria.
     """
     _verifica_key(x_api_key)
@@ -198,7 +198,7 @@ def _crc16_ccitt(payload: str) -> str:
     return format(crc, "04X")
 
 
-def gerar_pix_copia_cola(chave_pix: str, valor: float, txid: str, nome_recebedor: str = "CLIQUEDF", cidade: str = "NEOPOLIS") -> str:
+def gerar_pix_copia_cola(chave_pix: str, valor: float, txid: str, nome_recebedor: str = "JACTOS", cidade: str = "NEOPOLIS") -> str:
     """
     Monta o payload Pix estático (copia-e-cola) no padrão EMV do Bacen.
     Usa a chave já cadastrada na carteira de cobrança (fn_carteira_cobranca.pix_chave) —

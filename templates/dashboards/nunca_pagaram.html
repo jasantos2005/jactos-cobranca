@@ -85,7 +85,7 @@ tr:hover td{background:rgba(248,81,73,.03)}
       </div>
       <div class="kpi" style="border-color:var(--amber)">
         <div class="kpi-label">Com OS retirada</div>
-        <div class="kpi-value" style="color:var(--amber)">{{ com_os39 }}</div>
+        <div class="kpi-value" style="color:var(--amber)">{{ com_os34 }}</div>
         <div class="kpi-sub">já em processo</div>
       </div>
     </div>
@@ -240,7 +240,7 @@ async function salvarInteracao() {
   if(res.ok) {
     fecharModal();
     // Se ação negativa e sem interações anteriores → avisa que OS 39 será aberta
-    if(ACOES_NEGATIVAS.includes(acao) && res.abriu_os39) {
+    if(ACOES_NEGATIVAS.includes(acao) && res.abriu_os34) {
       alert('⚠️ OS de retirada aberta automaticamente para ' + document.getElementById('m-razao').textContent);
     }
     location.reload();

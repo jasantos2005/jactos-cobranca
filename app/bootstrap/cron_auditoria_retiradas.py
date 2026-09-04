@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Cron Auditoria Retiradas — executa a cada 2h
-Verifica OS 39 finalizadas com técnico válido e foto → abre OS 38 estoque
+Verifica OS 34 finalizadas com técnico válido e foto → abre OS 171 estoque
 """
 import sys, os
 sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
@@ -24,8 +24,8 @@ def telegram(msg):
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=10)
     except: pass
 
-def verificar_os38():
-    """Monitora OS 38:
+def verificar_os171():
+    """Monitora OS 171:
     1. Abertas há mais de 48h — alerta
     2. Finalizadas sem baixa no comodato — alerta
     3. Finalizadas com baixa no comodato — notifica sucesso
@@ -33,7 +33,7 @@ def verificar_os38():
     from datetime import datetime, timezone, timedelta
     agora = datetime.now(timezone(timedelta(hours=-3)))
 
-    # ── 1. OS 38 abertas há mais de 48h ──
+    # ── 1. OS 171 abertas há mais de 48h ──
     abertas_48h = query("""
         SELECT o.id, o.id_cliente, c.razao,
                TIMESTAMPDIFF(HOUR, o.data_abertura, NOW()) AS horas_aberta,
@@ -41,11 +41,11 @@ def verificar_os38():
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT JOIN ixcprovedor.funcionarios u ON u.id=o.id_tecnico
-        WHERE o.id_assunto=38 AND o.status='A'
+        WHERE o.id_assunto=171 AND o.status='A'
           AND TIMESTAMPDIFF(HOUR, o.data_abertura, NOW()) > 48
     """, ())
 
-    # ── 2. OS 38 finalizadas sem baixa no comodato ──
+    # ── 2. OS 171 finalizadas sem baixa no comodato ──
     sem_baixa = query("""
         SELECT o.id, o.id_cliente, c.razao,
                DATE_FORMAT(o.data_fechamento,'%%d/%%m/%%Y') AS fechamento,
@@ -54,7 +54,7 @@ def verificar_os38():
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT JOIN ixcprovedor.funcionarios u ON u.id=o.id_tecnico
-        WHERE o.id_assunto=38 AND o.status='F'
+        WHERE o.id_assunto=171 AND o.status='F'
           AND DATE(o.data_fechamento) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
           AND o.id_cliente NOT IN (
             SELECT DISTINCT cc.id_cliente
@@ -64,7 +64,7 @@ def verificar_os38():
           )
     """, ())
 
-    # ── 3. OS 38 finalizadas COM baixa no comodato (hoje) ──
+    # ── 3. OS 171 finalizadas COM baixa no comodato (hoje) ──
     com_baixa = query("""
         SELECT o.id, o.id_cliente, c.razao,
                DATE_FORMAT(o.data_fechamento,'%%d/%%m/%%Y %%H:%%i') AS fechamento,
@@ -72,7 +72,7 @@ def verificar_os38():
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         LEFT JOIN ixcprovedor.funcionarios u ON u.id=o.id_tecnico
-        WHERE o.id_assunto=38 AND o.status='F'
+        WHERE o.id_assunto=171 AND o.status='F'
           AND DATE(o.data_fechamento) = CURDATE()
           AND o.id_cliente IN (
             SELECT DISTINCT cc.id_cliente
@@ -87,23 +87,23 @@ def verificar_os38():
     sucessos = []
 
     if abertas_48h:
-        alertas.append(f"⏰ <b>{len(abertas_48h)} OS 38 abertas há +48h (estoque pendente):</b>")
+        alertas.append(f"⏰ <b>{len(abertas_48h)} OS 171 abertas há +48h (estoque pendente):</b>")
         for o in abertas_48h[:5]:
             alertas.append(f"  • #{o['id']} {o['razao']} — {o['horas_aberta']}h ({o['tecnico'] or '—'})")
 
     if sem_baixa:
-        alertas.append(f"\n❌ <b>{len(sem_baixa)} OS 38 finalizadas SEM baixa no comodato:</b>")
+        alertas.append(f"\n❌ <b>{len(sem_baixa)} OS 171 finalizadas SEM baixa no comodato:</b>")
         for o in sem_baixa[:5]:
             resp = f"⚠️ fechado por {o['fechado_por']}" if o.get('responsavel') == 'incorreto' else o['fechado_por'] or '—'
             alertas.append(f"  • #{o['id']} {o['razao']} — fechada {o['fechamento']} ({resp})")
 
     if com_baixa:
-        sucessos.append(f"✅ <b>{len(com_baixa)} OS 38 finalizadas COM baixa no comodato hoje:</b>")
+        sucessos.append(f"✅ <b>{len(com_baixa)} OS 171 finalizadas COM baixa no comodato hoje:</b>")
         for o in com_baixa[:5]:
             sucessos.append(f"  • #{o['id']} {o['razao']} — {o['fechamento']} ({o['tecnico'] or '—'})")
 
     if alertas:
-        msg = "🔴 <b>HubCobrança — Monitoramento OS 38</b>\n\n"
+        msg = "🔴 <b>HubCobrança — Monitoramento OS 171</b>\n\n"
         msg += "\n".join(alertas)
         msg += f"\n\n<i>{agora.strftime('%d/%m/%Y %H:%M')}</i>"
         if ENVIAR_TELEGRAM: telegram(msg)
@@ -120,8 +120,8 @@ def verificar_os38():
 def retirada_imediata_nunca_pagou():
     """
     Clientes que nunca pagaram:
-    - Fecha OS 246 se existir
-    - Abre OS 39 imediatamente
+    - Fecha OS 190 se existir
+    - Abre OS 34 imediatamente
     """
     from app.core.db import query, query_one, execute
     log("=== RETIRADA IMEDIATA NUNCA PAGOU ===")
@@ -156,21 +156,44 @@ def retirada_imediata_nunca_pagou():
     abertas = 0
     for c in candidatos:
         try:
-            # Fecha OS 246 se existir
-            os246 = query_one("""
+            # Fecha OS 190 se existir
+            os190 = query_one("""
                 SELECT id FROM ixcprovedor.su_oss_chamado
                 WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
             """, (c["id_cliente"],))
-            if os246:
-                execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os246["id"],))
+            if os190:
+                execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os190["id"],))
 
-            # Abre OS 39
+            # Busca a fatura que origina a retirada.
+            # O contrato da fatura define a filial da OS 34.
             fat = query_one("""
-                SELECT id, documento FROM ixcprovedor.fn_areceber
-                WHERE id_cliente=%s AND status='A' AND data_vencimento < CURDATE()
-                ORDER BY data_vencimento ASC LIMIT 1
+                SELECT
+                    id,
+                    documento,
+                    id_contrato
+                FROM ixcprovedor.fn_areceber
+                WHERE id_cliente=%s
+                  AND status='A'
+                  AND data_vencimento < CURDATE()
+                ORDER BY data_vencimento ASC
+                LIMIT 1
             """, (c["id_cliente"],))
-            fat_info = f" | Fatura #{fat['id']} ({fat['documento']})" if fat else ""
+
+            if not fat or not fat.get("id_contrato"):
+                log(
+                    f"  🚫 BLOQUEADO — {c['razao']}: "
+                    f"fatura sem contrato válido"
+                )
+                continue
+
+            from app.core.filial_scope import resolver_filial_contrato
+
+            id_contrato = int(fat["id_contrato"])
+            id_filial = resolver_filial_contrato(id_contrato)
+
+            fat_info = (
+                f" | Fatura #{fat['id']} ({fat['documento']})"
+            )
 
             # Busca vendedor e Serasa no comercial
             COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
@@ -196,16 +219,29 @@ def retirada_imediata_nunca_pagou():
                    f"Serasa: {serasa}")
             execute("""
                 INSERT INTO ixcprovedor.su_oss_chamado
-                    (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                VALUES (%s, 39, %s, NOW(), 'A', 8)
-            """, (c["id_cliente"], msg))
-            log(f"  ✅ OS 39 aberta — {c['razao']} (boleto vencido há {c['maior_atraso']}d)")
+                    (
+                        id_cliente,
+                        id_assunto,
+                        mensagem,
+                        data_abertura,
+                        status,
+                        setor,
+                        id_filial
+                    )
+                VALUES (%s, 34, %s, NOW(), 'A', 8, %s)
+            """, (c["id_cliente"], msg, id_filial))
+
+            log(
+                f"  ✅ OS 34 aberta — {c['razao']} "
+                f"(contrato #{id_contrato}, filial {id_filial}, "
+                f"boleto vencido há {c['maior_atraso']}d)"
+            )
             abertas += 1
         except Exception as e:
             log(f"  ❌ ERRO — {c['razao']}: {e}")
 
     if abertas > 0:
-        if ENVIAR_TELEGRAM: telegram(f"🚨 <b>Retirada Imediata</b>\n{abertas} OS 39 abertas para clientes que NUNCA pagaram\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>")
+        if ENVIAR_TELEGRAM: telegram(f"🚨 <b>Retirada Imediata</b>\n{abertas} OS 34 abertas para clientes que NUNCA pagaram\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>")
     return abertas
 
 def main():
@@ -218,9 +254,9 @@ def main():
     log("=== AUDITORIA RETIRADAS ===")
     ph = ",".join(["%s"]*len(TECNICOS_IDS))
 
-    # Busca OS 39 finalizadas HOJE com técnico válido e foto, sem OS 38 aberta
+    # Busca OS 34 finalizadas HOJE com técnico válido e foto, sem OS 171 aberta
     os_validas = query(f"""
-        SELECT DISTINCT o.id AS os39_id, o.id_cliente, c.razao,
+        SELECT DISTINCT o.id AS os34_id, o.id_cliente, o.id_filial, c.razao,
                u.funcionario AS tecnico_nome, o.id_tecnico,
                o.data_fechamento,
                COUNT(a.id) AS qtd_fotos
@@ -234,13 +270,13 @@ def main():
           AND o.id_tecnico IN ({ph})
           AND o.id_cliente NOT IN (
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=38
+            WHERE id_assunto=171
             AND DATE(data_abertura) = CURDATE()
           )
         GROUP BY o.id, o.id_cliente, c.razao, u.funcionario, o.id_tecnico, o.data_fechamento
     """, TECNICOS_IDS)
 
-    log(f"OS válidas para abrir OS 38: {len(os_validas)}")
+    log(f"OS válidas para abrir OS 171: {len(os_validas)}")
     abertas = erros = 0
 
     for os in os_validas:
@@ -249,21 +285,21 @@ def main():
             id_cidade = str(cli["cidade"]) if cli and cli["cidade"] else ""
             msg_os = (f"Devolução de equipamento ao estoque\n"
                       f"Técnico: {os['tecnico_nome']}\n"
-                      f"OS retirada: #{os['os39_id']}\n"
+                      f"OS retirada: #{os['os34_id']}\n"
                       f"Cliente: {os['razao']}\n"
                       f"Fotos anexadas: {os['qtd_fotos']}")
             execute("""
                 INSERT INTO ixcprovedor.su_oss_chamado
-                    (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                VALUES (%s, 38, %s, NOW(), 'A', 9)
-            """, (os["id_cliente"], msg_os))
-            log(f"  ✅ OS 38 aberta — {os['razao']} (técnico: {os['tecnico_nome']})")
+                    (id_cliente, id_assunto, mensagem, data_abertura, status, setor, id_filial)
+                VALUES (%s, 171, %s, NOW(), 'A', 9, %s)
+            """, (os["id_cliente"], msg_os, os["id_filial"]))
+            log(f"  ✅ OS 171 aberta — {os['razao']} (técnico: {os['tecnico_nome']})")
             abertas += 1
         except Exception as e:
             log(f"  ❌ ERRO — {os['razao']}: {e}")
             erros += 1
 
-    # Busca OS 39 finalizadas SEM foto ou SEM técnico válido para alertar
+    # Busca OS 34 finalizadas SEM foto ou SEM técnico válido para alertar
     sem_foto = query(f"""
         SELECT o.id, c.razao, o.data_fechamento,
                u.funcionario AS tecnico
@@ -305,8 +341,8 @@ def main():
     if abertas > 0:
         if ENVIAR_TELEGRAM: telegram(f"✅ <b>HubCobrança — Retiradas</b>\n\n{abertas} OS de devolução ao estoque abertas automaticamente.\n<i>{now_br().strftime('%d/%m/%Y %H:%M')}</i>")
 
-    # Monitora OS 38
-    ab48, sb, cb = verificar_os38()
+    # Monitora OS 171
+    ab48, sb, cb = verificar_os171()
     log(f"OS38 — abertas+48h={ab48} sem_baixa={sb} com_baixa={cb}")
     log(f"=== CONCLUÍDO — abertas={abertas} erros={erros} sem_foto={len(sem_foto)} sem_tecnico={len(sem_tecnico)} ===")
 

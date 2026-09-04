@@ -127,7 +127,7 @@ def abrir_os_retirada(
         "melhor_horario_agenda":     "Q",
         "mensagem":                  (
             mensagem
-            or "OS de retirada de equipamento — sistema de cobranca Cliquedf"
+            or "OS de retirada de equipamento — sistema de cobranca Jactos"
         ),
         "status":                    "A",
         "status_assinatura":         "A",

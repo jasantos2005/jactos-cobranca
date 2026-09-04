@@ -123,14 +123,14 @@ def get_dashboard_gerencial():
           )
     """, ())
 
-    os39_abertas = query_one("""
+    os34_abertas = query_one("""
         SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado
         WHERE id_assunto=34 AND status NOT IN ('F')
     """, ())
 
-    os38_pendentes = query_one("""
+    os171_pendentes = query_one("""
         SELECT COUNT(*) AS total FROM ixcprovedor.su_oss_chamado
-        WHERE id_assunto=38 AND status NOT IN ('F')
+        WHERE id_assunto=171 AND status NOT IN ('F')
     """, ())
 
     # === QUALIDADE VENDAS ===
@@ -200,8 +200,8 @@ def get_dashboard_gerencial():
         "tend_inad":     tend_inad,
         # Alertas
         "nunca_pagaram": int(nunca_pagaram["total"] or 0),
-        "os39_abertas":  int(os39_abertas["total"] or 0),
-        "os38_pendentes":int(os38_pendentes["total"] or 0),
+        "os34_abertas":  int(os34_abertas["total"] or 0),
+        "os171_pendentes":int(os171_pendentes["total"] or 0),
         "opa_criticos":  opa_criticos,
         # Qualidade vendas
         "qual_total":    kpis_qual.get("total", 0),

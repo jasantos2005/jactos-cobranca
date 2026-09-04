@@ -56,11 +56,11 @@ def checar_token_ixc():
         telegram(f"⚠️ <b>HubCobrança — ALERTA</b>\n\nErro ao conectar na API IXC:\n<code>{e}</code>")
         return False
 
-# ── 2. FECHA OS 39 DE QUEM PAGOU ─────────────────────────────────────────────
-def corrigir_os39_pagos():
-    # Busca clientes com OS 39 aberta que NÃO têm mais nenhuma fatura em aberto
+# ── 2. FECHA OS 34 DE QUEM PAGOU ─────────────────────────────────────────────
+def corrigir_os34_pagos():
+    # Busca clientes com OS 34 aberta que NÃO têm mais nenhuma fatura em aberto
     clientes = query("""
-        SELECT DISTINCT c.id, c.razao, o.id AS os39_id
+        SELECT DISTINCT c.id, c.razao, o.id AS os34_id
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.cliente c ON c.id=o.id_cliente
         WHERE o.id_assunto=34 AND o.status NOT IN ('F')
@@ -74,16 +74,16 @@ def corrigir_os39_pagos():
     fechados = 0
     for c in clientes:
         try:
-            execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s AND status<>'F'", (c["os39_id"],))
+            execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s AND status<>'F'", (c["os34_id"],))
             fechados += 1
-            log(f"  ✅ OS 39 #{c['os39_id']} fechada — {c['razao']}")
-            registrar("os39_fechada", f"OS 39 #{c['os39_id']} fechada — {c['razao']}", True)
+            log(f"  ✅ OS 34 #{c['os34_id']} fechada — {c['razao']}")
+            registrar("os34_fechada", f"OS 34 #{c['os34_id']} fechada — {c['razao']}", True)
         except Exception as e:
-            log(f"  ❌ Erro ao fechar OS 39 #{c['os39_id']}: {e}")
+            log(f"  ❌ Erro ao fechar OS 34 #{c['os34_id']}: {e}")
     return fechados
 
-# ── 3. ABRE OS 39 PARA CRÍTICOS ───────────────────────────────────────────────
-def corrigir_os39_faltantes():
+# ── 3. ABRE OS 34 PARA CRÍTICOS ───────────────────────────────────────────────
+def corrigir_os34_faltantes():
     EXCLUIR = ['ESCOLA','ESCOLAR','COLEGIO','COLÉGIO','CONSELHO','CAIXA ESCOLAR','UNIDADE EXECUTORA']
     rows = local_query("SELECT DISTINCT fn_areceber_id FROM cob_interacoes WHERE segunda_cobranca=1 AND pago=0 AND resolvido=0", ())
     if not rows:
@@ -91,19 +91,34 @@ def corrigir_os39_faltantes():
     fn_ids = tuple(r["fn_areceber_id"] for r in rows)
     ph = ",".join(["%s"]*len(fn_ids))
     criticos = query(f"""
-        SELECT f.id_cliente, c.razao,
-               MAX(DATEDIFF(CURDATE(), f2.data_vencimento)) AS maior_atraso,
-               SUM(f2.valor_aberto) AS total_aberto
+        SELECT
+            f.id AS fn_areceber_id,
+            f.id_cliente,
+            f.id_contrato,
+            c.razao,
+            MAX(DATEDIFF(CURDATE(), f2.data_vencimento)) AS maior_atraso,
+            SUM(f2.valor_aberto) AS total_aberto
         FROM ixcprovedor.fn_areceber f
-        INNER JOIN ixcprovedor.cliente c ON c.id=f.id_cliente
-        LEFT JOIN ixcprovedor.fn_areceber f2 ON f2.id_cliente=f.id_cliente
-            AND f2.status='A' AND f2.data_vencimento < CURDATE()
+        INNER JOIN ixcprovedor.cliente c
+            ON c.id=f.id_cliente
+        LEFT JOIN ixcprovedor.fn_areceber f2
+            ON f2.id_cliente=f.id_cliente
+           AND f2.status='A'
+           AND f2.data_vencimento < CURDATE()
         WHERE f.id IN ({ph})
-        AND f.id_cliente NOT IN (
-            SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto=34 AND status NOT IN ('F')
-        )
-        GROUP BY f.id_cliente, c.razao
+          AND f.id_contrato IS NOT NULL
+          AND f.id_contrato > 0
+          AND f.id_cliente NOT IN (
+              SELECT DISTINCT id_cliente
+              FROM ixcprovedor.su_oss_chamado
+              WHERE id_assunto=34
+                AND status NOT IN ('F')
+          )
+        GROUP BY
+            f.id,
+            f.id_cliente,
+            f.id_contrato,
+            c.razao
         HAVING maior_atraso >= 45
     """, fn_ids)
     abertos = 0
@@ -112,16 +127,51 @@ def corrigir_os39_faltantes():
         if any(k in razao.upper() for k in EXCLUIR):
             continue
         try:
+            from app.core.filial_scope import resolver_filial_contrato
+
+            id_contrato = int(c.get("id_contrato") or 0)
+
+            if id_contrato <= 0:
+                log(
+                    f"  🚫 OS 34 bloqueada — {razao}: "
+                    "fatura sem contrato válido"
+                )
+                continue
+
+            try:
+                id_filial = resolver_filial_contrato(id_contrato)
+            except Exception as e:
+                log(
+                    f"  🚫 OS 34 bloqueada — {razao}: "
+                    f"não foi possível resolver filial do contrato "
+                    f"#{id_contrato}: {e}"
+                )
+                continue
+
             execute("""
                 INSERT INTO ixcprovedor.su_oss_chamado
-                    (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                VALUES (%s, 39, %s, NOW(), 'A', 8)
-            """, (c["id_cliente"], f"Retirada automática — {razao} com {c['maior_atraso']}d inadimplente"))
+                    (
+                        id_cliente,
+                        id_assunto,
+                        id_filial,
+                        mensagem,
+                        data_abertura,
+                        status,
+                        setor
+                    )
+                VALUES (%s, 34, %s, %s, NOW(), 'A', 8)
+            """, (
+                c["id_cliente"],
+                id_filial,
+                f"Retirada automática — {razao} com "
+                f"{c['maior_atraso']}d inadimplente"
+            ))
+
             abertos += 1
-            log(f"  ✅ OS 39 aberta — {razao} ({c['maior_atraso']}d)")
-            registrar("os39_aberta", f"OS 39 aberta — {razao} ({c['maior_atraso']}d)", True)
+            log(f"  ✅ OS 34 aberta — {razao} ({c['maior_atraso']}d)")
+            registrar("os34_aberta", f"OS 34 aberta — {razao} ({c['maior_atraso']}d)", True)
         except Exception as e:
-            log(f"  ❌ Erro ao abrir OS 39 para {razao}: {e}")
+            log(f"  ❌ Erro ao abrir OS 34 para {razao}: {e}")
     return abertos
 
 # ── 4. RESOLVE INTERAÇÕES INVÁLIDAS ──────────────────────────────────────────
@@ -172,15 +222,15 @@ def main():
     # 1. Token IXC
     token_ok = checar_token_ixc()
 
-    # 2. Fecha OS 39 de quem pagou
-    fechados = corrigir_os39_pagos()
+    # 2. Fecha OS 34 de quem pagou
+    fechados = corrigir_os34_pagos()
     if fechados > 0:
-        correcoes.append(f"✅ {fechados} OS 39 fechadas (clientes que pagaram)")
+        correcoes.append(f"✅ {fechados} OS 34 fechadas (clientes que pagaram)")
 
-    # 3. Abre OS 39 faltantes
-    abertos = corrigir_os39_faltantes()
+    # 3. Abre OS 34 faltantes
+    abertos = corrigir_os34_faltantes()
     if abertos > 0:
-        correcoes.append(f"✅ {abertos} OS 39 abertas (clientes +60d sem retirada)")
+        correcoes.append(f"✅ {abertos} OS 34 abertas (clientes +60d sem retirada)")
 
     # 4. Resolve interações inválidas
     resolvidas = corrigir_interacoes_invalidas()
@@ -339,7 +389,7 @@ def limpar_segunda_cobranca():
     log(f"Pagos: {len(pagos)} | Cancelados: {len(cancelados)}")
 
 def reabrir_os_fatura_aberta():
-    """Reabre OS 39/22 fechadas de clientes que ainda têm fatura em aberto e nunca pagaram"""
+    """Reabre OS 34 fechadas de clientes que ainda têm fatura em aberto e nunca pagaram"""
     from app.core.db import query, execute
     log("=== REABRE OS RETIRADA COM FATURA ABERTA ===")
 

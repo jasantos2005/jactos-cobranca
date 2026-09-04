@@ -269,7 +269,7 @@ def get_fila(filtros: FiltrosGlobais):
     rows = query(sql, params)
     cobrados_hoje = _ids_cobrados_hoje()
 
-    # Busca recorrentes em batch (OS 246 finalizada)
+    # Busca recorrentes em batch (OS 190 finalizada)
     id_clientes = list({row["id_cliente"] for row in rows})
     recorrentes_map = {}
     if id_clientes:
@@ -278,7 +278,7 @@ def get_fila(filtros: FiltrosGlobais):
             SELECT id_cliente,
                    DATE_FORMAT(MAX(data_fechamento),'%%m/%%Y') AS ultima_cobranca
             FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto = 246 AND status = 'F'
+            WHERE id_assunto = 190 AND status = 'F'
               AND id_cliente IN ({ph2})
             GROUP BY id_cliente
         """, tuple(id_clientes))
@@ -365,14 +365,6 @@ def check_os_aberta(id_cliente: int):
     """, (id_cliente,))
     return r["id"] if r else None
 
-def abrir_os_retirada(id_cliente: int) -> int:
-    return execute("""
-        INSERT INTO ixcprovedor.su_oss_chamado
-            (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-        VALUES (%s, 39, 'OS de retirada de equipamento — sistema de cobrança Cliquedf', NOW(), 'a', 8)
-    """, (id_cliente,))
-
-# ─── ANDAMENTO ───────────────────────────────────────────────────────────────
 
 def get_andamento(filtros: FiltrosGlobais, usuario_id: int = None, data_inicio: str = None, data_fim: str = None):
     limit  = int(filtros.por_pagina)
@@ -418,10 +410,10 @@ def get_andamento(filtros: FiltrosGlobais, usuario_id: int = None, data_inicio: 
         for fn_id, fat in faturas_map.items():
             if fat.get("fatura_status") != "A" or fat.get("contrato_status") not in ("A", None):
                 local_execute("UPDATE cob_interacoes SET resolvido=1 WHERE fn_areceber_id=? AND resolvido=0", (int(fn_id),))
-    # Busca clientes com OS de retirada ou cobrança (246) aberta em batch
+    # Busca clientes com OS de retirada ou cobrança (190) aberta em batch
     id_clientes_fatura = list({fat["id_cliente"] for fat in faturas_map.values() if fat.get("id_cliente")})
     clientes_com_retirada = set()
-    clientes_com_os246 = set()
+    clientes_com_os190 = set()
     if id_clientes_fatura:
         ph3 = ",".join(["%s"] * len(id_clientes_fatura))
         os_retiradas = query(f"""
@@ -430,12 +422,12 @@ def get_andamento(filtros: FiltrosGlobais, usuario_id: int = None, data_inicio: 
               AND id_cliente IN ({ph3})
         """, tuple(id_clientes_fatura))
         clientes_com_retirada = {r["id_cliente"] for r in os_retiradas}
-        os_246 = query(f"""
+        os_190 = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto = 246 AND status = 'A'
+            WHERE id_assunto = 190 AND status = 'A'
               AND id_cliente IN ({ph3})
         """, tuple(id_clientes_fatura))
-        clientes_com_os246 = {r["id_cliente"] for r in os_246}
+        clientes_com_os190 = {r["id_cliente"] for r in os_190}
 
     # Busca clientes que pagaram outras faturas nos últimos 60 dias
     id_clientes_and = list({fat["id_cliente"] for fat in faturas_map.values() if fat.get("id_cliente")})
@@ -705,7 +697,7 @@ def resolver_interacoes_pagas():
         """, (fn_id,))
         resolvidos += 1
 
-        # Fecha a OS 246 (cobrança) do cliente, identificando qual fatura foi paga
+        # Fecha a OS 190 (cobrança) do cliente, identificando qual fatura foi paga
         try:
             fat_cli = query_one("SELECT id_cliente FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
             if fat_cli:
@@ -722,7 +714,7 @@ def resolver_interacoes_pagas():
                         WHERE id=%s
                     """, (nova_msg_pg, os_aberta_pg["id"]))
         except Exception as ex:
-            print(f"Erro ao fechar OS 246 (fatura {fn_id} paga): {ex}")
+            print(f"Erro ao fechar OS 190 (fatura {fn_id} paga): {ex}")
 
         if promessa:
             try:
@@ -954,7 +946,7 @@ def get_faturas_cliente(id_cliente: int):
         ORDER BY f.data_vencimento ASC
     """, (id_cliente,))
 
-OS_ASSUNTOS = {6:"RECOLHER ONU E PTO",22:"RECOLHIMENTO DE EQUIPAMENTO",23:"DEVOLUÇÃO DE EQUIPAMENTOS",28:"INSTALAR EQUIPAMENTO DE TESTE",29:"RECOLHER EQUIPAMENTO DE TESTE",31:"SOLICITAÇÃO DE CANCELAMENTO",32:"[FINANCEIRO]NEGOCIAÇÃO",33:"[COMERCIAL]DEVOLUÇÃO DE EQUIPAMENTO",37:"[COMERCIAL]RECEBER EQUIPAMENTO EM LOJA",38:"DEVOLUÇÃO DE EQUIPAMENTOS",39:"RETIRADA DE EQUIPAMENTO",40:"RETIRADA DA FIBRA NA CTO",63:"CANCELAR CONTRATO POR DESISTENCIA DE INSTALAÇÃO",73:"GERAR COBRANÇA",74:"ABRIR PROCESSO DE RECOLHIMENTO",75:"REATIVAÇÃO - NOVO CONTRATO",80:"COBRANÇA - PRIMEIRA TENTATIVA",81:"ACORDO REALIZADO",82:"ACORDO NÃO REALIZADO",83:"COBRANÇA - SEGUNDA TENTATIVA",84:"CANCELAMENTO DE CONTRATO POR INADIMPLENCIA",85:"CLIENTE RETIDO",86:"CLIENTE NÃO RETIDO",87:"DEVOLUÇÃO DE EQUIPAMENTO NA LOJA",89:"RETIRAR FIBRA",100:"ACORDO COM O TECNICO",109:"CANCELAMENTO DE CONTRATO E FINANCEIRO",112:"RECOLHER/DEVOLUÇÃO",126:"CANCELAMENTO ITTV",127:"RECOLHER EQUIPAMENTO (ITTV)",128:"DESATIVAR LOGIN E REFAZER FINANCEIRO (ITTV)",129:"AUDITORIA (ITTV)",139:"SPC",205:"SOLICITAÇÃO DE SUSPENSÃO TEMPORÁRIA",206:"REALIZAR SUSPENSÃO TEMPORÁRIA",224:"CANCELAR CONTRATO POR DESISTENCIA DE REATIVAÇÃO",246:"COBRANÇA EM ANDAMENTO"}
+OS_ASSUNTOS = {6:"RECOLHER ONU E PTO",22:"RECOLHIMENTO DE EQUIPAMENTO",23:"DEVOLUÇÃO DE EQUIPAMENTOS",28:"INSTALAR EQUIPAMENTO DE TESTE",29:"RECOLHER EQUIPAMENTO DE TESTE",31:"SOLICITAÇÃO DE CANCELAMENTO",32:"[FINANCEIRO]NEGOCIAÇÃO",33:"[COMERCIAL]DEVOLUÇÃO DE EQUIPAMENTO",37:"[COMERCIAL]RECEBER EQUIPAMENTO EM LOJA",38:"DEVOLUÇÃO DE EQUIPAMENTOS",39:"RETIRADA DE EQUIPAMENTO",40:"RETIRADA DA FIBRA NA CTO",63:"CANCELAR CONTRATO POR DESISTENCIA DE INSTALAÇÃO",73:"GERAR COBRANÇA",74:"ABRIR PROCESSO DE RECOLHIMENTO",75:"REATIVAÇÃO - NOVO CONTRATO",80:"COBRANÇA - PRIMEIRA TENTATIVA",81:"ACORDO REALIZADO",82:"ACORDO NÃO REALIZADO",83:"COBRANÇA - SEGUNDA TENTATIVA",84:"CANCELAMENTO DE CONTRATO POR INADIMPLENCIA",85:"CLIENTE RETIDO",86:"CLIENTE NÃO RETIDO",87:"DEVOLUÇÃO DE EQUIPAMENTO NA LOJA",89:"RETIRAR FIBRA",100:"ACORDO COM O TECNICO",109:"CANCELAMENTO DE CONTRATO E FINANCEIRO",112:"RECOLHER/DEVOLUÇÃO",126:"CANCELAMENTO ITTV",127:"RECOLHER EQUIPAMENTO (ITTV)",128:"DESATIVAR LOGIN E REFAZER FINANCEIRO (ITTV)",129:"AUDITORIA (ITTV)",139:"SPC",205:"SOLICITAÇÃO DE SUSPENSÃO TEMPORÁRIA",206:"REALIZAR SUSPENSÃO TEMPORÁRIA",224:"CANCELAR CONTRATO POR DESISTENCIA DE REATIVAÇÃO",190:"COBRANÇA EM ANDAMENTO"}
 
 def get_os_cliente(id_cliente: int):
     rows = query("""
@@ -963,7 +955,7 @@ def get_os_cliente(id_cliente: int):
                DATE_FORMAT(o.data_fechamento,'%%d/%%m/%%Y') AS data_fechamento,
                o.status, o.mensagem
         FROM ixcprovedor.su_oss_chamado o
-        WHERE o.id_cliente = %s AND o.id_assunto IN (6,22,23,28,29,31,32,33,37,38,39,40,63,73,74,75,80,81,82,83,84,85,86,87,89,100,109,112,126,127,128,129,139,205,206,224,246)
+        WHERE o.id_cliente = %s AND o.id_assunto IN (6,22,23,28,29,31,32,33,37,38,39,40,63,73,74,75,80,81,82,83,84,85,86,87,89,100,109,112,126,127,128,129,139,205,206,224,190)
         ORDER BY o.data_abertura DESC LIMIT 20
     """, (id_cliente,))
     result = []
@@ -1200,14 +1192,14 @@ def get_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data_f
 
     # Busca clientes que ja tem OS de retirada em andamento (nao finalizada)
     id_clientes_check = list({fat.get("id_cliente") for fat in faturas_map.values() if fat.get("id_cliente")})
-    clientes_com_os39 = set()
+    clientes_com_os190 = set()
     if id_clientes_check:
         ph3 = ",".join(["%s"]*len(id_clientes_check))
-        os39 = query(f"""
+        os190 = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto = 39 AND status != 'F' AND id_cliente IN ({ph3})
+            WHERE id_assunto = 190 AND status != 'F' AND id_cliente IN ({ph3})
         """, tuple(id_clientes_check))
-        clientes_com_os39 = {r["id_cliente"] for r in os39}
+        clientes_com_os190 = {r["id_cliente"] for r in os190}
 
     result = []
     for row in rows:
@@ -1217,7 +1209,7 @@ def get_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data_f
         # Pula interações de faturas inválidas
         if fn_id and fat and (fat.get("fatura_status") != "A" or fat.get("contrato_status") not in ("A", None)):
             continue
-        if fat and fat.get("id_cliente") in clientes_com_os39:
+        if fat and fat.get("id_cliente") in clientes_com_os190:
             continue
         atraso = int(fat.get("maior_atraso") or 0) if fat else 0
         faltam = max(0, 45 - atraso)
@@ -1255,14 +1247,14 @@ def count_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data
     fat_map = {f["id"]: f for f in faturas}
 
     id_clientes_check = list({f["id_cliente"] for f in faturas if f.get("id_cliente")})
-    clientes_com_os39 = set()
+    clientes_com_os190 = set()
     if id_clientes_check:
         ph2 = ",".join(["%s"]*len(id_clientes_check))
-        os39 = query(f"""
+        os190 = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto = 39 AND status != 'F' AND id_cliente IN ({ph2})
+            WHERE id_assunto = 190 AND status != 'F' AND id_cliente IN ({ph2})
         """, tuple(id_clientes_check))
-        clientes_com_os39 = {r["id_cliente"] for r in os39}
+        clientes_com_os190 = {r["id_cliente"] for r in os190}
 
     clientes_vistos = set()
     total = 0
@@ -1270,7 +1262,7 @@ def count_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data
         fat = fat_map.get(fn_id, {})
         if fat and (fat.get("fatura_status") != "A" or fat.get("contrato_status") not in ("A", None)):
             continue
-        if fat and fat.get("id_cliente") in clientes_com_os39:
+        if fat and fat.get("id_cliente") in clientes_com_os190:
             continue
         id_cli = fat.get("id_cliente") if fat else None
         if id_cli and id_cli in clientes_vistos:
@@ -1281,7 +1273,7 @@ def count_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data
     return total
 
 def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_promessa: str = None):
-    """Marca interação atual como resolvida, cria nova na segunda cobrança e acumula na OS 246."""
+    """Marca interação atual como resolvida, cria nova na segunda cobrança e acumula na OS 190."""
     from datetime import datetime, timezone, timedelta
     from app.core.ixc_api import IXC_API_URL, _auth
     import requests as _req
@@ -1300,149 +1292,73 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
     op = local_query_one("SELECT nome FROM cob_usuarios WHERE id=?", (orig["usuario_id"],))
     nome_op = op["nome"] if op else "Operador"
 
-    # Marca original como resolvida
-    local_execute("UPDATE cob_interacoes SET resolvido=1, acao=?, obs=?, data_promessa=? WHERE id=?",
-                  (acao, obs, data_promessa, interacao_id))
+    # Busca cliente e contrato via fn_areceber ANTES de alterar o histórico local.
+    # A filial da OS deve ser determinada pelo contrato da fatura.
+    cli = query_one("""
+        SELECT
+            id_cliente,
+            id_contrato
+        FROM ixcprovedor.fn_areceber
+        WHERE id=%s
+        LIMIT 1
+    """, (orig["fn_areceber_id"],))
 
-    # Cria nova interação na segunda cobrança
-    local_execute("""
-        INSERT INTO cob_interacoes
-        (fn_areceber_id, usuario_id, acao, obs, pago, criado_em, data_promessa, resolvido, segunda_cobranca)
-        VALUES (?,?,?,?,0,?,?,0,1)
-    """, (orig["fn_areceber_id"], orig["usuario_id"], acao, obs, agora_str, data_promessa))
-
-    # Busca id_cliente via fn_areceber
-    cli = query_one("SELECT id_cliente FROM ixcprovedor.fn_areceber WHERE id=%s", (orig["fn_areceber_id"],))
     if not cli:
-        return True
-    id_cliente = cli["id_cliente"]
-
-    # Nova mensagem de interação
-    nova_msg = f"\n{'='*35}\n2ª COBRANÇA — {agora_fmt}\nFatura: #{orig['fn_areceber_id']}\nOperador: {nome_op}\nAção: {acao}"
-    if obs:
-        nova_msg += f"\nObs: {obs}"
-    if data_promessa:
-        nova_msg += f"\nPromessa de pagamento: {data_promessa}"
-    nova_msg += f"\n{'='*35}"
-
-    # Verifica se existe OS 246 aberta
-    os_aberta = query_one("""
-        SELECT id, mensagem FROM ixcprovedor.su_oss_chamado
-        WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
-    """, (id_cliente,))
-
-    if os_aberta:
-        # Acumula mensagem na OS existente
-        msg_atual = os_aberta["mensagem"] or ""
-        nova_mensagem = msg_atual + nova_msg
-        try:
-            execute("""
-                UPDATE ixcprovedor.su_oss_chamado
-                SET mensagem=%s WHERE id=%s
-            """, (nova_mensagem, os_aberta["id"]))
-        except: pass
-    else:
-        # Abre nova OS 246
-        id_cidade_row = query_one("SELECT cidade FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
-        id_cidade = str(id_cidade_row["cidade"]) if id_cidade_row and id_cidade_row["cidade"] else ""
-        url  = f"{IXC_API_URL}/webservice/v1/su_oss_chamado"
-        data = {
-            "tipo": "C", "id_assunto": "246", "id_cliente": str(id_cliente),
-            "id_filial": "1", "setor": "13", "mensagem": nova_msg.strip(),
-            "status": "A", "prioridade": "B", "origem_cadastro": "P",
-            "origem_endereco": "C", "id_cidade": id_cidade,
-            "liberado": "1", "impresso": "N", "gera_comissao": "N",
-            "melhor_horario_agenda": "Q", "status_pesquisa_satisfacao": "0",
-        }
-        try:
-            hdrs = {"Authorization": _auth(), "ixcsoft": ""}
-            _req.post(url, data=data, headers=hdrs, timeout=10)
-        except: pass
-
-    return True
-
-
-# ── SEGUNDA COBRANÇA ─────────────────────────────────────────────────────────
-def count_segunda_cobranca(usuario_id: int = None, data_inicio: str = None, data_fim: str = None):
-    wheres = ["segunda_cobranca=1", "pago=0", "(resolvido IS NULL OR resolvido=0)"]
-    if usuario_id:
-        wheres.append(f"usuario_id={usuario_id}")
-    if data_inicio:
-        wheres.append(f"date(criado_em) >= '{data_inicio}'")
-    if data_fim:
-        wheres.append(f"date(criado_em) <= '{data_fim}'")
-    where_str = " AND ".join(wheres)
-    linhas = local_query(f"SELECT fn_areceber_id FROM cob_interacoes WHERE {where_str}")
-    fn_ids = [int(r["fn_areceber_id"]) for r in linhas if r["fn_areceber_id"]]
-    if not fn_ids:
-        return 0
-    ph = ",".join(["%s"]*len(fn_ids))
-    faturas = query(f"""
-        SELECT f.id, f.status AS fatura_status, f.id_cliente,
-               cc.status AS contrato_status
-        FROM ixcprovedor.fn_areceber f
-        LEFT JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        WHERE f.id IN ({ph})
-    """, tuple(fn_ids))
-    fat_map = {f["id"]: f for f in faturas}
-
-    id_clientes_check = list({f["id_cliente"] for f in faturas if f.get("id_cliente")})
-    clientes_com_os39 = set()
-    if id_clientes_check:
-        ph2 = ",".join(["%s"]*len(id_clientes_check))
-        os39 = query(f"""
-            SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
-            WHERE id_assunto = 39 AND status != 'F' AND id_cliente IN ({ph2})
-        """, tuple(id_clientes_check))
-        clientes_com_os39 = {r["id_cliente"] for r in os39}
-
-    total = 0
-    for fn_id in fn_ids:
-        fat = fat_map.get(fn_id, {})
-        # Mesma logica da lista: fat vazio (fatura nao encontrada) conta como valido por padrao
-        if fat and (fat.get("fatura_status") != "A" or fat.get("contrato_status") not in ("A", None)):
-            continue
-        if fat and fat.get("id_cliente") in clientes_com_os39:
-            continue
-        total += 1
-    return total
-
-def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_promessa: str = None):
-    """Marca interação atual como resolvida, cria nova na segunda cobrança e acumula na OS 246."""
-    from datetime import datetime, timezone, timedelta
-    from app.core.ixc_api import IXC_API_URL, _auth
-    import requests as _req
-
-    tz_br = timezone(timedelta(hours=-3))
-    agora = datetime.now(tz_br)
-    agora_str = agora.strftime('%Y-%m-%d %H:%M:%S')
-    agora_fmt = agora.strftime('%d/%m/%Y %H:%M')
-
-    # Busca interação original
-    orig = local_query_one("SELECT * FROM cob_interacoes WHERE id=?", (interacao_id,))
-    if not orig:
+        print(
+            f"[SEGUNDA-COBRANCA] "
+            f"Fatura #{orig['fn_areceber_id']} não encontrada. "
+            f"Operação bloqueada.",
+            flush=True
+        )
         return False
 
-    # Busca operador
-    op = local_query_one("SELECT nome FROM cob_usuarios WHERE id=?", (orig["usuario_id"],))
-    nome_op = op["nome"] if op else "Operador"
+    id_cliente = int(cli.get("id_cliente") or 0)
+    id_contrato = int(cli.get("id_contrato") or 0)
 
-    # Marca original como resolvida
-    local_execute("UPDATE cob_interacoes SET resolvido=1, acao=?, obs=?, data_promessa=? WHERE id=?",
-                  (acao, obs, data_promessa, interacao_id))
+    if not id_cliente:
+        print(
+            f"[SEGUNDA-COBRANCA] "
+            f"Fatura #{orig['fn_areceber_id']} sem cliente válido. "
+            f"Operação bloqueada.",
+            flush=True
+        )
+        return False
 
-    # Cria nova interação na segunda cobrança
+    if not id_contrato:
+        print(
+            f"[SEGUNDA-COBRANCA] "
+            f"Fatura #{orig['fn_areceber_id']} sem contrato. "
+            f"Operação bloqueada.",
+            flush=True
+        )
+        return False
+
+    try:
+        from app.core.filial_scope import resolver_filial_contrato
+        id_filial = resolver_filial_contrato(id_contrato)
+    except (ValueError, TypeError) as exc:
+        print(
+            f"[SEGUNDA-COBRANCA] "
+            f"Não foi possível resolver a filial do contrato "
+            f"#{id_contrato}: {exc}. "
+            f"Operação bloqueada.",
+            flush=True
+        )
+        return False
+
+    # Somente após validar cliente, contrato e filial:
+    # marca a interação original como resolvida.
+    local_execute(
+        "UPDATE cob_interacoes SET resolvido=1, acao=?, obs=?, data_promessa=? WHERE id=?",
+        (acao, obs, data_promessa, interacao_id)
+    )
+
+    # Cria nova interação na segunda cobrança.
     local_execute("""
         INSERT INTO cob_interacoes
         (fn_areceber_id, usuario_id, acao, obs, pago, criado_em, data_promessa, resolvido, segunda_cobranca)
         VALUES (?,?,?,?,0,?,?,0,1)
     """, (orig["fn_areceber_id"], orig["usuario_id"], acao, obs, agora_str, data_promessa))
-
-    # Busca id_cliente via fn_areceber
-    cli = query_one("SELECT id_cliente FROM ixcprovedor.fn_areceber WHERE id=%s", (orig["fn_areceber_id"],))
-    if not cli:
-        return True
-    id_cliente = cli["id_cliente"]
 
     # Nova mensagem de interação
     nova_msg = f"\n{'='*35}\n2ª COBRANÇA — {agora_fmt}\nFatura: #{orig['fn_areceber_id']}\nOperador: {nome_op}\nAção: {acao}"
@@ -1452,7 +1368,7 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
         nova_msg += f"\nPromessa de pagamento: {data_promessa}"
     nova_msg += f"\n{'='*35}"
 
-    # Verifica se existe OS 246 aberta
+    # Verifica se existe OS 190 aberta
     os_aberta = query_one("""
         SELECT id, mensagem FROM ixcprovedor.su_oss_chamado
         WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1
@@ -1469,13 +1385,13 @@ def mover_para_segunda_cobranca(interacao_id: int, acao: str, obs: str, data_pro
             """, (nova_mensagem, os_aberta["id"]))
         except: pass
     else:
-        # Abre nova OS 246
+        # Abre nova OS 190
         id_cidade_row = query_one("SELECT cidade FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
         id_cidade = str(id_cidade_row["cidade"]) if id_cidade_row and id_cidade_row["cidade"] else ""
         url  = f"{IXC_API_URL}/webservice/v1/su_oss_chamado"
         data = {
-            "tipo": "C", "id_assunto": "246", "id_cliente": str(id_cliente),
-            "id_filial": "1", "setor": "13", "mensagem": nova_msg.strip(),
+            "tipo": "C", "id_assunto": "190", "id_cliente": str(id_cliente),
+            "id_filial": str(id_filial), "setor": "13", "mensagem": nova_msg.strip(),
             "status": "A", "prioridade": "B", "origem_cadastro": "P",
             "origem_endereco": "C", "id_cidade": id_cidade,
             "liberado": "1", "impresso": "N", "gera_comissao": "N",

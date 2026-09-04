@@ -141,15 +141,6 @@ async def api_interacao(request: Request, usuario=Depends(get_usuario)):
             if acao_i not in ["Pagamento realizado","Pago","💰 Pagamento realizado"]: _tg_acao(usuario["nome"], acao_i, cli_i["razao"], fd.get("obs",""), pagina_i)
     return {"ok": True}
 
-@router.post("/api/abrir-os")
-async def api_abrir_os(request: Request, usuario=Depends(get_usuario)):
-    fd = await request.form()
-    id_cliente = int(fd.get("id_cliente", 0))
-    if sv.check_os_aberta(id_cliente):
-        return {"ok": False, "msg": "OS já aberta"}
-    res = ixc_abrir_os(id_cliente)
-    return JSONResponse(res)
-
 # ─── FILA (N1+) ──────────────────────────────────────────────────────────────
 @router.get("/fila", response_class=HTMLResponse)
 async def fila(request: Request, faixa: str = "30", busca: str = "", pagina: int = 1, ocultar_cancelados: bool = True, usuario=Depends(get_usuario)):
@@ -245,21 +236,88 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
     # Abre OS 190 (cobranca) automaticamente se nao existir
     if acao not in ["Pagamento realizado", "Pago", "💰 Pagamento realizado"]:
         from app.core.db import query_one as _qo, execute as _ex
-        _fat190 = _qo("SELECT id_cliente, data_vencimento, valor_aberto FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
+        _fat190 = _qo("""
+            SELECT
+                f.id_cliente,
+                f.id_contrato,
+                f.data_vencimento,
+                f.valor_aberto
+            FROM ixcprovedor.fn_areceber f
+            WHERE f.id=%s
+            LIMIT 1
+        """, (fn_id,))
+
         if _fat190:
-            _id_cli190 = _fat190["id_cliente"]
-            _os190 = _qo("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=190 AND status NOT IN ('F') LIMIT 1", (_id_cli190,))
-            if not _os190:
-                _cli190 = _qo("SELECT razao, filial_id FROM ixcprovedor.cliente WHERE id=%s", (_id_cli190,))
-                _razao190 = _cli190["razao"] if _cli190 else ""
-                _filial190 = int(_cli190["filial_id"] or 1) if _cli190 else 1
-                _venc190 = str(_fat190["data_vencimento"])[:10] if _fat190.get("data_vencimento") else ""
-                _valor190 = float(_fat190["valor_aberto"] or 0)
-                _msg190 = (f"OS de cobranca aberta automaticamente — {_razao190}\n"
-                           f"Boleto: #{fn_id} | Vencimento: {_venc190} | Valor: R$ {_valor190:.2f}\n"
-                           f"Acao: {acao}.")
-                _ex("INSERT INTO ixcprovedor.su_oss_chamado (id_cliente, id_assunto, mensagem, data_abertura, status, setor, id_filial) VALUES (%s, 190, %s, NOW(), 'A', 7, %s)",
-                    (_id_cli190, _msg190, _filial190))
+            _id_cli190 = int(_fat190["id_cliente"] or 0)
+            _id_contrato190 = int(_fat190["id_contrato"] or 0)
+
+            if not _id_contrato190:
+                print(
+                    f"[OS-190] Fatura #{fn_id} sem contrato vinculado. "
+                    "OS não criada.",
+                    flush=True
+                )
+            else:
+                from app.core.filial_scope import resolver_filial_contrato
+
+                try:
+                    _filial190 = resolver_filial_contrato(_id_contrato190)
+                except ValueError as exc:
+                    print(
+                        f"[OS-190] Fatura #{fn_id} / "
+                        f"Contrato #{_id_contrato190}: {exc}. "
+                        "OS não criada.",
+                        flush=True
+                    )
+                    _filial190 = None
+
+                if _filial190:
+                    _os190 = _qo("""
+                        SELECT id
+                        FROM ixcprovedor.su_oss_chamado
+                        WHERE id_cliente=%s
+                          AND id_assunto=190
+                          AND status NOT IN ('F')
+                        LIMIT 1
+                    """, (_id_cli190,))
+
+                    if not _os190:
+                        _cli190 = _qo("""
+                            SELECT razao
+                            FROM ixcprovedor.cliente
+                            WHERE id=%s
+                            LIMIT 1
+                        """, (_id_cli190,))
+
+                        _razao190 = _cli190["razao"] if _cli190 else ""
+                        _venc190 = (
+                            str(_fat190["data_vencimento"])[:10]
+                            if _fat190.get("data_vencimento")
+                            else ""
+                        )
+                        _valor190 = float(_fat190["valor_aberto"] or 0)
+
+                        _msg190 = (
+                            f"OS de cobranca aberta automaticamente — {_razao190}\n"
+                            f"Boleto: #{fn_id} | "
+                            f"Vencimento: {_venc190} | "
+                            f"Valor: R$ {_valor190:.2f}\n"
+                            f"Acao: {acao}."
+                        )
+
+                        _ex("""
+                            INSERT INTO ixcprovedor.su_oss_chamado
+                                (
+                                    id_cliente,
+                                    id_assunto,
+                                    mensagem,
+                                    data_abertura,
+                                    status,
+                                    setor,
+                                    id_filial
+                                )
+                            VALUES (%s, 190, %s, NOW(), 'A', 7, %s)
+                        """, (_id_cli190, _msg190, _filial190))
     # Ações especiais
     if acao in ["🚛 Solicitar retirada", "Solicitar retirada", "📦 Material recolhido", "Material recolhido"]:
         from app.core.db import query_one, execute
@@ -270,49 +328,250 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
             razao = cli["razao"] if cli else ""
 
             if "recolhido" in acao.lower() or "Material" in acao:
-                # Material recolhido — fecha OS 246 + fecha OS 39 + abre OS 38 estoque
-                os246 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1", (id_cliente,))
-                if os246:
-                    execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os246["id"],))
-                # Verifica OS 39 finalizada recentemente
-                os39_fin = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status='F' ORDER BY data_fechamento DESC LIMIT 1", (id_cliente,))
-                # Abre OS 38 se não existir
-                os38 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=38 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
-                if not os38:
-                    execute("""
-                        INSERT INTO ixcprovedor.su_oss_chamado
-                            (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                        VALUES (%s, 38, %s, NOW(), 'A', 9)
-                    """, (id_cliente, f"Devolução ao estoque — {razao}. Material recolhido informado pelo operador de cobrança."))
+                # Material recolhido — fecha OS 190 + verifica OS 34 + abre OS 171 estoque
+                os190 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=190 AND status='A' LIMIT 1", (id_cliente,))
+                if os190:
+                    execute("UPDATE ixcprovedor.su_oss_chamado SET status='F', data_fechamento=NOW() WHERE id=%s", (os190["id"],))
+
+                # A OS 171 deve usar a filial do contrato da fatura.
+                # Nunca inferir a filial pela última OS 34 do cliente,
+                # pois um cliente pode possuir contratos em filiais diferentes.
+                _fat_171 = query_one("""
+                    SELECT id, id_cliente, id_contrato
+                    FROM ixcprovedor.fn_areceber
+                    WHERE id=%s
+                    LIMIT 1
+                """, (fn_id,))
+
+                _id_contrato_171 = (
+                    int(_fat_171["id_contrato"] or 0)
+                    if _fat_171 else 0
+                )
+
+                _filial_171 = None
+
+                if not _id_contrato_171:
+                    print(
+                        f"[OS171] Fatura #{fn_id} sem contrato vinculado. "
+                        "OS171 não criada.",
+                        flush=True
+                    )
+                else:
+                    from app.core.filial_scope import resolver_filial_contrato
+
+                    try:
+                        _filial_171 = resolver_filial_contrato(
+                            _id_contrato_171
+                        )
+                    except ValueError as exc:
+                        print(
+                            f"[OS171] Fatura #{fn_id} / "
+                            f"Contrato #{_id_contrato_171}: {exc}. "
+                            "OS171 não criada.",
+                            flush=True
+                        )
+                        _filial_171 = None
+
+                # Abre OS 171 se não existir e se a OS 34 possuir filial válida.
+                os171 = query_one("""
+                    SELECT id
+                    FROM ixcprovedor.su_oss_chamado
+                    WHERE id_cliente=%s
+                      AND id_assunto=171
+                      AND status NOT IN ('F')
+                    LIMIT 1
+                """, (id_cliente,))
+
+                if not os171:
+                    id_filial_171 = int(_filial_171 or 0)
+
+                    if id_filial_171 <= 0:
+                        print(
+                            f"[OS171] Cliente #{id_cliente} sem filial de contrato "
+                            "válida. OS171 não criada."
+                        )
+                    else:
+                        execute("""
+                            INSERT INTO ixcprovedor.su_oss_chamado
+                                (
+                                    id_cliente,
+                                    id_assunto,
+                                    mensagem,
+                                    data_abertura,
+                                    status,
+                                    setor,
+                                    id_filial
+                                )
+                            VALUES (%s, 171, %s, NOW(), 'A', 9, %s)
+                        """, (
+                            id_cliente,
+                            f"Devolução ao estoque — {razao}. Material recolhido informado pelo operador de cobrança.",
+                            id_filial_171,
+                        ))
             else:
-                # Solicitar retirada — abre OS 34 se não existir
-                os34 = query_one("SELECT id FROM ixcprovedor.su_oss_chamado WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1", (id_cliente,))
+                # Solicitar retirada — abre OS 34 se não existir.
+                # A filial da OS vem do contrato da fatura.
+                os34 = query_one("""
+                    SELECT id
+                    FROM ixcprovedor.su_oss_chamado
+                    WHERE id_cliente=%s
+                      AND id_assunto=34
+                      AND status NOT IN ('F')
+                    LIMIT 1
+                """, (id_cliente,))
+
                 if not os34:
                     obs_text = fd.get("obs", "")
-                    _cli_ret = query_one("SELECT filial_id FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
-                    _filial_ret = int(_cli_ret["filial_id"] or 1) if _cli_ret else 1
-                    _fat_ret = query_one("SELECT id, data_vencimento, valor_aberto FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
-                    _venc_ret = str(_fat_ret["data_vencimento"])[:10] if _fat_ret and _fat_ret.get("data_vencimento") else ""
-                    _valor_ret = float(_fat_ret["valor_aberto"] or 0) if _fat_ret else 0
-                    _msg_ret = (f"Retirada solicitada pelo operador — {razao}\n"
-                                f"Boleto: #{fn_id} | Vencimento: {_venc_ret} | Valor: R$ {_valor_ret:.2f}\n"
-                                f"{obs_text}")
-                    execute("""
-                        INSERT INTO ixcprovedor.su_oss_chamado
-                            (id_cliente, id_assunto, mensagem, data_abertura, status, setor, id_filial)
-                        VALUES (%s, 34, %s, NOW(), 'A', 27, %s)
-                    """, (id_cliente, _msg_ret, _filial_ret))
+
+                    _fat_ret = query_one("""
+                        SELECT
+                            id,
+                            id_cliente,
+                            id_contrato,
+                            data_vencimento,
+                            valor_aberto
+                        FROM ixcprovedor.fn_areceber
+                        WHERE id=%s
+                        LIMIT 1
+                    """, (fn_id,))
+
+                    _id_contrato_ret = (
+                        int(_fat_ret["id_contrato"] or 0)
+                        if _fat_ret else 0
+                    )
+
+                    if not _id_contrato_ret:
+                        print(
+                            f"[OS-34] Fatura #{fn_id} sem contrato vinculado. "
+                            "OS não criada.",
+                            flush=True
+                        )
+                    else:
+                        from app.core.filial_scope import resolver_filial_contrato
+
+                        try:
+                            _filial_ret = resolver_filial_contrato(
+                                _id_contrato_ret
+                            )
+                        except ValueError as exc:
+                            print(
+                                f"[OS-34] Fatura #{fn_id} / "
+                                f"Contrato #{_id_contrato_ret}: {exc}. "
+                                "OS não criada.",
+                                flush=True
+                            )
+                            _filial_ret = None
+
+                        if _filial_ret:
+                            _venc_ret = (
+                                str(_fat_ret["data_vencimento"])[:10]
+                                if _fat_ret
+                                and _fat_ret.get("data_vencimento")
+                                else ""
+                            )
+                            _valor_ret = (
+                                float(_fat_ret["valor_aberto"] or 0)
+                                if _fat_ret else 0
+                            )
+
+                            _msg_ret = (
+                                f"Retirada solicitada pelo operador — {razao}\n"
+                                f"Boleto: #{fn_id} | "
+                                f"Vencimento: {_venc_ret} | "
+                                f"Valor: R$ {_valor_ret:.2f}\n"
+                                f"{obs_text}"
+                            )
+
+                            execute("""
+                                INSERT INTO ixcprovedor.su_oss_chamado
+                                    (
+                                        id_cliente,
+                                        id_assunto,
+                                        mensagem,
+                                        data_abertura,
+                                        status,
+                                        setor,
+                                        id_filial
+                                    )
+                                VALUES (%s, 34, %s, NOW(), 'A', 27, %s)
+                            """, (
+                                id_cliente,
+                                _msg_ret,
+                                _filial_ret
+                            ))
 
     return {"ok": True}
 
 @router.post("/api/abrir-os-retirada")
 async def api_os_retirada(request: Request, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 1)
+
     fd = await request.form()
-    id_cliente = int(fd.get("id_cliente", 0))
+
+    id_cliente = int(fd.get("id_cliente", 0) or 0)
+    fn_areceber_id = int(fd.get("fn_areceber_id", 0) or 0)
+    mensagem = fd.get("mensagem", "")
+
+    if not id_cliente:
+        return JSONResponse({
+            "ok": False,
+            "msg": "id_cliente obrigatório"
+        })
+
+    if not fn_areceber_id:
+        return JSONResponse({
+            "ok": False,
+            "msg": "fn_areceber_id obrigatório"
+        })
+
     if sv.check_os_aberta(id_cliente):
-        return {"ok": False, "msg": "OS já aberta"}
-    res = ixc_abrir_os(id_cliente)
+        return JSONResponse({
+            "ok": False,
+            "msg": "OS já aberta"
+        })
+
+    fatura = query_one("""
+        SELECT
+            id,
+            id_cliente,
+            id_contrato
+        FROM ixcprovedor.fn_areceber
+        WHERE id = %s
+        LIMIT 1
+    """, (fn_areceber_id,))
+
+    if not fatura:
+        return JSONResponse({
+            "ok": False,
+            "msg": f"Fatura #{fn_areceber_id} não encontrada."
+        })
+
+    if int(fatura.get("id_cliente") or 0) != id_cliente:
+        return JSONResponse({
+            "ok": False,
+            "msg": (
+                f"Fatura #{fn_areceber_id} "
+                f"não pertence ao cliente #{id_cliente}."
+            )
+        })
+
+    id_contrato = int(fatura.get("id_contrato") or 0)
+
+    if not id_contrato:
+        return JSONResponse({
+            "ok": False,
+            "msg": (
+                f"Fatura #{fn_areceber_id} não possui "
+                "contrato vinculado. A OS não pode ser criada."
+            )
+        })
+
+    res = ixc_abrir_os(
+        id_cliente=id_cliente,
+        id_contrato=id_contrato,
+        mensagem=mensagem,
+    )
+
     return JSONResponse(res)
 
 # ─── ANDAMENTO (N1+) ─────────────────────────────────────────────────────────
@@ -578,36 +837,93 @@ async def api_clientes_cidade(id_cidade: int, request: Request, usuario=Depends(
 
 
 @router.post("/api/abrir-os-cobranca")
-async def api_abrir_os_cobranca(request: Request, usuario=Depends(get_usuario)):
+async def api_abrir_os_cobranca(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
     checar_nivel(usuario, 1)
-    form = await request.form()
-    id_cliente = int(form.get("id_cliente", 0))
-    acao       = form.get("acao", "")
-    obs        = form.get("obs", "")
-    fn_areceber_id = int(form.get("fn_areceber_id", 0) or 0)
-    print(f"[OS-COB] id_cliente={id_cliente} acao={acao} fn_areceber_id={fn_areceber_id}", flush=True)
-    if not id_cliente:
-        return JSONResponse({"ok": False, "msg": "id_cliente obrigatório"})
-    id_login  = sv.get_ixc_login(usuario["id"])
-    id_cidade = sv.get_id_cidade_cliente(id_cliente)
-    resultado = abrir_os_cobranca(id_cliente, acao, obs, id_login=id_login, id_cidade=id_cidade, fn_areceber_id=fn_areceber_id)
-    return JSONResponse(resultado)
 
-
-@router.post("/api/abrir-os-cobranca")
-async def api_abrir_os_cobranca(request: Request, usuario=Depends(get_usuario)):
-    checar_nivel(usuario, 1)
     form = await request.form()
-    id_cliente = int(form.get("id_cliente", 0))
-    acao       = form.get("acao", "")
-    obs        = form.get("obs", "")
-    fn_areceber_id = int(form.get("fn_areceber_id", 0) or 0)
-    print(f"[OS-COB] id_cliente={id_cliente} acao={acao} fn_areceber_id={fn_areceber_id}", flush=True)
+
+    id_cliente = int(form.get("id_cliente", 0) or 0)
+    acao = form.get("acao", "")
+    obs = form.get("obs", "")
+    fn_areceber_id = int(
+        form.get("fn_areceber_id", 0) or 0
+    )
+
+    print(
+        f"[OS-COB] "
+        f"id_cliente={id_cliente} "
+        f"acao={acao} "
+        f"fn_areceber_id={fn_areceber_id}",
+        flush=True
+    )
+
     if not id_cliente:
-        return JSONResponse({"ok": False, "msg": "id_cliente obrigatório"})
-    id_login  = sv.get_ixc_login(usuario["id"])
+        return JSONResponse({
+            "ok": False,
+            "msg": "id_cliente obrigatório"
+        })
+
+    if not fn_areceber_id:
+        return JSONResponse({
+            "ok": False,
+            "msg": "fn_areceber_id obrigatório"
+        })
+
+    fatura = query_one("""
+        SELECT
+            id,
+            id_cliente,
+            id_contrato
+        FROM ixcprovedor.fn_areceber
+        WHERE id = %s
+        LIMIT 1
+    """, (fn_areceber_id,))
+
+    if not fatura:
+        return JSONResponse({
+            "ok": False,
+            "msg": f"Fatura #{fn_areceber_id} não encontrada."
+        })
+
+    id_contrato = int(
+        fatura.get("id_contrato") or 0
+    )
+
+    if not id_contrato:
+        return JSONResponse({
+            "ok": False,
+            "msg": (
+                f"Fatura #{fn_areceber_id} "
+                "não possui contrato vinculado. "
+                "A OS não pode ser criada."
+            )
+        })
+
+    if int(fatura.get("id_cliente") or 0) != id_cliente:
+        return JSONResponse({
+            "ok": False,
+            "msg": (
+                f"Fatura #{fn_areceber_id} "
+                f"não pertence ao cliente #{id_cliente}."
+            )
+        })
+
+    id_login = sv.get_ixc_login(usuario["id"])
     id_cidade = sv.get_id_cidade_cliente(id_cliente)
-    resultado = abrir_os_cobranca(id_cliente, acao, obs, id_login=id_login, id_cidade=id_cidade, fn_areceber_id=fn_areceber_id)
+
+    resultado = abrir_os_cobranca(
+        id_cliente=id_cliente,
+        id_contrato=id_contrato,
+        acao=acao,
+        obs=obs,
+        id_login=id_login,
+        id_cidade=id_cidade,
+        fn_areceber_id=fn_areceber_id,
+    )
+
     return JSONResponse(resultado)
 
 
@@ -684,8 +1000,8 @@ async def nunca_pagaram(request: Request, pagina: int = 1, usuario=Depends(get_u
     rows  = get_nunca_pagaram(pagina=pagina, por_pagina=por_pagina)
     total = count_nunca_pagaram()
     kpis  = get_kpis_nunca_pagaram()
-    # Conta quantos já têm OS 39
-    com_os39 = query_one("""
+    # Conta quantos já têm OS 34
+    com_os34 = query_one("""
         SELECT COUNT(DISTINCT cc.id_cliente) AS total
         FROM ixcprovedor.cliente_contrato cc
         INNER JOIN ixcprovedor.fn_areceber f ON f.id_cliente=cc.id_cliente
@@ -702,7 +1018,7 @@ async def nunca_pagaram(request: Request, pagina: int = 1, usuario=Depends(get_u
     return templates.TemplateResponse("dashboards/nunca_pagaram.html", {
         "request": request, "usuario": usuario,
         "rows": rows, "total": total, "kpis": kpis,
-        "com_os39": com_os39["total"] if com_os39 else 0,
+        "com_os34": com_os34["total"] if com_os34 else 0,
         "pagina": pagina, "paginas": math.ceil(total / por_pagina),
     })
 
@@ -710,7 +1026,7 @@ async def nunca_pagaram(request: Request, pagina: int = 1, usuario=Depends(get_u
 @router.post("/api/registrar-cobranca-np")
 async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
     """Registra interação para clientes que nunca pagaram — vai direto para 2ª cobrança.
-    Se ação negativa e sem interações anteriores → abre OS 39 automaticamente."""
+    Se ação negativa e sem interações anteriores → abre OS 34 automaticamente."""
     checar_nivel(usuario, 1)
     fd = await request.form()
     fn_id  = int(fd.get("fn_areceber_id", 0))
@@ -738,7 +1054,7 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
         if cli_np:
             if acao not in ["Pagamento realizado","Pago","💰 Pagamento realizado"]: _tg_acao(usuario["nome"], acao, cli_np["razao"], obs, "Nunca Pagaram")
 
-    abriu_os39 = False
+    abriu_os34 = False
     # Se ação negativa — verifica se já tinha interações anteriores
     if acao in ACOES_NEGATIVAS:
         from app.core.db_local import local_query_one
@@ -748,26 +1064,72 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
             WHERE fn_areceber_id=? AND id != (SELECT MAX(id) FROM cob_interacoes WHERE fn_areceber_id=?)
         """, (fn_id, fn_id))
 
-        # Se não tinha interação anterior — abre OS 39
+        # Se não tinha interação anterior — abre OS 34
         if inter_anterior and inter_anterior["total"] == 0:
-            fat = query_one("SELECT id_cliente FROM ixcprovedor.fn_areceber WHERE id=%s", (fn_id,))
-            if fat:
-                id_cliente = fat["id_cliente"]
-                os_existe = query_one("""
-                    SELECT id FROM ixcprovedor.su_oss_chamado
-                    WHERE id_cliente=%s AND id_assunto=34 AND status NOT IN ('F') LIMIT 1
-                """, (id_cliente,))
-                if not os_existe:
-                    cli = query_one("SELECT razao FROM ixcprovedor.cliente WHERE id=%s", (id_cliente,))
-                    razao = cli["razao"] if cli else ""
-                    execute("""
-                        INSERT INTO ixcprovedor.su_oss_chamado
-                            (id_cliente, id_assunto, mensagem, data_abertura, status, setor)
-                        VALUES (%s, 34, %s, NOW(), 'A', 27)
-                    """, (id_cliente, f"RETIRADA — {razao} nunca pagou. Ação: {acao}. {obs}"))
-                    abriu_os39 = True
+            from app.core.filial_scope import resolver_filial_contrato
 
-    return {"ok": True, "abriu_os39": abriu_os39}
+            fat = query_one("""
+                SELECT id_cliente, id_contrato
+                FROM ixcprovedor.fn_areceber
+                WHERE id=%s
+                LIMIT 1
+            """, (fn_id,))
+
+            if fat:
+                id_cliente = int(fat.get("id_cliente") or 0)
+                id_contrato = int(fat.get("id_contrato") or 0)
+
+                if not id_cliente:
+                    print(f"[OS34] Fatura #{fn_id} sem cliente válido. OS não criada.")
+                elif not id_contrato:
+                    print(f"[OS34] Fatura #{fn_id} sem contrato vinculado. OS não criada.")
+                else:
+                    try:
+                        id_filial = resolver_filial_contrato(id_contrato)
+                    except Exception as e:
+                        print(
+                            f"[OS34] Fatura #{fn_id} / contrato #{id_contrato} "
+                            f"sem filial válida. OS não criada: {e}"
+                        )
+                    else:
+                        os_existe = query_one("""
+                            SELECT id
+                            FROM ixcprovedor.su_oss_chamado
+                            WHERE id_cliente=%s
+                              AND id_assunto=34
+                              AND status NOT IN ('F')
+                            LIMIT 1
+                        """, (id_cliente,))
+
+                        if not os_existe:
+                            cli = query_one("""
+                                SELECT razao
+                                FROM ixcprovedor.cliente
+                                WHERE id=%s
+                            """, (id_cliente,))
+                            razao = cli["razao"] if cli else ""
+
+                            execute("""
+                                INSERT INTO ixcprovedor.su_oss_chamado
+                                    (
+                                        id_cliente,
+                                        id_assunto,
+                                        mensagem,
+                                        data_abertura,
+                                        status,
+                                        setor,
+                                        id_filial
+                                    )
+                                VALUES (%s, 34, %s, NOW(), 'A', 27, %s)
+                            """, (
+                                id_cliente,
+                                f"RETIRADA — {razao} nunca pagou. Ação: {acao}. {obs}",
+                                id_filial,
+                            ))
+
+                            abriu_os34 = True
+
+    return {"ok": True, "abriu_os34": abriu_os34}
 
 
 @router.get("/reprovados-serasa", response_class=HTMLResponse)

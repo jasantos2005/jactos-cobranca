@@ -4,7 +4,7 @@ Regras:
 - Fatura paga ou cancelada → resolvido=1
 - Contrato inativo/cancelado → resolvido=1
 - OS de retirada aberta → resolvido=1
-- OS 246 aberta → segunda_cobranca=1 (move para 2ª cobrança)
+- OS 190 aberta → segunda_cobranca=1 (move para 2ª cobrança)
 """
 import sys, os
 sys.path.insert(0, '/opt/automacoes/jactos/cobranca')
@@ -44,7 +44,7 @@ def limpar():
     # Clientes para verificar OS
     id_clientes = list({f["id_cliente"] for f in faturas if f.get("id_cliente")})
     clientes_com_retirada = set()
-    clientes_com_os246 = set()
+    clientes_com_os190 = set()
     if id_clientes:
         ph2 = ",".join(["%s"]*len(id_clientes))
         ret = query(f"""
@@ -54,12 +54,12 @@ def limpar():
         """, tuple(id_clientes))
         clientes_com_retirada = {r["id_cliente"] for r in ret}
 
-        os246 = query(f"""
+        os190 = query(f"""
             SELECT DISTINCT id_cliente FROM ixcprovedor.su_oss_chamado
             WHERE id_assunto=190 AND status='A'
             AND id_cliente IN ({ph2})
         """, tuple(id_clientes))
-        clientes_com_os246 = {r["id_cliente"] for r in os246}
+        clientes_com_os190 = {r["id_cliente"] for r in os190}
 
     resolvidos = 0
     movidos = 0
@@ -87,7 +87,7 @@ def limpar():
             continue
 
         # NOTA: removida a promoção automática para 2ª cobrança baseada em
-        # "cliente tem OS 246 aberta". Essa checagem promovia a própria
+        # "cliente tem OS 190 aberta". Essa checagem promovia a própria
         # interação recém-criada (vinda da Fila) para 2ª cobrança, pulando
         # a Primeira Cobrança. A transição agora só acontece de forma
         # explícita, quando o operador registra a 2ª interação em
