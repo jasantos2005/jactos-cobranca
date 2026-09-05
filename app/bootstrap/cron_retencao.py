@@ -28,17 +28,18 @@ def main():
     linhas = [
         "🛡️ <b>RELATÓRIO DE RETENÇÃO</b>",
         f"📅 {now_br().strftime('%d/%m/%Y')} | {kpis['total']} clientes monitorados",
-        f"🔴 Críticos: {kpis['criticos']} | 🟡 Atenção: {kpis['atencao']} | 📱 Com OPA: {kpis['com_opa']}",
+        f"🔴 Críticos: {kpis['criticos']} | 🟡 Atenção: {kpis['atencao']}",
         f"💸 Valor em risco: R$ {kpis['valor']:.2f}",
         "",
         "<b>🔝 Top clientes em risco:</b>",
     ]
     for r in rows[:10]:
         nivel = "🔴" if r["nivel"]=="critico" else "🟡"
-        opa_info = ""
-        if r["opa_fin"] > 0: opa_info += f" 💰{r['opa_fin']}x"
-        if r["opa_sup"] > 0: opa_info += f" 🔧{r['opa_sup']}x"
-        linhas.append(f"  {nivel} <b>{r['razao']}</b> — score {r['score']} | {r['dias_atraso']}d atraso | {r['total_pagas']} parcelas{opa_info}")
+        linhas.append(
+            f"  {nivel} <b>{r['razao']}</b> — "
+            f"score {r['score']} | {r['dias_atraso']}d atraso | "
+            f"{r['total_pagas']} parcelas"
+        )
 
     linhas.append(f"\n<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>")
     telegram("\n".join(linhas))

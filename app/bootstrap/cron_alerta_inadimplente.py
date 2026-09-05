@@ -6,14 +6,13 @@ from datetime import datetime, timezone, timedelta
 TZ_BR = timezone(timedelta(hours=-3))
 def now_br(): return datetime.now(TZ_BR)
 def log(msg): print(f"[{now_br().strftime('%d/%m/%Y %H:%M:%S')}] {msg}", flush=True)
-import sqlite3, requests
+import requests
 from app.core.db import query
 from app.core.db_local import local_query, local_execute
 from app.core.telegram import TELEGRAM_CHAT, telegram_url
 
 
 
-COMERCIAL_DB   = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
 
 def telegram(msg):
     try:
@@ -21,15 +20,6 @@ def telegram(msg):
             data={"chat_id": TELEGRAM_CHAT, "text": msg, "parse_mode": "HTML"}, timeout=10)
     except Exception as e:
         log(f"[TELEGRAM ERRO] {e}")
-
-def get_comercial(sql, params=()):
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute(sql, params)
-    rows = [dict(r) for r in cur.fetchall()]
-    conn.close()
-    return rows
 
 def main():
     log("=== ALERTA INADIMPLENTE ===")
@@ -65,12 +55,8 @@ def main():
     log(f"Novos inadimplentes recentes: {len(novos)}")
     if not novos:
         return
-    ids_clientes = tuple(r["id_cliente"] for r in novos)
-    ph = ",".join("?" * len(ids_clientes))
-    vendedores_map = {}
-    rows_com = get_comercial(f"SELECT ixc_cliente_id, vendedor_nome FROM hc_contratos_cache WHERE ixc_cliente_id IN ({ph})", ids_clientes)
-    for r in rows_com:
-        vendedores_map[r["ixc_cliente_id"]] = r["vendedor_nome"]
+    # Dados comerciais do ClickDF removidos.
+    # O alerta utiliza exclusivamente dados do IXC.
     # Registra todos como alertados
     for r in novos:
         local_execute("INSERT INTO cob_alertas_inadimplente (cliente_id, alertado_em) VALUES (?,?)",
@@ -83,23 +69,19 @@ def main():
         f"📅 {now_br().strftime('%d/%m/%Y %H:%M')} | {len(novos)} clientes | R$ {total_valor:.2f} em risco",
         "",
     ]
-    # Agrupa por vendedor
-    por_vendedor = {}
-    for r in novos:
-        v = vendedores_map.get(r["id_cliente"], "— IXC direto")
-        if v not in por_vendedor:
-            por_vendedor[v] = []
-        por_vendedor[v].append(r)
+    # Dados comerciais/vendedor do ClickDF removidos.
+    # O alerta apresenta os novos inadimplentes diretamente do IXC.
+    for c in novos[:20]:
+        parcela = c["menor_parcela"] or "?"
+        header.append(
+            f"  • {c['razao']} | {parcela}ª parcela | "
+            f"{c['dias_ativado']}d ativado | {c['maior_atraso']}d atraso"
+        )
 
-    for v, clientes in sorted(por_vendedor.items(), key=lambda x: -len(x[1])):
-        total_v = sum(float(c["total_aberto"]) for c in clientes)
-        header.append(f"👤 <b>{v}</b> — {len(clientes)} cliente(s) | R$ {total_v:.2f}")
-        for c in clientes[:5]:
-            parcela = c["menor_parcela"] or "?"
-            header.append(f"  • {c['razao']} | {parcela}ª parcela | {c['dias_ativado']}d ativado | {c['maior_atraso']}d atraso")
-        if len(clientes) > 5:
-            header.append(f"  ... e mais {len(clientes)-5} clientes")
-        header.append("")
+    if len(novos) > 20:
+        header.append(f"  ... e mais {len(novos)-20} clientes")
+
+    header.append("")
 
     header.append(f"<i>IaTechHub · {now_br().strftime('%d/%m/%Y %H:%M')}</i>")
 

@@ -1,9 +1,5 @@
 from app.core.db import query
 from app.core.db_local import local_query, local_query_one
-import sqlite3
-
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
-
 def get_nunca_pagaram(pagina=1, por_pagina=30):
     off = (pagina-1) * por_pagina
 
@@ -67,15 +63,8 @@ def get_nunca_pagaram(pagina=1, por_pagina=30):
     if not rows:
         return []
 
-    # Busca vendedor no comercial
-    ids = tuple(r["id_cliente"] for r in rows)
-    ph  = ",".join("?" * len(ids))
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur  = conn.cursor()
-    cur.execute(f"SELECT ixc_cliente_id, vendedor_nome, cidade_nome FROM hc_contratos_cache WHERE ixc_cliente_id IN ({ph})", ids)
-    comercial = {r["ixc_cliente_id"]: dict(r) for r in cur.fetchall()}
-    conn.close()
+    # Dados comerciais do ClickDF removidos.
+    comercial = {}
 
     # Busca ultima interacao
     fn_ids = []
@@ -101,8 +90,8 @@ def get_nunca_pagaram(pagina=1, por_pagina=30):
         fat = next((f[1] for f in fn_ids if f[0] == r["id_cliente"]), None)
         result.append({
             **r,
-            "vendedor":    com.get("vendedor_nome", "— IXC direto"),
-            "cidade":      com.get("cidade_nome", "—"),
+            "vendedor":    "—",
+            "cidade":      "—",
             "fn_id":       fat,
             "ultima_inter": interacoes_map.get(r["id_cliente"]),
         })

@@ -125,23 +125,64 @@ def get_top10_devedores(filial_id: int = 0):
         ORDER BY total_aberto DESC LIMIT 10
     """, ())
 
-def get_inadimplencia_por_cidade(filial_id: int = 0):
-    """Inadimplência agrupada por cidade."""
+
+def get_inadimplencia_por_bairro(filial_id: int = 0):
+    """Inadimplência agrupada pelo bairro cadastrado no IXC.
+
+    O bairro do cadastro do cliente é a referência geográfica
+    utilizada pelo indicador. Não utiliza CEP nem cidade.
+    """
     filtro = f"AND f.filial_id={filial_id}" if filial_id else ""
+
     return query(f"""
-        SELECT cid.nome AS cidade, cid.id AS id_cidade,
-               COUNT(DISTINCT c.id) AS qtd_clientes,
-               SUM(f.valor_aberto) AS total_aberto
+        SELECT
+            TRIM(c.bairro) AS bairro,
+
+            COUNT(DISTINCT c.id) AS total,
+
+            COUNT(DISTINCT CASE
+                WHEN f.status = 'A'
+                 AND f.data_vencimento < CURDATE()
+                 AND f.liberado = 'S'
+                THEN c.id
+            END) AS inad,
+
+            ROUND(
+                COUNT(DISTINCT CASE
+                    WHEN f.status = 'A'
+                     AND f.data_vencimento < CURDATE()
+                     AND f.liberado = 'S'
+                    THEN c.id
+                END)
+                * 100.0
+                / NULLIF(COUNT(DISTINCT c.id), 0),
+                2
+            ) AS taxa,
+
+            COUNT(DISTINCT f.id) AS titulos,
+
+            COALESCE(SUM(f.valor_aberto), 0) AS valor
+
         FROM ixcprovedor.fn_areceber f
-        INNER JOIN ixcprovedor.cliente c ON c.id = f.id_cliente
-        LEFT  JOIN ixcprovedor.cliente_contrato cc ON cc.id = f.id_contrato
-        LEFT  JOIN ixcprovedor.cidade cid ON cid.id = c.cidade
-        WHERE f.status = 'A' AND f.data_vencimento < CURDATE() AND f.liberado = 'S'
-          AND c.ativo = 'S' AND (cc.status IS NULL OR cc.status = 'A')
-          AND cid.nome IS NOT NULL
-          {filtro}
-        GROUP BY cid.id, cid.nome
-        ORDER BY total_aberto DESC LIMIT 15
+
+        INNER JOIN ixcprovedor.cliente c
+            ON c.id = f.id_cliente
+
+        LEFT JOIN ixcprovedor.cliente_contrato cc
+            ON cc.id = f.id_contrato
+
+        WHERE
+            f.status = 'A'
+            AND f.data_vencimento < CURDATE()
+            AND f.liberado = 'S'
+            AND c.ativo = 'S'
+            AND TRIM(COALESCE(c.bairro, '')) <> ''
+            AND (cc.status IS NULL OR cc.status = 'A')
+            {filtro}
+
+        GROUP BY TRIM(c.bairro)
+
+        ORDER BY taxa DESC, inad DESC, valor DESC
     """, ())
 
 def get_clientes_por_cidade(id_cidade: int):

@@ -1,0 +1,346 @@
+COMISSAO_VENDA = 20.0
+CUSTO_INSTALACAO_MEDIO = 303.58
+from app.core.db import query, query_one
+from app.core.db_local import local_query
+
+
+def get_qualidade_vendas(mes=None, vendedor=None, parcela=None):
+    """
+    Qualidade de vendas baseada exclusivamente nos dados do IXC.
+    """
+
+    filtros = [
+        "cc.data_ativacao IS NOT NULL",
+        "cc.data_ativacao != ''",
+    ]
+    params = []
+
+    if mes:
+        filtros.append(
+            "DATE_FORMAT(cc.data_ativacao, '%%Y-%%m') = %s"
+        )
+        params.append(mes)
+
+    if vendedor:
+        filtros.append("v.nome = %s")
+        params.append(vendedor)
+
+    where = " AND ".join(filtros)
+
+    contratos = query(f"""
+        SELECT
+            cc.id AS ixc_contrato_id,
+            cc.id_cliente AS ixc_cliente_id,
+            c.razao,
+            v.nome AS vendedor_nome,
+            cc.data_ativacao,
+            vd.nome AS plano_nome,
+            vd.valor_contrato AS plano_valor,
+            cc.status AS status_contrato
+        FROM ixcprovedor.cliente_contrato cc
+        INNER JOIN ixcprovedor.cliente c
+            ON c.id = cc.id_cliente
+        LEFT JOIN ixcprovedor.vendedor v
+            ON v.id = cc.id_vendedor
+        LEFT JOIN ixcprovedor.vd_contratos vd
+            ON vd.id = cc.id_vd_contrato
+        WHERE {where}
+        ORDER BY cc.data_ativacao DESC
+    """, tuple(params))
+
+    if not contratos:
+        return []
+
+    ids_clientes = tuple(
+        c["ixc_cliente_id"]
+        for c in contratos
+        if c.get("ixc_cliente_id")
+    )
+
+    cobranca_map = {}
+
+    if ids_clientes:
+        placeholders = ",".join(
+            ["%s"] * len(ids_clientes)
+        )
+
+        cobranca = query(f"""
+            SELECT
+                f.id_cliente,
+                MAX(
+                    DATEDIFF(CURDATE(), f.data_vencimento)
+                ) AS maior_atraso,
+                SUM(f.valor_aberto) AS total_aberto,
+                COUNT(f.id) AS qtd_faturas,
+                MIN(f.nparcela) AS menor_parcela,
+                (
+                    SELECT COUNT(*)
+                    FROM ixcprovedor.fn_areceber fp
+                    WHERE fp.id_cliente = f.id_cliente
+                      AND fp.status = 'R'
+                ) AS meses_pagos
+            FROM ixcprovedor.fn_areceber f
+            WHERE f.id_cliente IN ({placeholders})
+              AND f.status = 'A'
+              AND f.data_vencimento < CURDATE()
+            GROUP BY f.id_cliente
+        """, ids_clientes)
+
+        cobranca_map = {
+            str(r["id_cliente"]): r
+            for r in cobranca
+        }
+
+    resultado = []
+
+    for contrato in contratos:
+        cobranca = cobranca_map.get(
+            str(contrato["ixc_cliente_id"])
+        )
+
+        resultado.append({
+            **contrato,
+            "na_cobranca": bool(cobranca),
+            "maior_atraso": int(
+                cobranca["maior_atraso"] or 0
+            ) if cobranca else 0,
+            "total_aberto": float(
+                cobranca["total_aberto"] or 0
+            ) if cobranca else 0.0,
+            "qtd_faturas": int(
+                cobranca["qtd_faturas"] or 0
+            ) if cobranca else 0,
+            "menor_parcela": int(
+                cobranca["menor_parcela"] or 0
+            ) if cobranca else 0,
+            "meses_pagos": int(
+                cobranca["meses_pagos"] or 0
+            ) if cobranca else 0,
+        })
+
+    if parcela is not None:
+        resultado = [
+            r for r in resultado
+            if r["na_cobranca"]
+            and r["menor_parcela"] == int(parcela)
+        ]
+
+    return resultado
+
+def get_kpis_qualidade(mes=None, parcela=None):
+    rows = get_qualidade_vendas(mes=mes, parcela=parcela)
+    mes_ref = mes
+    # Total sempre sem filtro de parcela
+    total_mes = get_qualidade_vendas(mes=mes)
+    total = len(total_mes) if parcela else len(rows)
+    na_cobranca = sum(1 for r in rows if r["na_cobranca"])
+    por_vendedor = {}
+    for r in rows:
+        v = r["vendedor_nome"] or "—"
+        if v not in por_vendedor:
+            por_vendedor[v] = {"vendedor": v, "total": 0, "na_cobranca": 0, "valor_risco": 0}
+        por_vendedor[v]["total"] += 1
+        if r["na_cobranca"]:
+            por_vendedor[v]["na_cobranca"] += 1
+            por_vendedor[v]["valor_risco"] += r["total_aberto"]
+    ranking = sorted(por_vendedor.values(), key=lambda x: x["na_cobranca"], reverse=True)
+    # Calcula prejuizo total somando de todos os vendedores
+    score_ranks = get_score_vendedores(mes=mes_ref)
+    prejuizo_total = sum(v.get("prejuizo", 0) for v in score_ranks)
+    return {
+        "total": total,
+        "na_cobranca": na_cobranca,
+        "taxa": round(na_cobranca / total * 100, 1) if total else 0,
+        "ranking": ranking,
+        "prejuizo_total": round(prejuizo_total, 2),
+    }
+
+def get_meses_disponiveis():
+    rows = query("""
+        SELECT DISTINCT
+            DATE_FORMAT(
+                cc.data_ativacao,
+                '%%Y-%%m'
+            ) AS mes
+        FROM ixcprovedor.cliente_contrato cc
+        WHERE cc.data_ativacao IS NOT NULL
+          AND cc.data_ativacao != ''
+        ORDER BY mes DESC
+        LIMIT 12
+    """, ())
+
+    return [
+        r["mes"]
+        for r in rows
+        if r["mes"]
+    ]
+
+def get_ranking_planos(mes=None):
+    rows = get_qualidade_vendas(mes=mes)
+    por_plano = {}
+    for r in rows:
+        p = r["plano_nome"] or "—"
+        if p not in por_plano:
+            por_plano[p] = {"plano": p, "total": 0, "na_cobranca": 0, "valor_risco": 0.0}
+        por_plano[p]["total"] += 1
+        if r["na_cobranca"]:
+            por_plano[p]["na_cobranca"] += 1
+            por_plano[p]["valor_risco"] += r["total_aberto"]
+    ranking = sorted(por_plano.values(), key=lambda x: -x["na_cobranca"])
+    for p in ranking:
+        p["taxa"] = round(p["na_cobranca"] / p["total"] * 100) if p["total"] else 0
+    return ranking
+
+
+def get_score_vendedores(mes=None):
+    """
+    Score de qualidade 0-10 por vendedor baseado em:
+    - % inadimplência (peso 50%)
+    - % que pagou 3+ meses (peso 30%)
+    - % 1ª parcela não paga (peso 20%)
+    """
+    rows = get_qualidade_vendas(mes=mes)
+    por_vendedor = {}
+    for r in rows:
+        v = r["vendedor_nome"] or "—"
+        if v not in por_vendedor:
+            por_vendedor[v] = {"vendedor": v, "total": 0, "inadimplentes": 0,
+                               "pagou_3_meses": 0, "nao_pagou_1a": 0, "valor_risco": 0}
+        por_vendedor[v]["total"] += 1
+        if r["na_cobranca"]:
+            por_vendedor[v]["inadimplentes"] += 1
+            por_vendedor[v]["valor_risco"]   += r["total_aberto"]
+            if r["menor_parcela"] == 1:
+                por_vendedor[v]["nao_pagou_1a"] += 1
+        else:
+            if r["meses_pagos"] >= 3:
+                por_vendedor[v]["pagou_3_meses"] += 1
+
+    resultado = []
+    for v, d in por_vendedor.items():
+        if d["total"] == 0:
+            continue
+        pct_inad   = d["inadimplentes"] / d["total"]
+        pct_3m     = d["pagou_3_meses"] / d["total"]
+        pct_1a     = d["nao_pagou_1a"]  / d["total"]
+        score = 10 - (pct_inad * 5) - (pct_1a * 3) + (pct_3m * 2)
+        score = max(0, min(10, round(score, 1)))
+        # Prejuizo total = equipamentos + comissao + receita perdida
+        prejuizo = (d["inadimplentes"] * CUSTO_INSTALACAO_MEDIO) +                    (d["inadimplentes"] * COMISSAO_VENDA) +                    d["valor_risco"]
+        resultado.append({
+            **d,
+            "pct_inad":   round(pct_inad * 100),
+            "pct_3m":     round(pct_3m * 100),
+            "pct_1a":     round(pct_1a * 100),
+            "score":      score,
+            "prejuizo":   round(prejuizo, 2),
+            "custo_instalacao": round(d["inadimplentes"] * CUSTO_INSTALACAO_MEDIO, 2),
+            "custo_comissao":   round(d["inadimplentes"] * COMISSAO_VENDA, 2),
+        })
+    return sorted(resultado, key=lambda x: -x["score"])
+
+
+def get_inadimplencia_cidade():
+    """
+    Inadimplência agrupada por cidade usando somente o IXC.
+    """
+
+    rows = query("""
+        SELECT
+            c.id AS id_cliente,
+            c.cidade AS cidade_id,
+            cid.nome AS cidade_nome
+        FROM ixcprovedor.cliente c
+        LEFT JOIN ixcprovedor.cidade cid
+            ON cid.id = c.cidade
+        WHERE c.cidade IS NOT NULL
+          AND c.cidade > 0
+    """, ())
+
+    cidade_map = {}
+
+    for row in rows:
+        cliente_id = row["id_cliente"]
+
+        if cliente_id not in cidade_map:
+            cidade_map[cliente_id] = (
+                row["cidade_nome"] or "Não informado"
+            )
+
+    if not cidade_map:
+        return []
+
+    ids_clientes = tuple(cidade_map.keys())
+    placeholders = ",".join(
+        ["%s"] * len(ids_clientes)
+    )
+
+    inadimplentes = query(f"""
+        SELECT
+            f.id_cliente,
+            SUM(f.valor_aberto) AS total_aberto
+        FROM ixcprovedor.fn_areceber f
+        WHERE f.status = 'A'
+          AND f.data_vencimento < CURDATE()
+          AND f.id_cliente IN ({placeholders})
+        GROUP BY f.id_cliente
+    """, ids_clientes)
+
+    totais = {}
+    valores = {}
+
+    for row in inadimplentes:
+        cidade = cidade_map.get(
+            row["id_cliente"],
+            "Não informado"
+        )
+
+        totais[cidade] = totais.get(cidade, 0) + 1
+        valores[cidade] = (
+            valores.get(cidade, 0.0)
+            + float(row["total_aberto"] or 0)
+        )
+
+    total_clientes = {}
+
+    for cidade in cidade_map.values():
+        total_clientes[cidade] = (
+            total_clientes.get(cidade, 0) + 1
+        )
+
+    resultado = []
+
+    for cidade, quantidade_inad in totais.items():
+        total = total_clientes.get(cidade, 0)
+
+        resultado.append({
+            "cidade": cidade,
+            "inad": quantidade_inad,
+            "valor": valores.get(cidade, 0.0),
+            "total": total,
+            "taxa": round(
+                quantidade_inad / total * 100
+            ) if total else 0,
+        })
+
+    return sorted(
+        resultado,
+        key=lambda x: -x["taxa"]
+    )
+
+def get_vendedores_disponiveis():
+    rows = query("""
+        SELECT DISTINCT
+            v.nome AS vendedor_nome
+        FROM ixcprovedor.cliente_contrato cc
+        INNER JOIN ixcprovedor.vendedor v
+            ON v.id = cc.id_vendedor
+        WHERE v.nome IS NOT NULL
+          AND v.nome != ''
+        ORDER BY v.nome
+    """, ())
+
+    return [
+        r["vendedor_nome"]
+        for r in rows
+    ]

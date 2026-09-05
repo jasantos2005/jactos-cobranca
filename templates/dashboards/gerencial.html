@@ -113,12 +113,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <div class="card-sub">devoluções pendentes</div>
         <div class="card-icon">📦</div>
       </a>
-      <a href="/cobranca/retencao" class="card {% if d.opa_criticos > 5 %}alerta{% else %}aviso{% endif %}">
-        <div class="card-label">Críticos OPA</div>
-        <div class="card-value" style="color:{% if d.opa_criticos > 5 %}var(--red){% else %}var(--amber){% endif %}">{{ d.opa_criticos }}</div>
-        <div class="card-sub">clientes com 2+ chamados/30d</div>
-        <div class="card-icon">📱</div>
-      </a>
     </div>
 
     <hr class="divider"/>

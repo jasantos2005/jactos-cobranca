@@ -124,7 +124,7 @@ async def login_post(request: Request, response: Response,
     saudacao = "Bom dia" if hora < 12 else "Boa tarde" if hora < 18 else "Boa noite"
     msg_bv = f"Bem-vindo(a) de volta, {u['nome'].split()[0]}!" if ja_logou else f"{saudacao}, {u['nome'].split()[0]}! Bem-vindo(a) ao HubCobrança 👋"
     resp = RedirectResponse(f"{destino}?boas_vindas={msg_bv}", status_code=302)
-    resp.set_cookie("access_token", token, httponly=True, samesite="lax", max_age=28800)
+    resp.set_cookie("access_token", token, httponly=True, secure=True, samesite="lax", max_age=28800)
     # Limpa cookie de filial para não-admins (filial fixa do cadastro)
     if u["nivel"] < 99:
         resp.delete_cookie("filial_id")

@@ -118,7 +118,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <th>Ativação</th><th>Cancelamento</th><th>Base</th><th>Plano</th>
           <th>Saúde</th><th>Causa provável</th>
           <th>Pagas</th><th>Em dia</th><th>Atrasadas</th>
-          <th>Suporte IXC</th><th>Sem acesso</th><th>Lenta</th><th>Manutenção</th><th>OPA Suporte</th><th>OPA Financeiro</th>
           <th>Observação</th>
         </tr></thead>
         <tbody>
@@ -153,8 +152,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.sem_acesso > 0 %}var(--red){% else %}var(--muted2){% endif %}">{{ r.sem_acesso }}</td>
           <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.lenta > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.lenta }}</td>
           <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.manutencao > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.manutencao }}</td>
-          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.opa_suporte > 0 %}var(--purple){% else %}var(--muted2){% endif %}">{{ r.opa_suporte or '—' }}</td>
-          <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:{% if r.opa_financeiro > 0 %}var(--amber){% else %}var(--muted2){% endif %}">{{ r.opa_financeiro or '—' }}</td>
           <td style="font-size:10px;color:var(--muted2);max-width:150px">{{ r.obs_cancelamento or '—' }}</td>
         </tr>
         {% endfor %}

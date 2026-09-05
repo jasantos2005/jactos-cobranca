@@ -1,0 +1,553 @@
+==========================================================================================
+AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V3.4
+MODO: SOMENTE LEITURA — NENHUMA ALTERAÇÃO NO IXC
+==========================================================================================
+
+Clientes analisados: 15611
+CEPs analisados: 2007
+
+DISTRIBUIÇÃO:
+  SEGURO: 1682
+  REVISAR: 69
+  BLOQUEADO: 256
+
+PRINCIPAIS CASOS SEGUROS:
+  74465290 | 62 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [62] | JARDIM NOVA ESPERANÇA (55) | Jardim Nova Esperança (7)
+  74474101 | 62 | sugerido=JARDIM DAS HORTÊNCIAS
+      família: JARDIM DAS HORTÊNCIAS [62] | JARDIM DAS HORTÊNCIAS (32) | JARDIM DAS HORTENCIAS (22) | Jardim das Hortências (4) | JARDIM DAS HORTENSIAS (2) | JARDIM  DAS HORTENCIA (1) | JARDIM DAS HORTÊNSIAS (1)
+  74465420 | 60 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [60] | JARDIM NOVA ESPERANÇA (47) | Jardim Nova Esperança (13)
+  74465270 | 59 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [59] | JARDIM NOVA ESPERANÇA (45) | Jardim Nova Esperança (13) | JARDIM NOVA ESPERANCA (1)
+  74465190 | 57 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [57] | JARDIM NOVA ESPERANÇA (42) | Jardim Nova Esperança (14) | NOVA ESPERANÇA (1)
+  74465210 | 52 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [52] | JARDIM NOVA ESPERANÇA (43) | Jardim Nova Esperança (8) | JARDIM NOVA ESPERANCA (1)
+  74465160 | 48 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [48] | JARDIM NOVA ESPERANÇA (41) | Jardim Nova Esperança (7)
+  74465440 | 48 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [48] | JARDIM NOVA ESPERANÇA (39) | Jardim Nova Esperança (8) | JARDIM NOVA ESPERANCA (1)
+  74481705 | 48 | sugerido=MANSÕES PARAÍSO
+      família: MANSÕES PARAÍSO [48] | MANSÕES PARAÍSO (18) | MANSÕES PARAISO (11) | RESIDENCIAL MANSÕES PARAÍSO (8) | MANSOES PARAISO (5) | Residencial Mansões Paraíso (5) | MANÇOES PARAÍSO (1)
+  74465120 | 47 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [47] | JARDIM NOVA ESPERANÇA (36) | Jardim Nova Esperança (11)
+  74465050 | 46 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [46] | JARDIM NOVA ESPERANÇA (39) | Jardim Nova Esperança (6) | NOVA ESPERANÇA (1)
+  74465390 | 46 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [46] | JARDIM NOVA ESPERANÇA (37) | Jardim Nova Esperança (6) | NOVA ESPERANÇA (2) | JARDIM NOVA ESPERANCA (1)
+  74465070 | 45 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [45] | JARDIM NOVA ESPERANÇA (35) | Jardim Nova Esperança (8) | JARDIM NOVA ESPERANCA (1) | Jardim Nova esperança (1)
+  74481710 | 45 | sugerido=MANSÕES PARAISO
+      família: MANSÕES PARAISO [45] | MANSÕES PARAISO (15) | Residencial Mansões Paraíso (9) | RESIDENCIAL MANSÕES PARAÍSO (8) | MANSOES PARAISO (7) | MANSÕES PARAÍSO (6)
+  74475530 | 43 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [43] | JARDIM LIBERDADE (39) | Jardim Liberdade (3) | LIBERDADE (1)
+  74475590 | 41 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [41] | JARDIM LIBERDADE (39) | Jardim Liberdade (2)
+  74475640 | 39 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [39] | JARDIM LIBERDADE (35) | Jardim Liberdade (4)
+  74465020 | 36 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [36] | JARDIM NOVA ESPERANÇA (33) | Jardim Nova Esperança (3)
+  74475575 | 36 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [36] | JARDIM LIBERDADE (34) | Jardim Liberdade (2)
+  74480400 | 36 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [36] | NOVO PLANALTO (22) | SETOR NOVO PLANALTO (11) | Setor Novo Planalto (3)
+  74465150 | 34 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [34] | JARDIM NOVA ESPERANÇA (28) | Jardim Nova Esperança (6)
+  74465350 | 34 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [34] | JARDIM NOVA ESPERANÇA (28) | Jardim Nova Esperança (6)
+  74474014 | 34 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [34] | JARDIM COLORADO (28) | Jardim Colorado (6)
+  74480395 | 34 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [34] | NOVO PLANALTO (25) | SETOR NOVO PLANALTO (6) | Setor Novo Planalto (3)
+  74463760 | 33 | sugerido=SANTOS DUMONT
+      família: SANTOS DUMONT [33] | SANTOS DUMONT (16) | SETOR SANTOS DUMONT (14) | Setor Santos Dumont (3)
+  74465010 | 33 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [33] | JARDIM NOVA ESPERANÇA (27) | Jardim Nova Esperança (5) | JARDIM NOVA ESPERANÇAA (1)
+  74474102 | 33 | sugerido=JARDIM DAS HORTENCIAS
+      família: JARDIM DAS HORTENCIAS [33] | JARDIM DAS HORTENCIAS (18) | JARDIM DAS HORTÊNCIAS (12) | Jardim das Hortências (3)
+  74473835 | 32 | sugerido=RESIDENCIAL MARINGÁ
+      família: RESIDENCIAL MARINGÁ [32] | RESIDENCIAL MARINGÁ (23) | RESIDENCIAL MARINGA (5) | Residencial Maringá (4)
+  74481700 | 32 | sugerido=MANSÕES PARAÍSO
+      família: MANSÕES PARAÍSO [32] | MANSÕES PARAÍSO (9) | MANSOES PARAISO (7) | Residencial Mansões Paraíso (6) | RESIDENCIAL MANSÕES PARAÍSO (6) | MANSÕES PARAISO (4)
+  74450400 | 31 | sugerido=CAPUAVA
+      família: CAPUAVA [31] | CAPUAVA (23) | BAIRRO CAPUAVA (4) | Capuava (4)
+  74474021 | 31 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [31] | JARDIM COLORADO (30) | Jardim Colorado (1)
+  74463220 | 29 | sugerido=CANDIDA DE MORAES
+      família: CANDIDA DE MORAES [29] | CANDIDA DE MORAES (13) | SETOR CÂNDIDA DE MORAIS (11) | Setor Cândida de Morais (5)
+  74474105 | 29 | sugerido=JARDIM DAS HORTENCIAS
+      família: JARDIM DAS HORTENCIAS [29] | JARDIM DAS HORTENCIAS (14) | JARDIM DAS HORTÊNCIAS (9) | Jardim das Hortências (6)
+  74475535 | 29 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [29] | JARDIM LIBERDADE (28) | Jardim Liberdade (1)
+  74474206 | 27 | sugerido=JARDIM VISTA BELA
+      família: JARDIM VISTA BELA [27] | JARDIM VISTA BELA (25) | Jardim Vista Bela (2)
+  74475650 | 27 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [27] | JARDIM LIBERDADE (25) | Jardim Liberdade (2)
+  74445090 | 26 | sugerido=VILA JOÃO VAZ
+      família: VILA JOÃO VAZ [26] | VILA JOÃO VAZ (20) | Vila João Vaz (4) | VILA JOAO VAZ (2)
+  74450490 | 26 | sugerido=CAPUAVA
+      família: CAPUAVA [26] | CAPUAVA (21) | BAIRRO CAPUAVA (2) | Capuava (2) | SETOR CAPUAVA (1)
+  74463770 | 26 | sugerido=SANTOS DUMONT
+      família: SANTOS DUMONT [26] | SANTOS DUMONT (13) | SETOR SANTOS DUMONT (10) | Setor Santos Dumont (3)
+  74474026 | 26 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [26] | JARDIM COLORADO (23) | Jardim Colorado (3)
+
+PRINCIPAIS CASOS PARA REVISÃO:
+  74465445 | 306 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [279] | JARDIM NOVA ESPERANÇA (273) | Jardim Nova Esperança (6)
+      família: CANDIDA DE MORAES [26] | CANDIDA DE MORAES (26)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74463280 | 292 | sugerido=CANDIDA DE MORAES
+      família: CANDIDA DE MORAES [289] | CANDIDA DE MORAES (265) | SETOR CÂNDIDA DE MORAIS (17) | Setor Cândida de Morais (5) | CANDIDO DE MORAES (1) | SETOR CANDIDA DE MORAES (1)
+      família: JARDIM NOVA ESPERANÇA [3] | JARDIM NOVA ESPERANÇA (3)
+  74710260 | 115 | sugerido=JARDIM NOVO MUNDO
+      família: JARDIM NOVO MUNDO [111] | JARDIM NOVO MUNDO (106) | Jardim Novo Mundo (5)
+      família: JARDIM EMANUELI [1] | JARDIM EMANUELI (1)
+      família: JARDIM NOVO MUNDO 3 [1] | JARDIM NOVO MUNDO 3 (1)
+      família: JD. EMANUELLE / NOVO MUNDO [1] | JD. EMANUELLE / NOVO MUNDO (1)
+      família: RESID. EMANUELLI / JARDIM NOVO MUNDO [1] | RESID. EMANUELLI / JARDIM NOVO MUNDO (1)
+  74474006 | 85 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [83] | JARDIM COLORADO (78) | Jardim Colorado (5)
+      família: JARDIM COLORADO QD- 12 LT- 11 [1] | JARDIM COLORADO QD- 12 LT- 11 (1)
+      família: SAO CARLOS [1] | SAO CARLOS (1)
+  74465100 | 81 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [80] | JARDIM NOVA ESPERANÇA (63) | Jardim Nova Esperança (16) | NOVA ESPERANÇA (1)
+      família: JARDIM GRAMADO [1] | JARDIM GRAMADO (1)
+  74475660 | 77 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [74] | JARDIM LIBERDADE (68) | Jardim Liberdade (6)
+      família: VILA MUTIRÃO [3] | VILA MUTIRÃO (3)
+  74465280 | 60 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [58] | JARDIM NOVA ESPERANÇA (53) | Jardim Nova Esperança (4) | NOVA ESPERANÇA (1)
+      família: CANDIDA DE MORAES [1] | CANDIDA DE MORAES (1)
+      família: SANTOS DUMONT [1] | SANTOS DUMONT (1)
+  74474009 | 60 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [59] | JARDIM COLORADO (55) | Jardim Colorado (4)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+  74474203 | 60 | sugerido=JARDIM VISTA BELA
+      família: JARDIM VISTA BELA [55] | JARDIM VISTA BELA (49) | Jardim Vista Bela (5) | VISTA BELA (1)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+      família: MANSÕES PARAÍSO [1] | MANSÕES PARAÍSO (1)
+      família: NOVO PLANALTO [1] | NOVO PLANALTO (1)
+      família: PARQUE TREMENDÃO [1] | PARQUE TREMENDÃO (1)
+  74474011 | 59 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [58] | JARDIM COLORADO (46) | Jardim Colorado (11) | RESIDENCIAL JARDIM COLORADO (1)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+  74480060 | 55 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [52] | NOVO PLANALTO (32) | SETOR NOVO PLANALTO (15) | Setor Novo Planalto (5)
+      família: JARDIM NOVA ESPERANÇA [1] | JARDIM NOVA ESPERANÇA (1)
+      família: MANSÕES PARAISO [1] | MANSÕES PARAISO (1)
+      família: Vila Mutirão [1] | Vila Mutirão (1)
+  74474047 | 52 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [51] | JARDIM COLORADO (47) | Jardim Colorado (4)
+      família: VILA MUTIRAO [1] | VILA MUTIRAO (1)
+  74480350 | 52 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [50] | NOVO PLANALTO (29) | SETOR NOVO PLANALTO (16) | Setor Novo Planalto (5)
+      família: CANDIDA DE MORAES [1] | CANDIDA DE MORAES (1)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74481715 | 50 | sugerido=MANSÕES PARAÍSO
+      família: MANSÕES PARAÍSO [48] | MANSÕES PARAÍSO (11) | MANSÕES PARAISO (11) | RESIDENCIAL MANSÕES PARAÍSO (10) | Residencial Mansões Paraíso (8) | MANSOES PARAISO (5) | RESIDENCIAL MANSÕES PARAISO (2) | RESIDENCIAL MANSOES PARAISO (1)
+      família: JARDIM CURITIBA IV [1] | JARDIM CURITIBA IV (1)
+      família: RESIDENCIAL MANSÕES DO PARAISO [1] | RESIDENCIAL MANSÕES DO PARAISO (1)
+  74475520 | 47 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [43] | JARDIM LIBERDADE (36) | Jardim Liberdade (7)
+      família: VILA MUTIRÃO [4] | VILA MUTIRÃO (3) | VILA MUTIRAO (1)
+  74480355 | 47 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [46] | NOVO PLANALTO (27) | SETOR NOVO PLANALTO (14) | Setor Novo Planalto (4) | Novo Planalto (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+  74474048 | 45 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [43] | JARDIM COLORADO (39) | Jardim Colorado (4)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+  74480330 | 45 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [44] | NOVO PLANALTO (29) | SETOR NOVO PLANALTO (13) | Setor Novo Planalto (2)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74463200 | 44 | sugerido=SETOR CÂNDIDA DE MORAIS
+      família: SETOR CÂNDIDA DE MORAIS [42] | SETOR CÂNDIDA DE MORAIS (21) | CANDIDA DE MORAES (11) | Setor Cândida de Morais (8) | CANDIDA DE MORAIS (1) | SETOR CANDIDA DE MORAIS (1)
+      família: JARDIM NOVA ESPERANÇA [1] | JARDIM NOVA ESPERANÇA (1)
+      família: SETOR CANDIDADE MORAES [1] | SETOR CANDIDADE MORAES (1)
+  74474200 | 42 | sugerido=JARDIM VISTA BELA
+      família: JARDIM VISTA BELA [37] | JARDIM VISTA BELA (36) | Jardim Vista Bela (1)
+      família: JARDIM COLORADO [5] | JARDIM COLORADO (5)
+  74480030 | 41 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [39] | JARDIM LIBERDADE (37) | Jardim Liberdade (2)
+      família: VILA MUTIRÃO [2] | VILA MUTIRÃO (2)
+  74480340 | 41 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [40] | NOVO PLANALTO (23) | SETOR NOVO PLANALTO (9) | Setor Novo Planalto (8)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74475580 | 38 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [34] | JARDIM LIBERDADE (30) | Jardim Liberdade (4)
+      família: VILA MUTIRÃO [2] | VILA MUTIRÃO (1) | Vila mutirão (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+      família: RESIDENCIAL FORTALEZA [1] | RESIDENCIAL FORTALEZA (1)
+  74474103 | 34 | sugerido=JARDIM DAS HORTENCIAS
+      família: JARDIM DAS HORTENCIAS [33] | JARDIM DAS HORTENCIAS (19) | JARDIM DAS HORTÊNCIAS (10) | Jardim das Hortências (4)
+      família: PARQUE TREMENDAO [1] | PARQUE TREMENDAO (1)
+  74474018 | 33 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [32] | JARDIM COLORADO (29) | Jardim Colorado (3)
+      família: JARDIM COLORADO 1 [1] | JARDIM COLORADO 1 (1)
+  74474023 | 33 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [32] | JARDIM COLORADO (30) | Jardim Colorado (2)
+      família: PARQUE TREMENDÃO [1] | PARQUE TREMENDÃO (1)
+  74480070 | 29 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [24] | JARDIM LIBERDADE (23) | Jardim Liberdade (1)
+      família: NOVO PLANALTO [3] | NOVO PLANALTO (2) | SETOR NOVO PLANALTO (1)
+      família: VILA MUTIRÃO [2] | VILA MUTIRÃO (1) | VILA MUTIRAO (1)
+  74480390 | 29 | sugerido=NOVO PLANALTO
+      família: NOVO PLANALTO [28] | NOVO PLANALTO (15) | Setor Novo Planalto (8) | SETOR NOVO PLANALTO (5)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74445160 | 27 | sugerido=VILA JOÃO VAZ
+      família: VILA JOÃO VAZ [26] | VILA JOÃO VAZ (19) | Vila João Vaz (5) | VILA JOAO VAZ (2)
+      família: CAPUAVA [1] | CAPUAVA (1)
+  74475610 | 27 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [26] | JARDIM LIBERDADE (24) | Jardim Liberdade (2)
+      família: NOVO PLANALTO [1] | NOVO PLANALTO (1)
+  74463380 | 24 | sugerido=SANTOS DUMONT
+      família: SANTOS DUMONT [23] | SANTOS DUMONT (11) | SETOR SANTOS DUMONT (8) | Setor Santos Dumont (4)
+      família: JARDIM NOVA ESPERANCA [1] | JARDIM NOVA ESPERANCA (1)
+  74465310 | 24 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [21] | JARDIM NOVA ESPERANÇA (12) | Jardim Nova Esperança (9)
+      família: JARDIM NOVO MUNDO [2] | JARDIM NOVO MUNDO (2)
+      família: BARRA DA TIJUCA [1] | BARRA DA TIJUCA (1)
+  74475020 | 24 | sugerido=PARQUE TREMENDÃO
+      família: PARQUE TREMENDÃO [23] | PARQUE TREMENDÃO (17) | SETOR PARQUE TREMENDÃO (5) | PARQUE TREMENDAO (1)
+      família: PARQUE TREMENDÃO 2 [1] | PARQUE TREMENDÃO 2 (1)
+  74475550 | 24 | sugerido=JARDIM LIBERDADE
+      família: JARDIM LIBERDADE [23] | JARDIM LIBERDADE (21) | Jardim Liberdade (2)
+      família: SETOR PERIM [1] | SETOR PERIM (1)
+  74474250 | 23 | sugerido=RESIDENCIAL ANGLO
+      família: RESIDENCIAL ANGLO [22] | RESIDENCIAL ANGLO (18) | Residencial Anglo (4)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+  74463210 | 22 | sugerido=SETOR CÂNDIDA DE MORAIS
+      família: SETOR CÂNDIDA DE MORAIS [21] | SETOR CÂNDIDA DE MORAIS (11) | CANDIDA DE MORAES (7) | Setor Cândida de Morais (3)
+      família: CENTRO [1] | CENTRO (1)
+  74463240 | 22 | sugerido=CANDIDA DE MORAES
+      família: CANDIDA DE MORAES [21] | CANDIDA DE MORAES (11) | SETOR CÂNDIDA DE MORAIS (6) | Setor Cândida de Morais (4)
+      família: JARDIM NOVA ESPERANÇA [1] | JARDIM NOVA ESPERANÇA (1)
+  74474001 | 20 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [18] | JARDIM COLORADO (16) | Jardim Colorado (2)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+  74450170 | 19 | sugerido=CAPUAVA
+      família: CAPUAVA [18] | CAPUAVA (14) | Capuava (4)
+      família: CANDIDA DE MORAES. [1] | CANDIDA DE MORAES. (1)
+  74463165 | 19 | sugerido=SETOR CÂNDIDA DE MORAIS
+      família: SETOR CÂNDIDA DE MORAIS [17] | SETOR CÂNDIDA DE MORAIS (8) | Setor Cândida de Morais (4) | CANDIDA DE MORAES (3) | CÂNDIDA DE MORAES (1) | CÂNDIDAS DE MORAIS (1)
+      família: SETOR SANTOS DUMONT [2] | SETOR SANTOS DUMONT (2)
+
+PRINCIPAIS CASOS BLOQUEADOS:
+  74000000 | 4180 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [625] | JARDIM NOVA ESPERANÇA (606) | JD NOVA ESPERANÇA (8) | JARDIM NOVA ESPERANCA (6) | NOVA ESPERANÇA (3) | JARDIM NOVA ESPERANÇAA (1) | JD. NOVA ESPERANÇA (1)
+      família: JARDIM NOVO MUNDO [440] | JARDIM NOVO MUNDO (401) | NOVO MUNDO (31) | Jardim Novo Mundo (3) | JD. NOVO MUNDO (3) | JARDIM  NOVO MUNDO (1) | JD NOVO MUNDO (1)
+      família: JARDIM COLORADO [344] | JARDIM COLORADO (341) | JD COLORADO (2) | COLORADO (1)
+      família: JARDIM LIBERDADE [284] | JARDIM LIBERDADE (282) | Jardim Liberdade (1) | JD LIBERDADE (1)
+      família: VILA MUTIRÃO [247] | VILA MUTIRÃO (232) | Vila Mutirão (8) | VILA MUTIRAO (6) | VILA MULTIRÃO (1)
+      família: NOVO PLANALTO [196] | NOVO PLANALTO (195) | NOVO PLALNALTO (1)
+      família: JARDIM DAS HORTENCIAS [184] | JARDIM DAS HORTENCIAS (157) | JARDIM DAS HORTÊNCIAS (24) | JD DAS HORTENCIAS (3)
+      família: SANTOS DUMONT [165] | SANTOS DUMONT (165)
+      família: JARDIM CURITIBA IV [129] | JARDIM CURITIBA IV (128) | CURITIBA IV (1)
+      família: CANDIDA DE MORAES [113] | CANDIDA DE MORAES (97) | CANDIDA DE MORAIS (11) | CÂNDIDA DE MORAES (2) | CANDIDA DE MORAES. (1) | SETOR CÂNDIDA DE MORAIS (1) | Setor Cândida de Morais (1)
+      família: MANSÕES PARAISO [113] | MANSÕES PARAISO (80) | MANSÕES PARAÍSO (15) | MANSOES PARAISO (11) | RESIDENCIAL MANSÕES PARAISO (3) | MANSÓES PARAISO (1) | MANSOÊS PARAISO (1) | MANSÔES PARAISO (1) | RESIDENCIAL MANSÕES PARAÍSO (1)
+      família: JARDIM VISTA BELA [108] | JARDIM VISTA BELA (101) | VISTA BELA (5) | Jardim Vista Bela (1) | SETOR VISTA BELA (1)
+      família: VILA SÃO JOSE [90] | VILA SÃO JOSE (42) | VILA SÃO JOSÉ (24) | Vila São José (12) | Vila são José (9) | VILA SAO JOSE (2) | VILA  SÃO JOSÉ (1)
+      família: VILA JOÃO VAZ [69] | VILA JOÃO VAZ (66) | VILA JOAO VAZ (3)
+      família: SÃO CARLOS [68] | SÃO CARLOS (66) | BAIRRO SAO CARLOS (1) | SETOR SAO CARLOS (1)
+      família: CAPUAVA [67] | CAPUAVA (64) | Capuava (2) | BAIRRO CAPUAVA (1)
+      família: PARQUE TREMENDÃO [52] | PARQUE TREMENDÃO (50) | PARQUE TREMEDÃO (1) | PARUE TREMENDÃO (1)
+      família: BAIRRO DA VITORIA [52] | BAIRRO DA VITORIA (30) | BAIRRO DA VITÓRIA (22)
+      família: RESIDENCIAL FORTALEZA [43] | RESIDENCIAL FORTALEZA (43)
+      família: VILA FINSOCIAL [42] | VILA FINSOCIAL (42)
+      família: JARDIM PETRÓPOLIS [42] | JARDIM PETRÓPOLIS (27) | JARDIM PETROPOLIS (15)
+      família: SETOR NOROESTE [40] | SETOR NOROESTE (38) | NOROESTE (2)
+      família: SETOR AEROVIARIO [40] | SETOR AEROVIARIO (29) | SETOR AEROVIÁRIO (7) | AEROVIÁRIO (2) | AEROVIARIO (2)
+      família: SETOR MARABÁ [39] | SETOR MARABÁ (36) | SETOR MARABA (2) | MARABÁ (1)
+      família: RESIDENCIAL PRIVE NORTE [38] | RESIDENCIAL PRIVE NORTE (32) | RESIDENCIAL PRIVÊ NORTE (6)
+      família: RESIDENCIAL MARINGÁ [34] | RESIDENCIAL MARINGÁ (29) | RESIDENCIAL MARINGA (5)
+      família: VILA REGINA [34] | VILA REGINA (23) | Vila Regina (11)
+      família: MORADA DO SOL [30] | MORADA DO SOL (30)
+      família: RESIDENCIAL GREEN PARK [28] | RESIDENCIAL GREEN PARK (28)
+      família: ALBINO BOAVENTURA [28] | ALBINO BOAVENTURA (27) | RESIDENCIAL ALBINO BOAVENTURA (1)
+      família: SETOR PERIM [26] | SETOR PERIM (23) | BAIRRO PERIM (1) | PERIM (1) | Setor Perim (1)
+      família: SETOR PROGRESSO [25] | SETOR PROGRESSO (24) | SETOR  PROGRESSO (1)
+      família: JARDIM CLARISSA [22] | JARDIM CLARISSA (22)
+      família: JARDIM HELLOU [20] | JARDIM HELLOU (20)
+      família: VILA CRISTINA [18] | VILA CRISTINA (18)
+      família: JARDIM GRAMADO [17] | JARDIM GRAMADO (17)
+      família: VILA MARIA DILCE [17] | VILA MARIA DILCE (17)
+      família: VILA MORAIS [17] | VILA MORAIS (17)
+      família: BARRA DA TIJUCA [17] | BARRA DA TIJUCA (16) | SETOR BARRA DA TIJUCA (1)
+      família: VILA MARIA LUIZA [15] | VILA MARIA LUIZA (15)
+      família: JARDIM BONANZA [13] | JARDIM BONANZA (13)
+      família: JARDIM CAMARGO [12] | JARDIM CAMARGO (12)
+      família: RESIDENCIAL ITAMARACÁ [11] | RESIDENCIAL ITAMARACÁ (6) | RESIDENCIAL ITAMARACA (5)
+      família: RESIDENCIAL ANGLO [10] | RESIDENCIAL ANGLO (10)
+      família: VALE DOS CARAIBAS [9] | VALE DOS CARAIBAS (5) | SETOR VALE DOS CARAIBAS (1) | VALE DAS CARAÍBAS (1) | VALE DAS CARAIBAS (1) | VALE DOS CARAÍBAS (1)
+      família: AGUA BRANCA [9] | AGUA BRANCA (4) | ÁGUA BRANCA (3) | AGUÁ BRANCA (2)
+      família: ESPLANADA DO ANICUNS [8] | ESPLANADA DO ANICUNS (8)
+      família: RESIDENCIAL 14 BIS [8] | RESIDENCIAL 14 BIS (8)
+      família: RESIDENCIAL HUGO DE MORAES [8] | RESIDENCIAL HUGO DE MORAES (8)
+      família: VILA MUTIRÃO II [8] | VILA MUTIRÃO II (8)
+      família: SETOR SEVENE [7] | SETOR SEVENE (7)
+      família: JARDIM BRASIL [6] | JARDIM BRASIL (6)
+      família: SÃO JOSÉ [6] | SÃO JOSÉ (5) | SÃO JOSE (1)
+      família: VILA MARTINS [5] | VILA MARTINS (5)
+      família: RESIDENCIAL VALE DO ARAGUAIA [4] | RESIDENCIAL VALE DO ARAGUAIA (3) | VALE DO ARAGUAIA (1)
+      família: JARDIM CALIFORNIA [4] | JARDIM CALIFORNIA (2) | JARDIM CALIFONIA (1) | JD. CALIFÓRNIA (1)
+      família: PQ TREMENDÃO [4] | PQ TREMENDÃO (2) | PQ.TREMENDÃO (1) | SETOR PQ. TREMENDÃO (1)
+      família: PARQUE INDUSTRIAL PAULISTA [3] | PARQUE INDUSTRIAL PAULISTA (3)
+      família: SETOR EMPRESARIAL [3] | SETOR EMPRESARIAL (3)
+      família: VILA MUTIRÃO I [3] | VILA MUTIRÃO I (3)
+      família: VILA ROMANA [3] | VILA ROMANA (3)
+      família: CONJUNTO RIVIERA [3] | CONJUNTO RIVIERA (2) | Conjunto Riviera (1)
+      família: RECREIO SÃO JOAQUIM [3] | RECREIO SÃO JOAQUIM (2) | CH RECREIO SÃO JOAQUIM (1)
+      família: CHACARAS MANSOES ROSAS DE OURO [2] | CHACARAS MANSOES ROSAS DE OURO (2)
+      família: FINSOCIAL [2] | FINSOCIAL (2)
+      família: JARDIM CURITIBA 4 [2] | JARDIM CURITIBA 4 (2)
+      família: JARDIM CURITIBA II [2] | JARDIM CURITIBA II (2)
+      família: JARDIM HELOU [2] | JARDIM HELOU (2)
+      família: JOÃO VAZ [2] | JOÃO VAZ (2)
+      família: MANSÕES ROSAS DE OURO [2] | MANSÕES ROSAS DE OURO (2)
+      família: RESIDENCIAL ANGULO [2] | RESIDENCIAL ANGULO (2)
+      família: CURITIBA I [2] | CURITIBA I (1) | JARDIM CURITIBA I (1)
+      família: JARDIM EMANUELE [2] | JARDIM EMANUELE (1) | RESIDENCIAL EMANUELE (1)
+      família: JARDIM NOVO MUNDO II [2] | JARDIM NOVO MUNDO II (1) | NOVO MUNDO II (1)
+      família: JARDIM NOVO PETROPOLIS [2] | JARDIM NOVO PETROPOLIS (1) | JD NOVO PETROPOLIS (1)
+      família: RESIDENCIAL ARUANA [2] | RESIDENCIAL ARUANA (1) | RESIDENCIAL ARUANÃ (1)
+      família: CAPUAVA RESIDENCIAL PRIVÊ [1] | CAPUAVA RESIDENCIAL PRIVÊ (1)
+      família: CENTRO [1] | CENTRO (1)
+      família: CONDOMINIO PORTAL DAS HORTÊNCIAS [1] | CONDOMINIO PORTAL DAS HORTÊNCIAS (1)
+      família: CONDOMINIO RIO BRANCO [1] | CONDOMINIO RIO BRANCO (1)
+      família: CRIMEIA OESTE [1] | CRIMEIA OESTE (1)
+      família: JARDIM COLORADO EXTEÇÃO [1] | JARDIM COLORADO EXTEÇÃO (1)
+      família: JARDIM COLORADO EXTENSÃO [1] | JARDIM COLORADO EXTENSÃO (1)
+      família: JARDIM CURITIBA 04 [1] | JARDIM CURITIBA 04 (1)
+      família: JARDIM CURITIBA 1 [1] | JARDIM CURITIBA 1 (1)
+      família: JARDIM CURITIBA III [1] | JARDIM CURITIBA III (1)
+      família: JARDIM EMANUELY [1] | JARDIM EMANUELY (1)
+      família: JARDIM LAGO AZUL [1] | JARDIM LAGO AZUL (1)
+      família: JD. CURITIBA [1] | JD. CURITIBA (1)
+      família: JD. EMANUELLE - NOVO MUNDO [1] | JD. EMANUELLE - NOVO MUNDO (1)
+      família: MARIA LUIZA [1] | MARIA LUIZA (1)
+      família: PARQUE INDUSTRIAL JOAO BRAZ [1] | PARQUE INDUSTRIAL JOAO BRAZ (1)
+      família: PARQUE MARACANA [1] | PARQUE MARACANA (1)
+      família: PQ INDUSTRIAL PAULISTA [1] | PQ INDUSTRIAL PAULISTA (1)
+      família: RESIDENCIAL ARAGUAIA [1] | RESIDENCIAL ARAGUAIA (1)
+      família: RESIDENCIAL BUENA VISTA 4 [1] | RESIDENCIAL BUENA VISTA 4 (1)
+      família: RESIDENCIAL FLORESTA [1] | RESIDENCIAL FLORESTA (1)
+      família: SÃO MARCOS I [1] | SÃO MARCOS I (1)
+      família: SETOR ESTRELA DALVA [1] | SETOR ESTRELA DALVA (1)
+      família: VILA CLEMENTE [1] | VILA CLEMENTE (1)
+      família: VILA MARTINS - EXTENSÃO - NOVO MUNDO [1] | VILA MARTINS - EXTENSÃO - NOVO MUNDO (1)
+      família: VILA MORAIS NOVO MUNDO [1] | VILA MORAIS NOVO MUNDO (1)
+  74465140 | 130 | sugerido=JARDIM NOVA ESPERANÇA
+      família: JARDIM NOVA ESPERANÇA [85] | JARDIM NOVA ESPERANÇA (69) | Jardim Nova Esperança (12) | JARDIM NOVA ESPERANCA (2) | NOVA ESPERANÇA (2)
+      família: JARDIM COLORADO [13] | JARDIM COLORADO (13)
+      família: JARDIM DAS HORTÊNCIAS [8] | JARDIM DAS HORTÊNCIAS (6) | JARDIM DAS HORTENCIAS (2)
+      família: NOVO PLANALTO [5] | NOVO PLANALTO (5)
+      família: SETOR MARABÁ [4] | SETOR MARABÁ (4)
+      família: CANDIDA DE MORAES [3] | CANDIDA DE MORAES (3)
+      família: MANSÕES PARAÍSO [3] | MANSÕES PARAÍSO (2) | RESIDENCIAL MANSOES PARAISO (1)
+      família: JARDIM LIBERDADE [2] | JARDIM LIBERDADE (2)
+      família: SETOR NOROESTE [2] | SETOR NOROESTE (2)
+      família: ALBINO BOAVENTURA [1] | ALBINO BOAVENTURA (1)
+      família: JARDIM HELLOU [1] | JARDIM HELLOU (1)
+      família: MORADA DO SOL [1] | MORADA DO SOL (1)
+      família: PARQUE TREMENDÃO [1] | PARQUE TREMENDÃO (1)
+      família: VILA FINSOCIAL [1] | VILA FINSOCIAL (1)
+  74400000 | 63 | sugerido=JARDIM NOVO MUNDO
+      família: JARDIM NOVO MUNDO [13] | JARDIM NOVO MUNDO (13)
+      família: JARDIM COLORADO [10] | JARDIM COLORADO (10)
+      família: JARDIM NOVA ESPERANÇA [6] | JARDIM NOVA ESPERANÇA (6)
+      família: JARDIM DAS HORTENCIAS [3] | JARDIM DAS HORTENCIAS (3)
+      família: JARDIM CURITIBA 4 [2] | JARDIM CURITIBA 4 (2)
+      família: JARDIM CURITIBA IV [2] | JARDIM CURITIBA IV (2)
+      família: NOVO PLANALTO [2] | NOVO PLANALTO (2)
+      família: VILA CRISTINA CONTINUAÇAO [2] | VILA CRISTINA CONTINUAÇAO (2)
+      família: VILA JOAO VAZ [2] | VILA JOAO VAZ (2)
+      família: MANSOES PARAISO [2] | MANSOES PARAISO (1) | SETOR MANSOES PARAISO (1)
+      família: BAIRRO DA VITORIA [1] | BAIRRO DA VITORIA (1)
+      família: CONJUNTO RESIDENCIAL ARUANA III [1] | CONJUNTO RESIDENCIAL ARUANA III (1)
+      família: ESTRELA DALVA [1] | ESTRELA DALVA (1)
+      família: JARDIM GRAMADO [1] | JARDIM GRAMADO (1)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+      família: JARDIM NOVO PETROPOLIS [1] | JARDIM NOVO PETROPOLIS (1)
+      família: JARDIM PETROPOLIS [1] | JARDIM PETROPOLIS (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+      família: MORADA DO SOL [1] | MORADA DO SOL (1)
+      família: PARQUE INDUSTRIAL PAULISTA [1] | PARQUE INDUSTRIAL PAULISTA (1)
+      família: Residencial Fortaleza [1] | Residencial Fortaleza (1)
+      família: SETOR CANDIDA DE MORAIS [1] | SETOR CANDIDA DE MORAIS (1)
+      família: SETOR CAPUAVA [1] | SETOR CAPUAVA (1)
+      família: SETOR NOROESTE [1] | SETOR NOROESTE (1)
+      família: SETOR SANTOS DUMONT [1] | SETOR SANTOS DUMONT (1)
+      família: VILA MARTINS [1] | VILA MARTINS (1)
+      família: VILA MUTIRAO [1] | VILA MUTIRAO (1)
+      família: VILA REGINA [1] | VILA REGINA (1)
+      família: VILA ROMANA [1] | VILA ROMANA (1)
+  74474605 | 48 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [33] | JARDIM COLORADO (33)
+      família: JARDIM COLORADO I [14] | JARDIM COLORADO I (9) | Jardim Colorado I (5)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+  74480450 | 40 | sugerido=JARDIM CURITIBA IV
+      família: JARDIM CURITIBA IV [28] | JARDIM CURITIBA IV (25) | CURITIBA IV (1) | JARDIM CURITBA IV (1) | Jardim Curitiba IV (1)
+      família: JARDIM CURITIBA [10] | JARDIM CURITIBA (5) | Jardim Curitiba (5)
+      família: Jardim Curitiba 4 [2] | Jardim Curitiba 4 (2)
+  74475460 | 30 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [17] | VILA MUTIRÃO (17)
+      família: VILA MUTIRÃO II [9] | VILA MUTIRÃO II (5) | Vila Mutirão II (4)
+      família: JARDIM LIBERDADE [4] | JARDIM LIBERDADE (4)
+  74480650 | 30 | sugerido=JARDIM CURITIBA IV
+      família: JARDIM CURITIBA IV [19] | JARDIM CURITIBA IV (19)
+      família: JARDIM CURITIBA [8] | JARDIM CURITIBA (7) | Jardim Curitiba (1)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+      família: SÃO CARLOS [1] | SÃO CARLOS (1)
+      família: VILA MUTIRÃO [1] | VILA MUTIRÃO (1)
+  74474410 | 29 | sugerido=RESIDENCIAL PRIVÊ NORTE
+      família: RESIDENCIAL PRIVÊ NORTE [17] | RESIDENCIAL PRIVÊ NORTE (9) | Residencial Privê Norte (5) | RESIDENCIAL PRIVE NORTE (3)
+      família: DOM CONSTANTINO [11] | DOM CONSTANTINO (11)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+  74480110 | 29 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [13] | VILA MUTIRÃO (13)
+      família: VILA MUTIRÃO I [10] | VILA MUTIRÃO I (8) | Vila Mutirão I (2)
+      família: JARDIM LIBERDADE [5] | JARDIM LIBERDADE (5)
+      família: JARDIM CURITIBA IV [1] | JARDIM CURITIBA IV (1)
+  74480260 | 29 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [16] | VILA MUTIRÃO (16)
+      família: VILA MUTIRÃO I [12] | VILA MUTIRÃO I (9) | Vila Mutirão I (3)
+      família: RESIDENCIAL GREEN PARK [1] | RESIDENCIAL GREEN PARK (1)
+  74480240 | 27 | sugerido=VILA MUTIRÃO I
+      família: VILA MUTIRÃO I [14] | VILA MUTIRÃO I (11) | Vila Mutirão I (3)
+      família: VILA MUTIRÃO [11] | VILA MUTIRÃO (10) | VILA MUTIRAO (1)
+      família: CANDIDA DE MORAIS [1] | CANDIDA DE MORAIS (1)
+      família: NOVO PLANALTO [1] | NOVO PLANALTO (1)
+  74480250 | 27 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [16] | VILA MUTIRÃO (11) | VILA MUTIRAO (3) | VILA MULTIRÃO (1) | Vila Mutirão (1)
+      família: VILA MUTIRÃO I [10] | VILA MUTIRÃO I (6) | Vila Mutirão I (4)
+      família: Jardim Liberdade [1] | Jardim Liberdade (1)
+  74480180 | 26 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [16] | VILA MUTIRÃO (14) | VILA MUTIRAO (2)
+      família: VILA MUTIRÃO I [10] | VILA MUTIRÃO I (5) | Vila Mutirão I (4) | VILA MULTIRÃO I (1)
+  74474140 | 25 | sugerido=JARDIM DAS HORTENCIAS
+      família: JARDIM DAS HORTENCIAS [16] | JARDIM DAS HORTENCIAS (10) | JARDIM DAS HORTÊNCIAS (5) | Jardim das Hortências (1)
+      família: JARDIM CURITIBA IV [2] | JARDIM CURITIBA IV (2)
+      família: PARQUE TREMENDÃO [2] | PARQUE TREMENDÃO (1) | Parque Tremendão (1)
+      família: CANDIDA DE MORAES [1] | CANDIDA DE MORAES (1)
+      família: JARDIM COLORADO [1] | JARDIM COLORADO (1)
+      família: NOVO PLANALTO [1] | NOVO PLANALTO (1)
+      família: PORTAL DAS HORTENCIAS [1] | PORTAL DAS HORTENCIAS (1)
+      família: RESIDENCIAL GREEN PARK [1] | RESIDENCIAL GREEN PARK (1)
+  74470705 | 23 | sugerido=JARDIM HELLOU
+      família: JARDIM HELLOU [13] | JARDIM HELLOU (13)
+      família: RESIDENCIAL JARDIM HELOU [7] | RESIDENCIAL JARDIM HELOU (4) | Residencial Jardim Helou (3)
+      família: JARDIM VISTA BELA [2] | JARDIM VISTA BELA (2)
+      família: JARDIM NOVA ESPERANÇA [1] | JARDIM NOVA ESPERANÇA (1)
+  74474640 | 23 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [16] | JARDIM COLORADO (16)
+      família: JARDIM COLORADO I [6] | JARDIM COLORADO I (4) | Jardim Colorado I (2)
+      família: SETOR NOROESTE [1] | SETOR NOROESTE (1)
+  74480430 | 23 | sugerido=JARDIM CURITIBA IV
+      família: JARDIM CURITIBA IV [18] | JARDIM CURITIBA IV (17) | JARDIM CURITIBA  IV (1)
+      família: JARDIM CURITIBA [4] | JARDIM CURITIBA (3) | Jardim Curitiba (1)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+  74480160 | 22 | sugerido=VILA MUTIRÃO I
+      família: VILA MUTIRÃO I [12] | VILA MUTIRÃO I (8) | Vila Mutirão I (4)
+      família: VILA MUTIRÃO [10] | VILA MUTIRÃO (10)
+  74474505 | 21 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [12] | JARDIM COLORADO (12)
+      família: JARDIM COLORADO EXTENSÃO [9] | JARDIM COLORADO EXTENSÃO (8) | Jardim Colorado Extensão (1)
+  74555558 | 21 | sugerido=ALBINO BOAVENTURA
+      família: ALBINO BOAVENTURA [13] | ALBINO BOAVENTURA (11) | RESIDENCIAL ALBINO BOAVENTURA (2)
+      família: RESIDENCIAL SENADOR ALBINO BOAVENTURA [8] | RESIDENCIAL SENADOR ALBINO BOAVENTURA (7) | Residencial Senador Albino Boaventura (1)
+  74480170 | 20 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [13] | VILA MUTIRÃO (11) | VILA MUTIRAO (2)
+      família: VILA MUTIRÃO I [7] | VILA MUTIRÃO I (4) | Vila Mutirão I (3)
+  74480270 | 20 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [10] | VILA MUTIRÃO (8) | Vila Mutirão (2)
+      família: VILA MUTIRÃO I [9] | VILA MUTIRÃO I (6) | Vila Mutirão I (3)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+  74480280 | 20 | sugerido=VILA MUTIRÃO I
+      família: VILA MUTIRÃO I [10] | VILA MUTIRÃO I (6) | Vila Mutirão I (4)
+      família: VILA MUTIRÃO [9] | VILA MUTIRÃO (9)
+      família: NOVO PLANALTO [1] | NOVO PLANALTO (1)
+  74475420 | 18 | sugerido=VILA MUTIRÃO II
+      família: VILA MUTIRÃO II [9] | VILA MUTIRÃO II (6) | Vila Mutirão II (3)
+      família: VILA MUTIRÃO [7] | VILA MUTIRÃO (7)
+      família: JARDIM LIBERDADE [2] | JARDIM LIBERDADE (2)
+  74480150 | 18 | sugerido=Vila Mutirão I
+      família: Vila Mutirão I [9] | Vila Mutirão I (7) | VILA MUTIRÃO I (2)
+      família: VILA MUTIRÃO [8] | VILA MUTIRÃO (8)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+  74470710 | 17 | sugerido=JARDIM HELLOU
+      família: JARDIM HELLOU [10] | JARDIM HELLOU (10)
+      família: JARDIM HELOU [3] | JARDIM HELOU (1) | RESIDENCIAL JARDIM HELOU (1) | Residencial Jardim Helou (1)
+      família: CHACARAS MANSOES ROSAS DE OURO [1] | CHACARAS MANSOES ROSAS DE OURO (1)
+      família: JARDIM CAMARGO [1] | JARDIM CAMARGO (1)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+      família: JARDIM VISTA BELA [1] | JARDIM VISTA BELA (1)
+  74475470 | 17 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [11] | VILA MUTIRÃO (11)
+      família: VILA MUTIRÃO II [6] | VILA MUTIRÃO II (3) | Vila Mutirão II (3)
+  74440060 | 16 | sugerido=SETOR SÃO JOSÉ
+      família: SETOR SÃO JOSÉ [12] | SETOR SÃO JOSÉ (7) | Setor São José (4) | SÃO JOSÉ (1)
+      família: VILA SÃO JOSE [4] | VILA SÃO JOSE (2) | VILA SÃO JOSÉ (1) | Vila são José (1)
+  74463340 | 16 | sugerido=SETOR SANTOS DUMONT
+      família: SETOR SANTOS DUMONT [12] | SETOR SANTOS DUMONT (6) | SANTOS DUMONT (5) | Setor Santos Dumont (1)
+      família: CANDIDA DE MORAES [4] | CANDIDA DE MORAES (4)
+  74475475 | 16 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [10] | VILA MUTIRÃO (10)
+      família: VILA MUTIRÃO II [6] | VILA MUTIRÃO II (5) | Vila Mutirão II (1)
+  74480230 | 16 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [10] | VILA MUTIRÃO (10)
+      família: VILA MUTIRÃO I [6] | VILA MUTIRÃO I (3) | Vila Mutirão I (3)
+  74474645 | 15 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [11] | JARDIM COLORADO (11)
+      família: JARDIM COLORADO I [3] | JARDIM COLORADO I (2) | Jardim Colorado I (1)
+      família: JARDIM COLORADO L [1] | JARDIM COLORADO L (1)
+  74475410 | 15 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [11] | VILA MUTIRÃO (10) | VILA MUTIRAO (1)
+      família: JARDIM LIBERDADE [2] | JARDIM LIBERDADE (2)
+      família: VILA MUTIRÃO II [2] | VILA MUTIRÃO II (1) | Vila Mutirão II (1)
+  74480300 | 15 | sugerido=VILA MUTIRÃO I
+      família: VILA MUTIRÃO I [9] | VILA MUTIRÃO I (6) | Vila Mutirão I (3)
+      família: VILA MUTIRÃO [5] | VILA MUTIRÃO (4) | VILA MULTIRÃO (1)
+      família: VILA MUTIRAO 1 [1] | VILA MUTIRAO 1 (1)
+  74480460 | 15 | sugerido=JARDIM CURITIBA IV
+      família: JARDIM CURITIBA IV [9] | JARDIM CURITIBA IV (9)
+      família: JARDIM CURITIBA [5] | JARDIM CURITIBA (4) | Jardim Curitiba (1)
+      família: PARQUE MARACANÃ [1] | PARQUE MARACANÃ (1)
+  74480140 | 14 | sugerido=VILA MUTIRÃO
+      família: VILA MUTIRÃO [9] | VILA MUTIRÃO (9)
+      família: VILA MUTIRÃO I [4] | VILA MUTIRÃO I (3) | Vila Mutirão I (1)
+      família: JARDIM LIBERDADE [1] | JARDIM LIBERDADE (1)
+  74480560 | 14 | sugerido=JARDIM CURITIBA IV
+      família: JARDIM CURITIBA IV [9] | JARDIM CURITIBA IV (9)
+      família: JARDIM CURITIBA [5] | JARDIM CURITIBA (3) | Jardim Curitiba (2)
+  74480120 | 13 | sugerido=VILA MUTIRÃO I
+      família: VILA MUTIRÃO I [7] | VILA MUTIRÃO I (6) | Vila Mutirão I (1)
+      família: VILA MUTIRÃO [5] | VILA MUTIRÃO (5)
+      família: CURITIBA 4 [1] | CURITIBA 4 (1)
+  74555557 | 13 | sugerido=ALBINO BOAVENTURA
+      família: ALBINO BOAVENTURA [10] | ALBINO BOAVENTURA (9) | ALBINO BOA VENTURA (1)
+      família: RESIDENCIAL SENADOR ALBINO BOAVENTURA [3] | RESIDENCIAL SENADOR ALBINO BOAVENTURA (2) | Residencial Senador Albino Boaventura (1)
+  70000000 | 12 | sugerido=JARDIM COLORADO
+      família: JARDIM COLORADO [2] | JARDIM COLORADO (2)
+      família: Vila São José [2] | Vila São José (1) | VILA SÃO JOSE (1)
+      família: JARDIM DAS HORTENCIAS [1] | JARDIM DAS HORTENCIAS (1)
+      família: JARDIM HELLOU [1] | JARDIM HELLOU (1)
+      família: JARDIM NOVO MUNDO [1] | JARDIM NOVO MUNDO (1)
+      família: MORADA DO SOL [1] | MORADA DO SOL (1)
+      família: SETOR CANDIDA DE MORAIS [1] | SETOR CANDIDA DE MORAIS (1)
+      família: SETOR PROGRESSO [1] | SETOR PROGRESSO (1)
+      família: VILA MARIA DILCE [1] | VILA MARIA DILCE (1)
+      família: VILA MUTIRÃO 1 [1] | VILA MUTIRÃO 1 (1)
+
+==========================================================================================
+VALIDAÇÃO DE SEGURANÇA
+==========================================================================================
+IXC UPDATE: NÃO
+IXC INSERT: NÃO
+IXC DELETE: NÃO
+CLIENTES ALTERADOS: 0
+RELATÓRIO: /opt/automacoes/jactos/cobranca/backups/auditoria_padronizacao_bairros_v3_4.tsv
+==========================================================================================

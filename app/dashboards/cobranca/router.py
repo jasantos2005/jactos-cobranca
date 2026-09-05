@@ -818,13 +818,13 @@ async def api_top10(request: Request, usuario=Depends(get_usuario)):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
     return JSONResponse([fix(r) for r in sv.get_top10_devedores(filial_id=usuario.get("filial_id",0))])
 
-@router.get("/api/inadimplencia-por-cidade")
-async def api_por_cidade(request: Request, usuario=Depends(get_usuario)):
+@router.get("/api/inadimplencia-por-bairro")
+async def api_por_bairro(request: Request, usuario=Depends(get_usuario)):
     checar_nivel(usuario, 2)
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
-    return JSONResponse([fix(r) for r in sv.get_inadimplencia_por_cidade(filial_id=usuario.get("filial_id",0))])
+    return JSONResponse([fix(r) for r in sv.get_inadimplencia_por_bairro(filial_id=usuario.get("filial_id",0))])
 
 @router.get("/api/clientes-por-cidade/{id_cidade}")
 async def api_clientes_cidade(id_cidade: int, request: Request, usuario=Depends(get_usuario)):

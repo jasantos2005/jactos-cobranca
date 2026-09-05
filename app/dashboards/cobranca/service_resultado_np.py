@@ -1,8 +1,4 @@
 from app.core.db import query, query_one
-import sqlite3
-
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
-
 def _filtro_base(data_ini, data_fim):
     where = f"cc.data_ativacao >= '{data_ini}'"
     if data_fim:
@@ -93,14 +89,8 @@ def get_resultado_nunca_pagaram(data_ini="2026-01-01", data_fim=None, pagina=1, 
     if not rows:
         return []
 
-    ids = tuple(r["contrato_id"] for r in rows)
-    ph  = ",".join("?"*len(ids))
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur  = conn.cursor()
-    cur.execute(f"SELECT ixc_contrato_id, vendedor_nome, cidade_nome, plano_nome FROM hc_contratos_cache WHERE ixc_contrato_id IN ({ph})", ids)
-    com_map = {r["ixc_contrato_id"]: dict(r) for r in cur.fetchall()}
-    conn.close()
+    # Dados comerciais do ClickDF removidos.
+    com_map = {}
 
     result = []
     for r in rows:
@@ -121,9 +111,9 @@ def get_resultado_nunca_pagaram(data_ini="2026-01-01", data_fim=None, pagina=1, 
             situacao = "pendente"
         result.append({
             **r,
-            "vendedor":    com.get("vendedor_nome", "—"),
-            "cidade":      com.get("cidade_nome", "—"),
-            "plano":       r["plano"] or com.get("plano_nome", "—"),
+            "vendedor":    "—",
+            "cidade":      "—",
+            "plano":       r["plano"] or "—",
             "situacao":    situacao,
             "valor_pago":  float(r["valor_pago"] or 0),
             "total_aberto":aberto,

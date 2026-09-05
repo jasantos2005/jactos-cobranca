@@ -129,7 +129,7 @@ select:focus,textarea:focus{border-color:var(--primary)}
       </div>
       <!-- INADIMPLÊNCIA POR CIDADE -->
       <div class="card" style="flex:1;min-width:340px">
-        <div class="card-title">📍 Inadimplência por Cidade</div>
+        <div class="card-title">📍 Inadimplência por Bairro</div>
         <div id="cidades-corpo" style="min-height:200px"><div class="loading">Carregando...</div></div>
       </div>
       <div style="display:none">
@@ -154,7 +154,7 @@ select:focus,textarea:focus{border-color:var(--primary)}
 let state={faixa:'all',busca:'',pagina:1,por_pagina:50,total:0,paginas:1};
 let chartEvo=null,buscaTimer=null;
 document.addEventListener('DOMContentLoaded',()=>{
-  carregarKPIs();carregarTop10();carregarCidades();carregarGrafico();
+  carregarKPIs();carregarTop10();carregarBairros();carregarGrafico();
   document.querySelectorAll('.filter-btn').forEach(b=>{
     b.addEventListener('click',()=>{
       document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
@@ -234,35 +234,157 @@ async function carregarTop10(){
   }catch(e){document.getElementById('top10-corpo').innerHTML='<p style="color:var(--muted2);padding:16px">Erro ao carregar.</p>';}
 }
 
-// ── INADIMPLÊNCIA POR CIDADE ──────────────────────────────────
-async function carregarCidades(){
+// ── INADIMPLÊNCIA POR BAIRRO ──────────────────────────────────
+async function carregarBairros(){
   try{
-    const r = await fetch('/cobranca/api/inadimplencia-por-cidade');
-    const dados = await r.json();
-    const el = document.getElementById('cidades-corpo');
-    if(!dados.length){el.innerHTML='<p style="color:var(--muted2);padding:16px">Nenhuma cidade encontrada.</p>';return;}
-    const max = parseFloat(dados[0].total_aberto);
-    el.innerHTML = `<div style="padding:4px 0">${dados.map(r=>`
-      <div onclick="abrirModalCidade(${r.id_cidade},'${(r.cidade||'').replace(/'/g,"\'")}' )"
-           style="padding:10px 8px;cursor:pointer;border-radius:6px;margin-bottom:4px;transition:background .15s"
-           onmouseover="this.style.background='var(--card2)'" onmouseout="this.style.background='transparent'">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-size:13px;font-weight:600;color:var(--text)">${r.cidade}</span>
-          <span style="font-size:12px;color:var(--danger);font-family:'JetBrains Mono',monospace;font-weight:600">
-            R$ ${parseFloat(r.total_aberto).toLocaleString('pt-BR',{minimumFractionDigits:2})}
-          </span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;height:4px;background:var(--border);border-radius:2px">
-            <div style="width:${Math.round(parseFloat(r.total_aberto)/max*100)}%;height:4px;background:var(--primary);border-radius:2px"></div>
-          </div>
-          <span style="font-size:11px;color:var(--muted)">${r.qtd_clientes} clientes</span>
-        </div>
-      </div>`).join('')}</div>`;
-  }catch(e){document.getElementById('cidades-corpo').innerHTML='<p style="color:var(--muted2);padding:16px">Erro ao carregar.</p>';}
-}
+    const r = await fetch('/cobranca/api/inadimplencia-por-bairro');
 
-// ── MODAL CIDADE ──────────────────────────────────────────────
+    if(!r.ok){
+      throw new Error(`HTTP ${r.status}`);
+    }
+
+    const dados = await r.json();
+
+    const el = document.getElementById('cidades-corpo');
+
+    if(!el){
+      console.error('Elemento cidades-corpo não encontrado.');
+      return;
+    }
+
+    if(!Array.isArray(dados) || !dados.length){
+      el.innerHTML='<p style="color:var(--muted2);padding:16px">Nenhum bairro encontrado.</p>';
+      return;
+    }
+
+    const maxValor = Math.max(
+      ...dados.map(r => parseFloat(r.valor || 0))
+    );
+
+    el.innerHTML = `
+      <div style="padding:4px 0">
+        ${dados.map(r => {
+          const valor = parseFloat(r.valor || 0);
+          const taxa = parseFloat(r.taxa || 0);
+          const total = parseInt(r.total || 0);
+          const inad = parseInt(r.inad || 0);
+          const titulos = parseInt(r.titulos || 0);
+
+          const largura = maxValor > 0
+            ? Math.max(2, Math.round((valor / maxValor) * 100))
+            : 2;
+
+          return `
+            <div
+              style="
+                padding:11px 8px;
+                margin-bottom:5px;
+                border-radius:7px;
+                border:1px solid var(--border);
+                background:var(--card);
+              "
+            >
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+                margin-bottom:6px;
+              ">
+                <div style="min-width:0">
+                  <div style="
+                    font-size:13px;
+                    font-weight:700;
+                    color:var(--text);
+                    white-space:nowrap;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                  ">
+                    ${r.bairro || '—'}
+                  </div>
+
+                  <div style="
+                    font-size:11px;
+                    color:var(--muted);
+                    margin-top:3px;
+                  ">
+                    ${inad} inadimplentes de ${total} clientes
+                    · ${titulos} título${titulos === 1 ? '' : 's'}
+                  </div>
+                </div>
+
+                <div style="
+                  text-align:right;
+                  flex-shrink:0;
+                ">
+                  <div style="
+                    font-size:13px;
+                    color:var(--danger);
+                    font-family:'JetBrains Mono',monospace;
+                    font-weight:700;
+                  ">
+                    R$ ${valor.toLocaleString('pt-BR',{
+                      minimumFractionDigits:2,
+                      maximumFractionDigits:2
+                    })}
+                  </div>
+
+                  <div style="
+                    font-size:11px;
+                    color:var(--muted);
+                    margin-top:2px;
+                  ">
+                    ${taxa.toFixed(2)}% de inadimplência
+                  </div>
+                </div>
+              </div>
+
+              <div style="
+                display:flex;
+                align-items:center;
+                gap:8px;
+              ">
+                <div style="
+                  flex:1;
+                  height:5px;
+                  background:var(--border);
+                  border-radius:3px;
+                  overflow:hidden;
+                ">
+                  <div style="
+                    width:${largura}%;
+                    height:5px;
+                    background:var(--primary);
+                    border-radius:3px;
+                  "></div>
+                </div>
+
+                <span style="
+                  font-size:10px;
+                  color:var(--muted);
+                  min-width:48px;
+                  text-align:right;
+                ">
+                  ${taxa.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+  }catch(e){
+    console.error('Erro ao carregar inadimplência por bairro:', e);
+
+    const el = document.getElementById('cidades-corpo');
+
+    if(el){
+      el.innerHTML =
+        '<p style="color:var(--muted2);padding:16px">Erro ao carregar bairros.</p>';
+    }
+  }
+}
 async function abrirModalCidade(idCidade, nomeCidade){
   // Cria modal dinamico
   let modal = document.getElementById('modal-cidade');
@@ -277,7 +399,7 @@ async function abrirModalCidade(idCidade, nomeCidade){
     <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-size:16px;font-weight:700;color:var(--text)">📍 ${nomeCidade}</div>
-        <div style="font-size:12px;color:var(--muted)">Clientes inadimplentes</div>
+        <div style="font-size:12px;color:var(--muted)">Clientes inadimplentes por bairro</div>
       </div>
       <button onclick="document.getElementById('modal-cidade').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
     </div>

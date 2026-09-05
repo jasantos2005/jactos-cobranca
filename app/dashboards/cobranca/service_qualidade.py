@@ -1,109 +1,145 @@
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
 COMISSAO_VENDA = 20.0
 CUSTO_INSTALACAO_MEDIO = 303.58
-import sqlite3
 from app.core.db import query, query_one
 from app.core.db_local import local_query
 
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
-
-def get_comercial(sql, params=()):
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute(sql, params)
-    rows = [dict(r) for r in cur.fetchall()]
-    conn.close()
-    return rows
-
-def _get_serasa_map(ids_clientes):
-    if not ids_clientes:
-        return {}
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    ph = ",".join("?" * len(ids_clientes))
-    cur.execute(f"""
-        SELECT p.ixc_cliente_id, al.resultado, al.detalhes
-        FROM hc_precadastros p
-        JOIN hc_auditoria_log al ON al.precadastro_id=p.id
-        WHERE p.ixc_cliente_id IN ({ph})
-          AND al.resultado IN ('ok','reprovado','pendente')
-          AND (al.regra LIKE '%serasa%' OR al.regra LIKE '%credito%' OR al.regra LIKE '%CREDITONM%')
-        ORDER BY al.id DESC
-    """, ids_clientes)
-    rows = [dict(r) for r in cur.fetchall()]
-    conn.close()
-    serasa_map = {}
-    for r in rows:
-        cid = str(r["ixc_cliente_id"])
-        if cid not in serasa_map:
-            serasa_map[cid] = {"resultado": r["resultado"], "detalhes": r["detalhes"]}
-    return serasa_map
 
 def get_qualidade_vendas(mes=None, vendedor=None, parcela=None):
     """
-    Cruza clientes ativados no período com os que entraram na cobrança.
+    Qualidade de vendas baseada exclusivamente nos dados do IXC.
     """
-    filtro = "WHERE data_ativacao IS NOT NULL AND data_ativacao != ''"
+
+    filtros = [
+        "cc.data_ativacao IS NOT NULL",
+        "cc.data_ativacao != ''",
+    ]
     params = []
+
     if mes:
-        filtro += " AND strftime('%Y-%m', data_ativacao) = ?"
+        filtros.append(
+            "DATE_FORMAT(cc.data_ativacao, '%%Y-%%m') = %s"
+        )
         params.append(mes)
+
     if vendedor:
-        filtro += " AND vendedor_nome = ?"
+        filtros.append("v.nome = %s")
         params.append(vendedor)
 
-    contratos = get_comercial(f"""
-        SELECT ixc_contrato_id, ixc_cliente_id, razao, vendedor_nome,
-               data_ativacao, plano_nome, plano_valor, status_contrato
-        FROM hc_contratos_cache
-        {filtro}
-        ORDER BY data_ativacao DESC
-    """, params)
+    where = " AND ".join(filtros)
+
+    contratos = query(f"""
+        SELECT
+            cc.id AS ixc_contrato_id,
+            cc.id_cliente AS ixc_cliente_id,
+            c.razao,
+            v.nome AS vendedor_nome,
+            cc.data_ativacao,
+            vd.nome AS plano_nome,
+            vd.valor_contrato AS plano_valor,
+            cc.status AS status_contrato
+        FROM ixcprovedor.cliente_contrato cc
+        INNER JOIN ixcprovedor.cliente c
+            ON c.id = cc.id_cliente
+        LEFT JOIN ixcprovedor.vendedor v
+            ON v.id = cc.id_vendedor
+        LEFT JOIN ixcprovedor.vd_contratos vd
+            ON vd.id = cc.id_vd_contrato
+        WHERE {where}
+        ORDER BY cc.data_ativacao DESC
+    """, tuple(params))
 
     if not contratos:
         return []
 
-    # Busca quais estão na cobrança
-    ids_clientes = tuple(c["ixc_cliente_id"] for c in contratos if c["ixc_cliente_id"])
-    ph = ",".join(["%s"]*len(ids_clientes))
+    ids_clientes = tuple(
+        c["ixc_cliente_id"]
+        for c in contratos
+        if c.get("ixc_cliente_id")
+    )
 
-    clientes_cobranca = query(f"""
-        SELECT f.id_cliente,
-               MAX(DATEDIFF(CURDATE(), f.data_vencimento)) AS maior_atraso,
-               SUM(f.valor_aberto) AS total_aberto,
-               COUNT(f.id) AS qtd_faturas,
-               MIN(f.nparcela) AS menor_parcela,
-               (SELECT COUNT(*) FROM ixcprovedor.fn_areceber fp
-                WHERE fp.id_cliente=f.id_cliente AND fp.status='R') AS meses_pagos
-        FROM ixcprovedor.fn_areceber f
-        WHERE f.id_cliente IN ({ph})
-          AND f.status='A' AND f.data_vencimento < CURDATE()
-        GROUP BY f.id_cliente
-    """, ids_clientes) if ids_clientes else []
+    cobranca_map = {}
 
-    cobranca_map = {str(r["id_cliente"]): r for r in clientes_cobranca}
-    serasa_map   = _get_serasa_map(ids_clientes)
+    if ids_clientes:
+        placeholders = ",".join(
+            ["%s"] * len(ids_clientes)
+        )
 
-    result = []
-    for c in contratos:
-        cob    = cobranca_map.get(str(c["ixc_cliente_id"]))
-        serasa = serasa_map.get(str(c["ixc_cliente_id"]), {})
-        result.append({
-            **c,
-            "na_cobranca":   bool(cob),
-            "maior_atraso":  int(cob["maior_atraso"]) if cob and cob["maior_atraso"] else 0,
-            "total_aberto":  float(cob["total_aberto"]) if cob and cob["total_aberto"] else 0,
-            "qtd_faturas":   int(cob["qtd_faturas"]) if cob and cob["qtd_faturas"] else 0,
-            "menor_parcela": int(cob["menor_parcela"]) if cob and cob["menor_parcela"] else 0,
-            "meses_pagos":   int(cob["meses_pagos"]) if cob and cob["meses_pagos"] else 0,
-            "serasa":        serasa.get("resultado", "—"),
-            "serasa_det":    serasa.get("detalhes", ""),
+        cobranca = query(f"""
+            SELECT
+                f.id_cliente,
+                MAX(
+                    DATEDIFF(CURDATE(), f.data_vencimento)
+                ) AS maior_atraso,
+                SUM(f.valor_aberto) AS total_aberto,
+                COUNT(f.id) AS qtd_faturas,
+                MIN(f.nparcela) AS menor_parcela
+            FROM ixcprovedor.fn_areceber f
+            WHERE f.id_cliente IN ({placeholders})
+              AND f.status = 'A'
+              AND f.data_vencimento < CURDATE()
+            GROUP BY f.id_cliente
+        """, ids_clientes)
+
+        cobranca_map = {
+            str(r["id_cliente"]): r
+            for r in cobranca
+        }
+
+        # Histórico de pagamentos separado da situação atual de cobrança.
+        # A regra histórica é por cliente e considera somente status R.
+        pagamentos = query(f"""
+            SELECT
+                fp.id_cliente,
+                COUNT(*) AS meses_pagos
+            FROM ixcprovedor.fn_areceber fp
+            WHERE fp.id_cliente IN ({placeholders})
+              AND fp.status = 'R'
+            GROUP BY fp.id_cliente
+        """, ids_clientes)
+
+        pagamentos_map = {
+            str(r["id_cliente"]): r
+            for r in pagamentos
+        }
+
+    resultado = []
+
+    for contrato in contratos:
+        cobranca = cobranca_map.get(
+            str(contrato["ixc_cliente_id"])
+        )
+
+        resultado.append({
+            **contrato,
+            "na_cobranca": bool(cobranca),
+            "maior_atraso": int(
+                cobranca["maior_atraso"] or 0
+            ) if cobranca else 0,
+            "total_aberto": float(
+                cobranca["total_aberto"] or 0
+            ) if cobranca else 0.0,
+            "qtd_faturas": int(
+                cobranca["qtd_faturas"] or 0
+            ) if cobranca else 0,
+            "menor_parcela": int(
+                cobranca["menor_parcela"] or 0
+            ) if cobranca else 0,
+            "meses_pagos": int(
+                pagamentos_map.get(
+                    str(contrato["ixc_cliente_id"]),
+                    {}
+                ).get("meses_pagos") or 0
+            ),
         })
+
     if parcela is not None:
-        result = [r for r in result if r["na_cobranca"] and r["menor_parcela"] == int(parcela)]
-    return result
+        resultado = [
+            r for r in resultado
+            if r["na_cobranca"]
+            and r["menor_parcela"] == int(parcela)
+        ]
+
+    return resultado
 
 def get_kpis_qualidade(mes=None, parcela=None):
     rows = get_qualidade_vendas(mes=mes, parcela=parcela)
@@ -134,13 +170,24 @@ def get_kpis_qualidade(mes=None, parcela=None):
     }
 
 def get_meses_disponiveis():
-    rows = get_comercial("""
-        SELECT DISTINCT strftime('%Y-%m', data_ativacao) AS mes
-        FROM hc_contratos_cache
-        WHERE data_ativacao IS NOT NULL AND data_ativacao != ''
-        ORDER BY mes DESC LIMIT 12
-    """)
-    return [r["mes"] for r in rows if r["mes"]]
+    rows = query("""
+        SELECT DISTINCT
+            DATE_FORMAT(
+                cc.data_ativacao,
+                '%%Y-%%m'
+            ) AS mes
+        FROM ixcprovedor.cliente_contrato cc
+        WHERE cc.data_ativacao IS NOT NULL
+          AND cc.data_ativacao != ''
+        ORDER BY mes DESC
+        LIMIT 12
+    """, ())
+
+    return [
+        r["mes"]
+        for r in rows
+        if r["mes"]
+    ]
 
 def get_ranking_planos(mes=None):
     rows = get_qualidade_vendas(mes=mes)
@@ -207,60 +254,84 @@ def get_score_vendedores(mes=None):
     return sorted(resultado, key=lambda x: -x["score"])
 
 
-def get_inadimplencia_cidade():
-    import sqlite3
-    COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT cidade_nome, ixc_cliente_id
-        FROM hc_contratos_cache
-        WHERE cidade_nome IS NOT NULL AND cidade_nome != ''
+def get_inadimplencia_bairro():
+    """
+    Inadimplência por bairro da JACTOS.
+
+    Fonte oficial:
+        ixcprovedor.cliente.bairro
+
+    O cadastro de bairros já foi padronizado diretamente no IXC.
+    Não utiliza matriz de CEP e não consulta banco comercial da ClickDF.
+    Somente dados de Goiânia (cidade 5412).
+    """
+
+    rows = query("""
+        SELECT
+            c.bairro AS bairro,
+            COUNT(DISTINCT c.id) AS total_clientes,
+            COUNT(DISTINCT CASE
+                WHEN f.id IS NOT NULL THEN c.id
+            END) AS inadimplentes,
+            COUNT(DISTINCT f.id) AS titulos_vencidos,
+            COALESCE(SUM(f.valor_aberto), 0) AS valor_aberto
+        FROM ixcprovedor.cliente c
+        INNER JOIN ixcprovedor.cliente_contrato cc
+            ON cc.id_cliente = c.id
+           AND cc.status = 'A'
+        LEFT JOIN ixcprovedor.fn_areceber f
+            ON f.id_contrato = cc.id
+           AND f.status = 'A'
+           AND f.valor_aberto > 0
+           AND f.data_vencimento < CURDATE()
+        WHERE c.cidade = 5412
+          AND c.bairro IS NOT NULL
+          AND TRIM(c.bairro) <> ''
+        GROUP BY c.bairro
+        ORDER BY
+            (
+                COUNT(DISTINCT CASE
+                    WHEN f.id IS NOT NULL THEN c.id
+                END) * 100.0
+                / NULLIF(COUNT(DISTINCT c.id), 0)
+            ) DESC,
+            COALESCE(SUM(f.valor_aberto), 0) DESC,
+            c.bairro
     """)
-    rows = [dict(r) for r in cur.fetchall()]
-    conn.close()
-
-    if not rows:
-        return []
-
-    cidade_map  = {r["ixc_cliente_id"]: r["cidade_nome"] for r in rows}
-    total_cidade = {}
-    for r in rows:
-        c = r["cidade_nome"]
-        total_cidade[c] = total_cidade.get(c, 0) + 1
-
-    ids = tuple(cidade_map.keys())
-    ph  = ",".join(["%s"]*len(ids))
-    inadimplentes = query(f"""
-        SELECT f.id_cliente, SUM(f.valor_aberto) AS total_aberto
-        FROM ixcprovedor.fn_areceber f
-        INNER JOIN ixcprovedor.cliente_contrato cc ON cc.id_cliente=f.id_cliente AND cc.status='A'
-        WHERE f.status='A' AND f.data_vencimento < CURDATE()
-        AND f.id_cliente IN ({ph})
-        GROUP BY f.id_cliente
-    """, ids)
-
-    por_cidade = {}
-    for r in inadimplentes:
-        cidade = cidade_map.get(r["id_cliente"], "—")
-        if cidade not in por_cidade:
-            por_cidade[cidade] = {"cidade": cidade, "inad": 0, "valor": 0.0}
-        por_cidade[cidade]["inad"]  += 1
-        por_cidade[cidade]["valor"] += float(r["total_aberto"])
 
     resultado = []
-    for cidade, d in por_cidade.items():
-        total = total_cidade.get(cidade, 0)
-        taxa  = round(d["inad"] / total * 100) if total else 0
-        resultado.append({**d, "total": total, "taxa": taxa})
-    return sorted(resultado, key=lambda x: -x["taxa"])
+
+    for row in rows:
+        total = int(row.get("total_clientes") or 0)
+        inad = int(row.get("inadimplentes") or 0)
+        titulos = int(row.get("titulos_vencidos") or 0)
+        valor = float(row.get("valor_aberto") or 0)
+
+        resultado.append({
+            "bairro": row.get("bairro") or "SEM BAIRRO",
+            "total": total,
+            "inad": inad,
+            "taxa": round((inad * 100.0 / total), 2) if total else 0,
+            "titulos": titulos,
+            "valor": round(valor, 2),
+        })
+
+    return resultado
 
 
 def get_vendedores_disponiveis():
-    rows = get_comercial("""
-        SELECT DISTINCT vendedor_nome FROM hc_contratos_cache
-        WHERE vendedor_nome IS NOT NULL AND vendedor_nome != ''
-        ORDER BY vendedor_nome
-    """)
-    return [r["vendedor_nome"] for r in rows]
+    rows = query("""
+        SELECT DISTINCT
+            v.nome AS vendedor_nome
+        FROM ixcprovedor.cliente_contrato cc
+        INNER JOIN ixcprovedor.vendedor v
+            ON v.id = cc.id_vendedor
+        WHERE v.nome IS NOT NULL
+          AND v.nome != ''
+        ORDER BY v.nome
+    """, ())
+
+    return [
+        r["vendedor_nome"]
+        for r in rows
+    ]

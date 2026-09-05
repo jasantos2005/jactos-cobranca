@@ -1,0 +1,441 @@
+#!/usr/bin/env python3
+"""
+AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V3.3
+
+OBJETIVO:
+- Auditar variações de cliente.bairro agrupando primeiro famílias equivalentes.
+- Separar:
+    * familia_comparacao = nome usado apenas para comparação;
+    * bairro_padrao_gravacao = valor REAL existente no IXC que poderá ser usado
+      futuramente como padrão.
+- NÃO altera o IXC.
+- NÃO executa UPDATE/INSERT/DELETE.
+
+REGRAS:
+1. Caixa, acentos e pequenas diferenças de grafia são equivalentes.
+2. Prefixos JARDIM/SETOR podem ser removidos apenas para comparação.
+3. Números/romanos e sufixos relevantes NÃO são removidos.
+   Ex.: JARDIM COLORADO != JARDIM COLORADO I.
+4. O bairro padrão deve ser sempre um valor real existente no IXC.
+5. Se houver famílias distintas relevantes no mesmo CEP:
+   - uma família claramente dominante pode ser sugerida;
+   - as demais permanecem como exceções;
+   - casos estruturalmente ambíguos permanecem REVISAR/BLOQUEADO.
+6. CEP genérico ou com bairros muito diferentes permanece BLOQUEADO.
+"""
+
+import sys
+import re
+import unicodedata
+from collections import Counter, defaultdict
+from pathlib import Path
+from difflib import SequenceMatcher
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from app.core.db import query_one
+
+
+def query_all(sql, params=None):
+    """Executa consulta retornando todas as linhas através da conexão do projeto."""
+    from app.core.db import get_connection
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, params or ())
+        return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+
+OUT = ROOT / "backups" / "auditoria_padronizacao_bairros_v3_3.tsv"
+
+
+PREFIXOS_COMPARACAO = (
+    "JARDIM ",
+    "JD ",
+    "SETOR ",
+    "ST ",
+)
+
+
+def normalizar_texto(valor):
+    if valor is None:
+        return ""
+
+    texto = str(valor).strip().upper()
+
+    texto = unicodedata.normalize("NFKD", texto)
+    texto = "".join(
+        c for c in texto
+        if not unicodedata.combining(c)
+    )
+
+    texto = re.sub(r"[^A-Z0-9]+", " ", texto)
+    texto = re.sub(r"\s+", " ", texto).strip()
+
+    return texto
+
+
+def normalizar_cep(valor):
+    if valor is None:
+        return ""
+
+    return re.sub(r"\D", "", str(valor)).zfill(8)[-8:]
+
+
+def familia_comparacao(bairro):
+    """
+    Normalização usada SOMENTE para comparação.
+
+    Importante:
+    - preserva números/romanos;
+    - preserva palavras que fazem parte da identidade;
+    - remove somente prefixos estruturais claramente equivalentes.
+    """
+    texto = normalizar_texto(bairro)
+
+    alterado = True
+    while alterado:
+        alterado = False
+
+        for prefixo in PREFIXOS_COMPARACAO:
+            if texto.startswith(prefixo):
+                texto = texto[len(prefixo):].strip()
+                alterado = True
+                break
+
+    return texto
+
+
+def similaridade(a, b):
+    if not a or not b:
+        return 0.0
+
+    if a == b:
+        return 1.0
+
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def sao_familias_equivalentes(a, b):
+    """
+    Decide se dois bairros pertencem à mesma família.
+
+    Não funde automaticamente:
+    - JARDIM COLORADO x JARDIM COLORADO I
+    - JARDIM CURITIBA x JARDIM CURITIBA IV
+
+    Porque o sufixo pode representar bairro distinto.
+    """
+    fa = familia_comparacao(a)
+    fb = familia_comparacao(b)
+
+    if not fa or not fb:
+        return False
+
+    if fa == fb:
+        return True
+
+    return False
+
+
+def construir_familias(variantes):
+    """
+    Agrupa variantes equivalentes antes de calcular dominância.
+    """
+    familias = []
+
+    for variante, quantidade in variantes.items():
+        colocado = False
+
+        for familia in familias:
+            representante = familia["representante"]
+
+            if sao_familias_equivalentes(variante, representante):
+                familia["variantes"][variante] += quantidade
+                familia["total"] += quantidade
+                colocado = True
+                break
+
+        if not colocado:
+            familias.append(
+                {
+                    "representante": variante,
+                    "variantes": Counter({variante: quantidade}),
+                    "total": quantidade,
+                }
+            )
+
+    # Recalcula o representante de cada família:
+    # preferência pelo valor real mais frequente.
+    for familia in familias:
+        familia["representante"] = max(
+            familia["variantes"],
+            key=lambda x: (
+                familia["variantes"][x],
+                1 if normalizar_texto(x).startswith(
+                    ("JARDIM ", "SETOR ")
+                ) else 0,
+                len(str(x)),
+            ),
+        )
+
+    familias.sort(
+        key=lambda f: f["total"],
+        reverse=True,
+    )
+
+    return familias
+
+
+def analisar_cep(cep, registros):
+    """
+    Classificação por CEP depois do agrupamento das famílias.
+    """
+    variantes = Counter()
+
+    for row in registros:
+        bairro = (row.get("bairro") or "").strip()
+
+        if bairro:
+            variantes[bairro] += 1
+
+    if not variantes:
+        return {
+            "status": "BLOQUEADO",
+            "bairro_padrao_gravacao": "",
+            "familias": [],
+            "excecoes": [],
+            "motivo": "CEP sem bairro válido",
+        }
+
+    familias = construir_familias(variantes)
+
+    principal = familias[0]
+    total = sum(f["total"] for f in familias)
+
+    segunda = familias[1]["total"] if len(familias) > 1 else 0
+    participacao = principal["total"] / total if total else 0
+
+    # Uma única família: caso seguro, desde que haja volume razoável.
+    if len(familias) == 1:
+        return {
+            "status": "SEGURO",
+            "bairro_padrao_gravacao": principal["representante"],
+            "familias": familias,
+            "excecoes": [],
+            "motivo": "Todas as variantes pertencem à mesma família",
+        }
+
+    # Família dominante muito forte:
+    # podemos sugerir a principal, mas preservamos as outras como exceções.
+    if principal["total"] >= 10 and participacao >= 0.80:
+        return {
+            "status": "REVISAR",
+            "bairro_padrao_gravacao": principal["representante"],
+            "familias": familias,
+            "excecoes": familias[1:],
+            "motivo": (
+                "Família dominante identificada, mas existem "
+                "famílias distintas no mesmo CEP"
+            ),
+        }
+
+    # Pequena diferença entre famílias ou pouco volume:
+    # não assumir.
+    if principal["total"] >= 5 and participacao >= 0.65:
+        return {
+            "status": "REVISAR",
+            "bairro_padrao_gravacao": principal["representante"],
+            "familias": familias,
+            "excecoes": familias[1:],
+            "motivo": (
+                "Há família dominante, porém sem segurança suficiente "
+                "para alteração automática"
+            ),
+        }
+
+    return {
+        "status": "BLOQUEADO",
+        "bairro_padrao_gravacao": "",
+        "familias": familias,
+        "excecoes": familias[1:],
+        "motivo": "CEP possui famílias de bairros estruturalmente distintas",
+    }
+
+
+def formatar_familia(familia):
+    partes = []
+
+    for variante, quantidade in familia["variantes"].most_common():
+        partes.append(f"{variante} ({quantidade})")
+
+    return " | ".join(partes)
+
+
+def main():
+    print("=" * 90)
+    print("AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V3.3")
+    print("MODO: SOMENTE LEITURA — NENHUMA ALTERAÇÃO NO IXC")
+    print("=" * 90)
+
+    rows = query_all(
+        """
+        SELECT
+            id,
+            cep,
+            bairro
+        FROM ixcprovedor.cliente
+        WHERE cep IS NOT NULL
+          AND TRIM(cep) <> ''
+          AND bairro IS NOT NULL
+          AND TRIM(bairro) <> ''
+        ORDER BY cep, id
+        """
+    )
+
+    por_cep = defaultdict(list)
+
+    for row in rows:
+        cep = normalizar_cep(row.get("cep"))
+
+        if cep:
+            por_cep[cep].append(row)
+
+    resultados = []
+
+    for cep, registros in sorted(por_cep.items()):
+        analise = analisar_cep(cep, registros)
+
+        resultados.append(
+            {
+                "cep": cep,
+                "clientes": len(registros),
+                "status": analise["status"],
+                "bairro_padrao_gravacao": (
+                    analise["bairro_padrao_gravacao"]
+                ),
+                "familias": analise["familias"],
+                "excecoes": analise["excecoes"],
+                "motivo": analise["motivo"],
+            }
+        )
+
+    distribuicao = Counter(r["status"] for r in resultados)
+
+    print()
+    print(f"Clientes analisados: {len(rows)}")
+    print(f"CEPs analisados: {len(resultados)}")
+    print()
+    print("DISTRIBUIÇÃO:")
+    for status in ("SEGURO", "REVISAR", "BLOQUEADO"):
+        print(f"  {status}: {distribuicao.get(status, 0)}")
+
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+
+    with OUT.open("w", encoding="utf-8") as f:
+        f.write(
+            "cep\tclientes\tstatus\tbairro_padrao_gravacao\t"
+            "familias\tmotivo\n"
+        )
+
+        for r in resultados:
+            familias = " || ".join(
+                formatar_familia(f)
+                for f in r["familias"]
+            )
+
+            f.write(
+                "\t".join(
+                    [
+                        r["cep"],
+                        str(r["clientes"]),
+                        r["status"],
+                        r["bairro_padrao_gravacao"],
+                        familias,
+                        r["motivo"],
+                    ]
+                )
+                + "\n"
+            )
+
+    print()
+    print("PRINCIPAIS CASOS SEGUROS:")
+    seguros = [
+        r for r in resultados
+        if r["status"] == "SEGURO"
+    ]
+
+    for r in sorted(
+        seguros,
+        key=lambda x: x["clientes"],
+        reverse=True,
+    )[:40]:
+        print(
+            f"  {r['cep']} | {r['clientes']} | "
+            f"{r['bairro_padrao_gravacao']}"
+        )
+
+    print()
+    print("PRINCIPAIS CASOS PARA REVISÃO:")
+    revisao = [
+        r for r in resultados
+        if r["status"] == "REVISAR"
+    ]
+
+    for r in sorted(
+        revisao,
+        key=lambda x: x["clientes"],
+        reverse=True,
+    )[:40]:
+        print(
+            f"  {r['cep']} | {r['clientes']} | "
+            f"sugerido={r['bairro_padrao_gravacao']}"
+        )
+
+        for familia in r["familias"]:
+            print(
+                f"      família: {formatar_familia(familia)}"
+            )
+
+    print()
+    print("PRINCIPAIS CASOS BLOQUEADOS:")
+    bloqueados = [
+        r for r in resultados
+        if r["status"] == "BLOQUEADO"
+    ]
+
+    for r in sorted(
+        bloqueados,
+        key=lambda x: x["clientes"],
+        reverse=True,
+    )[:40]:
+        print(
+            f"  {r['cep']} | {r['clientes']} | "
+            f"{r['motivo']}"
+        )
+
+        for familia in r["familias"][:8]:
+            print(
+                f"      família: {formatar_familia(familia)}"
+            )
+
+    print()
+    print("=" * 90)
+    print("VALIDAÇÃO DE SEGURANÇA")
+    print("=" * 90)
+    print("IXC UPDATE: NÃO")
+    print("IXC INSERT: NÃO")
+    print("IXC DELETE: NÃO")
+    print("CLIENTES ALTERADOS: 0")
+    print(f"RELATÓRIO: {OUT}")
+    print("=" * 90)
+
+
+if __name__ == "__main__":
+    main()

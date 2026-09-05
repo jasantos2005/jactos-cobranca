@@ -1,7 +1,5 @@
 from app.core.db import query, query_one
-import sqlite3
 
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
 
 # Busca motivos direto do IXC na inicialização
 def _carregar_motivos():
@@ -36,10 +34,18 @@ def get_cancelamentos(mes=None, data_ini=None, data_fim=None, pagina=1, por_pagi
                cc.descricao_aux_plano_venda AS plano,
                cc.obs_cancelamento, cc.motivo_cancelamento,
                cc.valor_unitario,
+               v.nome AS vendedor_nome,
+               cid.nome AS cidade_nome,
+               cid.uf AS cidade_uf,
+               vd.nome AS plano_nome_ixc,
+               vd.valor_contrato AS plano_valor_ixc,
                DATEDIFF(cc.data_cancelamento, cc.data_ativacao) AS dias_na_base,
                COALESCE(c.whatsapp, c.telefone_celular, c.fone,'') AS telefone
         FROM ixcprovedor.cliente_contrato cc
         INNER JOIN ixcprovedor.cliente c ON c.id=cc.id_cliente
+        LEFT JOIN ixcprovedor.vendedor v ON v.id=cc.id_vendedor
+        LEFT JOIN ixcprovedor.cidade cid ON cid.id=cc.cidade
+        LEFT JOIN ixcprovedor.vd_contratos vd ON vd.id=cc.id_vd_contrato
         WHERE cc.status='I'
           AND cc.data_cancelamento >= %s
           AND cc.data_cancelamento <= %s
@@ -107,18 +113,11 @@ def get_cancelamentos(mes=None, data_ini=None, data_fim=None, pagina=1, por_pagi
                 desconexoes_map[id_cli] = descon_by_login[login]
 
     # Vendedor, plano e cidade no comercial
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute(f"SELECT ixc_contrato_id, ixc_cliente_id, vendedor_nome, cidade_nome, plano_nome, plano_valor FROM hc_contratos_cache WHERE ixc_contrato_id IN ({','.join('?'*len(ids))})", tuple(r["contrato_id"] for r in rows))
-    com_map = {r["ixc_contrato_id"]: dict(r) for r in cur.fetchall()}
-    conn.close()
 
     result = []
     for r in rows:
         parc  = parc_map.get(r["id_cliente"], {})
         sup   = sup_map.get(r["id_cliente"], {})
-        com   = com_map.get(r["contrato_id"], {})
         motivo_id = r["motivo_cancelamento"] or 0
         result.append({
             **r,
@@ -130,10 +129,14 @@ def get_cancelamentos(mes=None, data_ini=None, data_fim=None, pagina=1, por_pagi
             "desconexoes": int(desconexoes_map.get(r["id_cliente"], {}).get("total_descon") or 0),
             "lost_carrier": int(desconexoes_map.get(r["id_cliente"], {}).get("lost_carrier") or 0),
             "user_request": int(desconexoes_map.get(r["id_cliente"], {}).get("user_request") or 0),
-            "vendedor": com.get("vendedor_nome", "—"),
-            "cidade": com.get("cidade_nome", "—"),
-            "plano": r["plano"] or com.get("plano_nome", "—"),
-            "plano_valor": float(com.get("plano_valor") or r.get("valor_unitario") or 0),
+            "vendedor": r.get("vendedor_nome") or "—",
+            "cidade": r.get("cidade_nome") or "—",
+            "plano": r.get("plano_nome_ixc") or r.get("plano") or "—",
+            "plano_valor": float(
+                  r.get("plano_valor_ixc")
+                  or r.get("valor_unitario")
+                  or 0
+              ),
         })
     return result
 

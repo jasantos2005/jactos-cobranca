@@ -60,7 +60,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <header class="header">
     <div>
       <div class="header-title">🛡️ Dashboard de Retenção</div>
-      <div class="header-sub">Clientes em risco de cancelamento — score baseado em atraso, OPA e histórico</div>
+      <div class="header-sub">Clientes em risco de cancelamento — score baseado em atraso e histórico de pagamentos</div>
     </div>
     <div class="filters">
       <select class="fsel" id="sel-nivel" onchange="filtrarNivel(this.value)">
@@ -68,7 +68,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <option value="critico">🔴 Crítico (score 70+)</option>
         <option value="atencao">🟡 Atenção (score 40+)</option>
         <option value="bom">⭐ Clientes Bons</option>
-        <option value="opa">📱 Com chamado OPA</option>
+
       </select>
     </div>
   </header>
@@ -89,12 +89,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="kpi-value" style="color:var(--amber)">{{ kpis.atencao }}</div>
         <div class="kpi-sub">score 40-69</div>
       </div>
-      <div class="kpi" style="border-color:var(--purple);cursor:pointer" onclick="filtrarNivel('opa')">
-        <div class="kpi-label">📱 Com chamado OPA</div>
-        <div class="kpi-value" style="color:var(--purple)">{{ kpis.com_opa }}</div>
-        <div class="kpi-sub">financeiro ou suporte</div>
-      </div>
-      <div class="kpi" style="border-color:var(--red)">
+<div class="kpi" style="border-color:var(--red)">
         <div class="kpi-label">💸 Valor em risco</div>
         <div class="kpi-value" style="color:var(--red);font-size:18px">R$ {{ "%.2f"|format(kpis.valor) }}</div>
         <div class="kpi-sub">total em aberto</div>
@@ -112,11 +107,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <thead><tr>
           <th>Score</th><th>Nível</th><th>Cliente</th><th>Cidade</th><th>Vendedor</th>
           <th>Atraso</th><th>Parcelas</th><th>Em dia</th><th>Valor</th>
-          <th>OPA Fin</th><th>OPA Sup</th><th>Contato</th><th>Ação</th>
+          <th>Contato</th><th>Ação</th>
         </tr></thead>
         <tbody>
         {% for r in rows %}
-        <tr data-nivel="{{ r.nivel }}" data-opa="{{ '1' if r.opa_fin > 0 or r.opa_sup > 0 else '0' }}">
+        <tr data-nivel="{{ r.nivel }}"">
           <td>
             <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:{% if r.score >= 70 %}var(--red){% elif r.score >= 40 %}var(--amber){% else %}var(--primary){% endif %}">{{ r.score }}</span>
             <div class="score-bar"><div class="score-fill" style="width:{{ r.score }}%;background:{% if r.score >= 70 %}var(--red){% elif r.score >= 40 %}var(--amber){% else %}var(--primary){% endif %}"></div></div>
@@ -139,12 +134,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px">{{ r.total_pagas }}</td>
           <td style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary)">{{ r.pagas_em_dia }}</td>
           <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">R$ {{ "%.2f"|format(r.total_aberto) }}</td>
-          <td style="text-align:center;color:{% if r.opa_fin > 0 %}var(--amber){% else %}var(--muted2){% endif %};font-family:'JetBrains Mono',monospace;font-size:12px">
-            {% if r.opa_fin > 0 %}{{ r.opa_fin }}x{% else %}—{% endif %}
-          </td>
-          <td style="text-align:center;color:{% if r.opa_sup > 0 %}var(--purple){% else %}var(--muted2){% endif %};font-family:'JetBrains Mono',monospace;font-size:12px">
-            {% if r.opa_sup > 0 %}{{ r.opa_sup }}x{% else %}—{% endif %}
-          </td>
           <td style="text-align:center">
             <button onclick="abrirContato({{ r.id_cliente }}, '{{ r.razao|replace("'","") }}')" style="padding:3px 8px;border-radius:5px;background:rgba(137,87,229,.15);color:var(--purple);border:1px solid var(--purple);font-size:10px;cursor:pointer">+ Contato</button>
           </td>
@@ -194,7 +183,7 @@ function filtrarNivel(nivel){
       <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Tipo</label>
       <select id="mc-tipo" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px">
         <option>Ligação realizada</option>
-        
+
         <option>Não atendeu</option>
         <option>Proposta de negociação</option>
         <option>Acordo firmado</option>

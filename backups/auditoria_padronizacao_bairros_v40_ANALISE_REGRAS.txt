@@ -1,0 +1,103 @@
+========================================================================================================================
+AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V4.0
+========================================================================================================================
+ANÁLISE DAS 38 REGRAS DA V3.9
+MODO: SOMENTE LEITURA — NENHUMA ALTERAÇÃO NO IXC
+
+
+========================================================================================================================
+CANDIDATO_SEGURO — 0 REGRAS
+========================================================================================================================
+
+
+========================================================================================================================
+REVISAR — 38 REGRAS
+========================================================================================================================
+
+[001]   46] 46 clientes | CANDIDA DE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[002]   40] 40 clientes | SETOR CÂNDIDA DE MORAIS -> CANDIDA DE MORAES
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[003]   26] 26 clientes | RESIDENCIAL GOIÂNIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[004]   15] 15 clientes | Setor Cândida de Morais -> CANDIDA DE MORAES
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[005]    8] 8 clientes | RESIDENCIAL GOI NIA VIVA -> RESIDENCIAL GOIÂNIA VIVA
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[006]    6] 6 clientes | RESIDENCIAL GOIANIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[007]    4] 4 clientes | JARDIM HELLOU -> RESIDENCIAL JARDIM HELOU
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[008]    2] 2 clientes | JARDIM DAS HORTENCIA -> JARDIM DAS HORTENCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[009]    2] 2 clientes | JARDIM DAS HORTENSIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[010]    2] 2 clientes | RESIDENCIAL GOINIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[011]    1] 1 clientes | AEOROVIARIO -> AEROVIÁRIO
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[012]    1] 1 clientes | AEOROVIARIO -> SETOR AEROVIARIO
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[013]    1] 1 clientes | AEOROVIÁRIO -> SETOR AEROVIARIO
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[014]    1] 1 clientes | CANDIDO DE MORAES -> CANDIDA DE MORAES
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[015]    1] 1 clientes | CONJUNTO RIVIEIRA -> CONJUNTO RIVIERA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[016]    1] 1 clientes | CÂNDIDA DE MORAIS -> CANDIDA DE MORAES
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[017]    1] 1 clientes | FAZENDA CAVEIRAS -> FAZENDA CAVEIRA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[018]    1] 1 clientes | HUGO DE MORAIS -> RESIDENCIAL HUGO DE MORAES
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[019]    1] 1 clientes | JARDIM  DAS HORTENCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[020]    1] 1 clientes | JARDIM COLORADO 1 -> JARDIM COLORADO
+      MOTIVO: Alteração envolve número/subdivisão.
+[021]    1] 1 clientes | JARDIM DAS HORTENCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[022]    1] 1 clientes | JARDIM DAS HORTENSIAS -> JARDIM DAS HORTENCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[023]    1] 1 clientes | JARDIM DAS HORTÊNCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[024]    1] 1 clientes | JARDIM DAS HORTÊNSIAS -> JARDIM DAS HORTENCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[025]    1] 1 clientes | JARDIM DAS HORTÊNSIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[026]    1] 1 clientes | JARDIM NOVA ESPERANÇAA -> JARDIM NOVA ESPERANÇA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[027]    1] 1 clientes | JARDIM NOVO MUNDO 3 -> JARDIM NOVO MUNDO
+      MOTIVO: Alteração envolve número/subdivisão.
+[028]    1] 1 clientes | JARDIM PETROPLIS -> JARDIM PETRÓPOLIS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[029]    1] 1 clientes | JARDIN DAS HORTENCIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[030]    1] 1 clientes | JARDIN NOVA ESPERANÇA -> JARDIM NOVA ESPERANÇA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[031]    1] 1 clientes | MANÇOES PARAÍSO -> MANSÕES PARAÍSO
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[032]    1] 1 clientes | PARQUE TREMENDÃO 2 -> PARQUE TREMENDÃO
+      MOTIVO: Alteração envolve número/subdivisão.
+[033]    1] 1 clientes | RESIDENCIAL ANA MORAIS -> RESIDENCIAL ANA MORAES
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[034]    1] 1 clientes | RESIDENCIAL GOINIA VIVA -> RESIDENCIAL GOIÂNIA VIVA
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[035]    1] 1 clientes | RESIDENCIAL HUGO DE MORAIS -> RESIDENCIAL HUGO DE MORAES
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[036]    1] 1 clientes | RESIDÊNCIAL GOIÂNIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Existe transformação inversa entre as duas formas.
+[037]    1] 1 clientes | SETOR CANDIDA DE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+[038]    1] 1 clientes | SETOR CANDIDADE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Diferença semântica/cadastral entre denominações.
+
+========================================================================================================================
+RESUMO
+========================================================================================================================
+CANDIDATO_SEGURO: 0 regras / 0 clientes
+REVISAR: 38 regras / 179 clientes
+
+IXC UPDATE: NÃO
+IXC INSERT: NÃO
+IXC DELETE: NÃO
+CLIENTES ALTERADOS: 0

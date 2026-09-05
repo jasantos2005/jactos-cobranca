@@ -1,9 +1,7 @@
 from app.core.db import query, query_one
 from app.core.db_local import local_query_one
-import sqlite3, re
 from datetime import datetime, timezone, timedelta
 
-COMERCIAL_DB = "/opt/automacoes/cliquedf/comercial/hub_comercial.db"
 
 def now_br():
     return datetime.now(timezone(timedelta(hours=-3)))
@@ -151,28 +149,6 @@ def get_dashboard_gerencial():
           AND DATE_FORMAT(data_cancelamento,'%%Y-%%m')='{mes_atu}'
     """, ())
 
-    # OPA alertas
-    conn = sqlite3.connect(COMERCIAL_DB)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    data_30 = (agora - timedelta(days=30)).strftime('%Y-%m-%d')
-    cur.execute("""
-        SELECT COUNT(DISTINCT canal_cliente) AS total
-        FROM (
-            SELECT canal_cliente, SUM(cnt) AS total_chamados
-            FROM (
-                SELECT canal_cliente, COUNT(*) AS cnt
-                FROM opa_atendimentos
-                WHERE setor IN ('Suporte','Financeiro') AND data_abertura >= ?
-                GROUP BY canal_cliente, setor
-            ) t GROUP BY canal_cliente
-            HAVING total_chamados >= 2
-        ) u
-    """, (data_30,))
-    row_opa = cur.fetchone()
-    opa_criticos = int(row_opa["total"] if row_opa else 0)
-    conn.close()
-
     # === RETENÇÃO ===
     from app.dashboards.cobranca.service_retencao import get_kpis_retencao
     kpis_ret = get_kpis_retencao()
@@ -202,7 +178,6 @@ def get_dashboard_gerencial():
         "nunca_pagaram": int(nunca_pagaram["total"] or 0),
         "os34_abertas":  int(os34_abertas["total"] or 0),
         "os171_pendentes":int(os171_pendentes["total"] or 0),
-        "opa_criticos":  opa_criticos,
         # Qualidade vendas
         "qual_total":    kpis_qual.get("total", 0),
         "qual_inad":     kpis_qual.get("na_cobranca", 0),

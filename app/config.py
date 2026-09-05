@@ -10,7 +10,11 @@ class Settings:
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
     DB_NAME:     str = os.getenv("DB_NAME", "ixcprovedor")
 
-    SECRET_KEY:  str = os.getenv("SECRET_KEY", "mude-isso-em-producao")
+    SECRET_KEY:  str = os.getenv("SECRET_KEY", "")
+    if not SECRET_KEY:
+        raise RuntimeError(
+            "SECRET_KEY não configurada. Defina SECRET_KEY no arquivo .env."
+        )
     ALGORITHM:   str = os.getenv("ALGORITHM", "HS256")
     TOKEN_EXP:   int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 480))
 

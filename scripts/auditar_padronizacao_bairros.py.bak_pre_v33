@@ -1,0 +1,658 @@
+#!/usr/bin/env python3
+
+import csv
+import re
+import sys
+import unicodedata
+from collections import Counter, defaultdict
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from app.core.db import query
+
+
+SAIDA = BASE_DIR / "backups" / "auditoria_padronizacao_bairros_v3.tsv"
+
+
+def normalizar_texto(valor):
+    if valor is None:
+        return ""
+
+    texto = str(valor).strip().upper()
+
+    texto = unicodedata.normalize("NFD", texto)
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    )
+
+    texto = re.sub(r"\s+", " ", texto)
+
+    return texto.strip()
+
+
+def normalizar_cep(valor):
+    if valor is None:
+        return ""
+
+    return re.sub(r"\D", "", str(valor))
+
+
+def remover_prefixos(texto):
+    """
+    Remove apenas prefixos administrativos comuns.
+
+    Não altera o valor original do IXC.
+    """
+    texto = normalizar_texto(texto)
+
+    texto = re.sub(
+        r"^(SETOR|BAIRRO|JD|JARDIM|VILA|VL|PARQUE|PQ)\s+",
+        "",
+        texto,
+    )
+
+    return texto.strip()
+
+
+def tokens(texto):
+    return set(
+        token
+        for token in normalizar_texto(texto).split()
+        if token
+    )
+
+
+def distancia_levenshtein(a, b):
+    if a == b:
+        return 0
+
+    if not a:
+        return len(b)
+
+    if not b:
+        return len(a)
+
+    anterior = list(range(len(b) + 1))
+
+    for i, caractere_a in enumerate(a, 1):
+        atual = [i]
+
+        for j, caractere_b in enumerate(b, 1):
+            custo = 0 if caractere_a == caractere_b else 1
+
+            atual.append(
+                min(
+                    atual[-1] + 1,
+                    anterior[j] + 1,
+                    anterior[j - 1] + custo,
+                )
+            )
+
+        anterior = atual
+
+    return anterior[-1]
+
+
+def similaridade(a, b):
+    a = normalizar_texto(a)
+    b = normalizar_texto(b)
+
+    if a == b:
+        return 100.0
+
+    if not a or not b:
+        return 0.0
+
+    tamanho = max(len(a), len(b))
+
+    if tamanho == 0:
+        return 100.0
+
+    distancia = distancia_levenshtein(a, b)
+
+    return round(
+        (1 - distancia / tamanho) * 100,
+        2,
+    )
+
+
+def similaridade_tokens(a, b):
+    ta = tokens(a)
+    tb = tokens(b)
+
+    if not ta or not tb:
+        return 0.0
+
+    intersecao = len(ta & tb)
+    uniao = len(ta | tb)
+
+    if not uniao:
+        return 0.0
+
+    return round(
+        intersecao * 100 / uniao,
+        2,
+    )
+
+
+def distancia_familia(a, b):
+    """
+    Compara o nome completo e também a forma sem prefixos.
+    """
+
+    a_norm = normalizar_texto(a)
+    b_norm = normalizar_texto(b)
+
+    a_fam = remover_prefixos(a)
+    b_fam = remover_prefixos(b)
+
+    sim_completa = similaridade(a_norm, b_norm)
+    sim_familia = similaridade(a_fam, b_fam)
+    sim_tokens = similaridade_tokens(a_fam, b_fam)
+
+    return max(
+        sim_completa,
+        sim_familia,
+        sim_tokens,
+    )
+
+
+def classificar_variacao(
+    principal,
+    variante,
+    quantidade_variante,
+):
+    """
+    Classifica uma variante em relação ao bairro principal.
+
+    SEGURO:
+        mesma representação após normalização.
+
+    PROVÁVEL:
+        pequena diferença ortográfica.
+
+    DIFERENTE:
+        não há evidência suficiente.
+    """
+
+    principal_norm = normalizar_texto(principal)
+    variante_norm = normalizar_texto(variante)
+
+    principal_fam = remover_prefixos(principal)
+    variante_fam = remover_prefixos(variante)
+
+    if principal_norm == variante_norm:
+        return {
+            "tipo": "SEGURO",
+            "similaridade": 100.0,
+            "motivo": "mesma grafia após normalização",
+        }
+
+    if principal_fam == variante_fam:
+        return {
+            "tipo": "SEGURO",
+            "similaridade": 100.0,
+            "motivo": "mesma família após remoção de prefixo",
+        }
+
+    sim = distancia_familia(
+        principal_fam,
+        variante_fam,
+    )
+
+    # Diferenças muito pequenas:
+    # provável erro de digitação, pluralização ou
+    # pequena variação ortográfica.
+    if sim >= 92:
+        return {
+            "tipo": "PROVÁVEL",
+            "similaridade": sim,
+            "motivo": "alta similaridade ortográfica",
+        }
+
+    # Pequena quantidade de caracteres diferentes.
+    if (
+        sim >= 85
+        and quantidade_variante <= 5
+    ):
+        return {
+            "tipo": "PROVÁVEL",
+            "similaridade": sim,
+            "motivo": "variante pequena e pouco frequente",
+        }
+
+    return {
+        "tipo": "DIFERENTE",
+        "similaridade": sim,
+        "motivo": "similaridade insuficiente",
+    }
+
+
+def analisar_cep(variacoes):
+    """
+    Recebe:
+
+        [(bairro, quantidade), ...]
+
+    e retorna uma análise completa do CEP.
+    """
+
+    total = sum(
+        quantidade
+        for _, quantidade in variacoes
+    )
+
+    if not total:
+        return {
+            "status": "BLOQUEADO",
+            "bairro_sugerido": "",
+            "alteraveis": [],
+            "provaveis": [],
+            "excecoes": [],
+            "clientes_alterar": 0,
+            "clientes_provaveis": 0,
+            "clientes_excecao": 0,
+            "confianca": 0.0,
+        }
+
+    principal, quantidade_principal = variacoes[0]
+
+    alteraveis = []
+    provaveis = []
+    excecoes = []
+
+    for bairro, quantidade in variacoes:
+        if bairro == principal:
+            alteraveis.append({
+                "bairro": bairro,
+                "quantidade": quantidade,
+                "similaridade": 100.0,
+                "motivo": "bairro principal",
+            })
+            continue
+
+        analise = classificar_variacao(
+            principal,
+            bairro,
+            quantidade,
+        )
+
+        item = {
+            "bairro": bairro,
+            "quantidade": quantidade,
+            "similaridade": analise["similaridade"],
+            "motivo": analise["motivo"],
+        }
+
+        if analise["tipo"] == "SEGURO":
+            alteraveis.append(item)
+
+        elif analise["tipo"] == "PROVÁVEL":
+            provaveis.append(item)
+
+        else:
+            excecoes.append(item)
+
+    clientes_alterar = sum(
+        item["quantidade"]
+        for item in alteraveis
+    )
+
+    clientes_provaveis = sum(
+        item["quantidade"]
+        for item in provaveis
+    )
+
+    clientes_excecao = sum(
+        item["quantidade"]
+        for item in excecoes
+    )
+
+    percentual_principal = (
+        quantidade_principal * 100 / total
+    )
+
+    # CEP extremamente genérico:
+    # se houver muitas famílias e nenhuma
+    # predominância clara, não sugerir nada.
+    quantidade_familias = len(variacoes)
+
+    if quantidade_familias == 1:
+        status = "SEGURO"
+
+    elif clientes_excecao == 0 and clientes_provaveis == 0:
+        status = "SEGURO"
+
+    elif (
+        percentual_principal >= 90
+        and clientes_excecao <= max(
+            3,
+            total * 0.05,
+        )
+    ):
+        status = "REVISAR"
+
+    elif (
+        percentual_principal >= 75
+        and (
+            clientes_provaveis > 0
+            or clientes_excecao > 0
+        )
+    ):
+        status = "REVISAR"
+
+    else:
+        status = "BLOQUEADO"
+
+    # A confiança representa a predominância
+    # do bairro principal, não uma autorização de UPDATE.
+    confianca = round(
+        percentual_principal,
+        2,
+    )
+
+    return {
+        "status": status,
+        "bairro_sugerido": remover_prefixos(principal),
+        "bairro_principal": principal,
+        "alteraveis": alteraveis,
+        "provaveis": provaveis,
+        "excecoes": excecoes,
+        "clientes_alterar": clientes_alterar,
+        "clientes_provaveis": clientes_provaveis,
+        "clientes_excecao": clientes_excecao,
+        "confianca": confianca,
+    }
+
+
+def main():
+    print("=" * 120)
+    print("AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V3")
+    print("MODO SOMENTE LEITURA")
+    print("=" * 120)
+
+    rows = query("""
+        SELECT
+            c.id AS id_cliente,
+            c.cep,
+            c.bairro
+        FROM ixcprovedor.cliente c
+        WHERE c.cep IS NOT NULL
+          AND TRIM(c.cep) <> ''
+          AND c.bairro IS NOT NULL
+          AND TRIM(c.bairro) <> ''
+        ORDER BY c.cep, c.bairro, c.id
+    """)
+
+    print(
+        f"\nClientes analisados: {len(rows)}"
+    )
+
+    por_cep = defaultdict(Counter)
+
+    for row in rows:
+        cep = normalizar_cep(
+            row.get("cep")
+        )
+
+        bairro = str(
+            row.get("bairro") or ""
+        ).strip()
+
+        if len(cep) != 8:
+            continue
+
+        if not bairro:
+            continue
+
+        por_cep[cep][bairro] += 1
+
+    resultado = []
+
+    distribuicao = Counter()
+
+    for cep, bairros in sorted(
+        por_cep.items()
+    ):
+        variacoes = bairros.most_common()
+
+        analise = analisar_cep(
+            variacoes
+        )
+
+        status = analise["status"]
+
+        distribuicao[status] += 1
+
+        resultado.append({
+            "cep": cep,
+            "status": status,
+            "bairro_sugerido": analise[
+                "bairro_sugerido"
+            ],
+            "bairro_principal": analise[
+                "bairro_principal"
+            ],
+            "clientes_total": sum(
+                bairros.values()
+            ),
+            "clientes_alterar": analise[
+                "clientes_alterar"
+            ],
+            "clientes_provaveis": analise[
+                "clientes_provaveis"
+            ],
+            "clientes_excecao": analise[
+                "clientes_excecao"
+            ],
+            "confianca": analise[
+                "confianca"
+            ],
+            "alteraveis": " | ".join(
+                f"{item['bairro']} "
+                f"({item['quantidade']})"
+                for item in analise[
+                    "alteraveis"
+                ]
+            ),
+            "provaveis": " | ".join(
+                f"{item['bairro']} "
+                f"({item['quantidade']}) "
+                f"[{item['similaridade']}%]"
+                for item in analise[
+                    "provaveis"
+                ]
+            ),
+            "excecoes": " | ".join(
+                f"{item['bairro']} "
+                f"({item['quantidade']}) "
+                f"[{item['similaridade']}%]"
+                for item in analise[
+                    "excecoes"
+                ]
+            ),
+            "todas_variacoes": " | ".join(
+                f"{nome} ({qtd})"
+                for nome, qtd in variacoes
+            ),
+        })
+
+    SAIDA.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    campos = [
+        "cep",
+        "status",
+        "bairro_sugerido",
+        "bairro_principal",
+        "clientes_total",
+        "clientes_alterar",
+        "clientes_provaveis",
+        "clientes_excecao",
+        "confianca",
+        "alteraveis",
+        "provaveis",
+        "excecoes",
+        "todas_variacoes",
+    ]
+
+    with SAIDA.open(
+        "w",
+        encoding="utf-8",
+        newline="",
+    ) as arquivo:
+        writer = csv.DictWriter(
+            arquivo,
+            fieldnames=campos,
+            delimiter="\t",
+        )
+
+        writer.writeheader()
+        writer.writerows(resultado)
+
+    print("\nDISTRIBUIÇÃO")
+    print("-" * 80)
+
+    for status in [
+        "SEGURO",
+        "REVISAR",
+        "BLOQUEADO",
+    ]:
+        print(
+            f"{status:<15}"
+            f"{distribuicao[status]:>8}"
+        )
+
+    print("\nTOP 40 — SEGUROS")
+    print("-" * 120)
+
+    seguros = [
+        r
+        for r in resultado
+        if r["status"] == "SEGURO"
+    ]
+
+    seguros.sort(
+        key=lambda r: (
+            -r["clientes_alterar"],
+            -r["clientes_total"],
+        )
+    )
+
+    for i, r in enumerate(
+        seguros[:40],
+        1,
+    ):
+        print(
+            f"{i:02d}. "
+            f"CEP {r['cep']} | "
+            f"{r['bairro_sugerido']:<40} | "
+            f"Total {r['clientes_total']:>4} | "
+            f"Alterar {r['clientes_alterar']:>4}"
+        )
+
+    print("\nTOP 40 — REVISAR")
+    print("-" * 120)
+
+    revisar = [
+        r
+        for r in resultado
+        if r["status"] == "REVISAR"
+    ]
+
+    revisar.sort(
+        key=lambda r: (
+            -r["clientes_alterar"],
+            -r["clientes_provaveis"],
+            -r["clientes_total"],
+        )
+    )
+
+    for i, r in enumerate(
+        revisar[:40],
+        1,
+    ):
+        print(
+            f"{i:02d}. "
+            f"CEP {r['cep']} | "
+            f"Sugestão: "
+            f"{r['bairro_sugerido']:<38} | "
+            f"Total {r['clientes_total']:>4} | "
+            f"Alterar {r['clientes_alterar']:>4} | "
+            f"Prováveis {r['clientes_provaveis']:>3} | "
+            f"Exceções {r['clientes_excecao']:>3}"
+        )
+
+        if r["alteraveis"]:
+            print(
+                f"    ALTERAR: "
+                f"{r['alteraveis']}"
+            )
+
+        if r["provaveis"]:
+            print(
+                f"    PROVÁVEIS: "
+                f"{r['provaveis']}"
+            )
+
+        if r["excecoes"]:
+            print(
+                f"    PRESERVAR: "
+                f"{r['excecoes']}"
+            )
+
+    print("\nTOP 40 — BLOQUEADOS")
+    print("-" * 120)
+
+    bloqueados = [
+        r
+        for r in resultado
+        if r["status"] == "BLOQUEADO"
+    ]
+
+    bloqueados.sort(
+        key=lambda r: -r["clientes_total"]
+    )
+
+    for i, r in enumerate(
+        bloqueados[:40],
+        1,
+    ):
+        print(
+            f"{i:02d}. "
+            f"CEP {r['cep']} | "
+            f"Total {r['clientes_total']:>5} | "
+            f"Famílias/variações:"
+        )
+
+        print(
+            f"    {r['todas_variacoes']}"
+        )
+
+    print("\n" + "=" * 120)
+    print("V3 CONCLUÍDA")
+    print("=" * 120)
+
+    print(f"Arquivo: {SAIDA}")
+
+    print()
+    print("IXC alterado: NÃO")
+    print("UPDATE executado: NÃO")
+    print("INSERT executado: NÃO")
+    print("DELETE executado: NÃO")
+    print("Clientes alterados: 0")
+
+    print("=" * 120)
+
+
+if __name__ == "__main__":
+    main()

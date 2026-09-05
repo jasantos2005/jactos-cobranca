@@ -1,0 +1,161 @@
+========================================================================================================================
+AUDITORIA DE PADRONIZAÇÃO DE BAIRROS — V4.1
+========================================================================================================================
+ANÁLISE REFINADA DAS REGRAS DA V3.8
+MODO: SOMENTE LEITURA — NENHUMA ALTERAÇÃO NO IXC
+
+Regras analisadas: 38
+CANDIDATO_SEGURO: 22 regras / 24 clientes
+REVISAR: 16 regras / 155 clientes
+
+========================================================================================================================
+CANDIDATOS SEGUROS
+========================================================================================================================
+
+[001]    2 clientes | JARDIM DAS HORTENCIA -> JARDIM DAS HORTENCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #8123, #19281
+
+[002]    2 clientes | JARDIM DAS HORTENSIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #18841, #19736
+
+[003]    1 clientes | AEOROVIARIO -> AEROVIÁRIO
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #19310
+
+[004]    1 clientes | CANDIDO DE MORAES -> CANDIDA DE MORAES
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #2514
+
+[005]    1 clientes | CONJUNTO RIVIEIRA -> CONJUNTO RIVIERA
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #20085
+
+[006]    1 clientes | CÂNDIDA DE MORAIS -> CANDIDA DE MORAES
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #19253
+
+[007]    1 clientes | FAZENDA CAVEIRAS -> FAZENDA CAVEIRA
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #21592
+
+[008]    1 clientes | JARDIM  DAS HORTENCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #6522
+
+[009]    1 clientes | JARDIM DAS HORTENCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #19337
+
+[010]    1 clientes | JARDIM DAS HORTENSIAS -> JARDIM DAS HORTENCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #18798
+
+[011]    1 clientes | JARDIM DAS HORTÊNCIA -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #6068
+
+[012]    1 clientes | JARDIM DAS HORTÊNSIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #20554
+
+[013]    1 clientes | JARDIM DAS HORTÊNSIAS -> JARDIM DAS HORTENCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #23379
+
+[014]    1 clientes | JARDIM NOVA ESPERANÇAA -> JARDIM NOVA ESPERANÇA
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #6703
+
+[015]    1 clientes | JARDIM PETROPLIS -> JARDIM PETRÓPOLIS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #17516
+
+[016]    1 clientes | JARDIN DAS HORTENCIAS -> JARDIM DAS HORTÊNCIAS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #5618
+
+[017]    1 clientes | JARDIN NOVA ESPERANÇA -> JARDIM NOVA ESPERANÇA
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #19087
+
+[018]    1 clientes | MANÇOES PARAÍSO -> MANSÕES PARAÍSO
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #2775
+
+[019]    1 clientes | RESIDENCIAL ANA MORAIS -> RESIDENCIAL ANA MORAES
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #22819
+
+[020]    1 clientes | RESIDENCIAL GOINIA VIVA -> RESIDENCIAL GOIÂNIA VIVA
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #22000
+
+[021]    1 clientes | RESIDENCIAL HUGO DE MORAIS -> RESIDENCIAL HUGO DE MORAES
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #19470
+
+[022]    1 clientes | SETOR CANDIDA DE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Mesma estrutura de palavras e pequena diferença ortográfica localizada.
+      CLIENTES: #18906
+
+========================================================================================================================
+REGRAS PARA REVISÃO
+========================================================================================================================
+
+[001]   46 clientes | CANDIDA DE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[002]   40 clientes | SETOR CÂNDIDA DE MORAIS -> CANDIDA DE MORAES
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[003]   26 clientes | RESIDENCIAL GOIÂNIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[004]   15 clientes | Setor Cândida de Morais -> CANDIDA DE MORAES
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[005]    8 clientes | RESIDENCIAL GOI NIA VIVA -> RESIDENCIAL GOIÂNIA VIVA
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[006]    6 clientes | RESIDENCIAL GOIANIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[007]    4 clientes | JARDIM HELLOU -> RESIDENCIAL JARDIM HELOU
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[008]    2 clientes | RESIDENCIAL GOINIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[009]    1 clientes | AEOROVIARIO -> SETOR AEROVIARIO
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[010]    1 clientes | AEOROVIÁRIO -> SETOR AEROVIARIO
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[011]    1 clientes | HUGO DE MORAIS -> RESIDENCIAL HUGO DE MORAES
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[012]    1 clientes | JARDIM COLORADO 1 -> JARDIM COLORADO
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[013]    1 clientes | JARDIM NOVO MUNDO 3 -> JARDIM NOVO MUNDO
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[014]    1 clientes | PARQUE TREMENDÃO 2 -> PARQUE TREMENDÃO
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[015]    1 clientes | RESIDÊNCIAL GOIÂNIA VIVA -> RESIDENCIAL GOI NIA VIVA
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+[016]    1 clientes | SETOR CANDIDADE MORAES -> SETOR CÂNDIDA DE MORAIS
+      MOTIVO: Não foi possível comprovar que a alteração é exclusivamente ortográfica.
+
+========================================================================================================================
+SEGURANÇA
+========================================================================================================================
+IXC UPDATE: NÃO
+IXC INSERT: NÃO
+IXC DELETE: NÃO
+CLIENTES ALTERADOS: 0
