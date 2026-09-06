@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -5,6 +6,7 @@ from app.auth.dependencies import get_usuario
 from app.core.filters import parse_filtros
 from app.core.db import query_one
 import app.dashboards.cobranca.service as sv
+import app.dashboards.cobranca.service_serasa as ss
 from app.core.ixc_api import abrir_os_retirada as ixc_abrir_os, abrir_os_cobranca
 from decimal import Decimal
 import json, os
@@ -46,6 +48,7 @@ def _tg_acao(usuario_nome, acao, cliente_nome, obs="", pagina=""):
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "../../../templates"))
 
 def jsonify(data):
+    
     return JSONResponse(json.loads(json.dumps(data, default=lambda o: float(o) if isinstance(o, Decimal) else str(o))))
 
 def checar_nivel(usuario, minimo, codigo_menu: str = None):
@@ -197,8 +200,10 @@ async def api_liberar_degrau(request: Request, usuario=Depends(get_usuario)):
     fd = await request.form()
     degrau = fd.get("degrau", "")
     if degrau not in sv.DEGRAUS:
+    
         return JSONResponse({"ok": False, "msg": "Degrau inválido"})
     sv.set_degrau_liberado(degrau)
+    
     return JSONResponse({"ok": True, "degrau": degrau})
 
 @router.post("/api/registrar-cobranca")
@@ -512,18 +517,21 @@ async def api_os_retirada(request: Request, usuario=Depends(get_usuario)):
     mensagem = fd.get("mensagem", "")
 
     if not id_cliente:
+    
         return JSONResponse({
             "ok": False,
             "msg": "id_cliente obrigatório"
         })
 
     if not fn_areceber_id:
+    
         return JSONResponse({
             "ok": False,
             "msg": "fn_areceber_id obrigatório"
         })
 
     if sv.check_os_aberta(id_cliente):
+    
         return JSONResponse({
             "ok": False,
             "msg": "OS já aberta"
@@ -540,12 +548,14 @@ async def api_os_retirada(request: Request, usuario=Depends(get_usuario)):
     """, (fn_areceber_id,))
 
     if not fatura:
+    
         return JSONResponse({
             "ok": False,
             "msg": f"Fatura #{fn_areceber_id} não encontrada."
         })
 
     if int(fatura.get("id_cliente") or 0) != id_cliente:
+    
         return JSONResponse({
             "ok": False,
             "msg": (
@@ -557,6 +567,7 @@ async def api_os_retirada(request: Request, usuario=Depends(get_usuario)):
     id_contrato = int(fatura.get("id_contrato") or 0)
 
     if not id_contrato:
+    
         return JSONResponse({
             "ok": False,
             "msg": (
@@ -571,6 +582,7 @@ async def api_os_retirada(request: Request, usuario=Depends(get_usuario)):
         mensagem=mensagem,
     )
 
+    
     return JSONResponse(res)
 
 # ─── ANDAMENTO (N1+) ─────────────────────────────────────────────────────────
@@ -816,6 +828,7 @@ async def api_top10(request: Request, usuario=Depends(get_usuario)):
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
+    
     return JSONResponse([fix(r) for r in sv.get_top10_devedores(filial_id=usuario.get("filial_id",0))])
 
 @router.get("/api/inadimplencia-por-bairro")
@@ -824,6 +837,7 @@ async def api_por_bairro(request: Request, usuario=Depends(get_usuario)):
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
+    
     return JSONResponse([fix(r) for r in sv.get_inadimplencia_por_bairro(filial_id=usuario.get("filial_id",0))])
 
 @router.get("/api/clientes-por-cidade/{id_cidade}")
@@ -832,6 +846,7 @@ async def api_clientes_cidade(id_cidade: int, request: Request, usuario=Depends(
     from decimal import Decimal
     def fix(r):
         return {k: float(v) if isinstance(v, Decimal) else v for k, v in dict(r).items()}
+    
     return JSONResponse([fix(r) for r in sv.get_clientes_por_cidade(id_cidade)])
 
 
@@ -860,12 +875,14 @@ async def api_abrir_os_cobranca(
     )
 
     if not id_cliente:
+    
         return JSONResponse({
             "ok": False,
             "msg": "id_cliente obrigatório"
         })
 
     if not fn_areceber_id:
+    
         return JSONResponse({
             "ok": False,
             "msg": "fn_areceber_id obrigatório"
@@ -882,6 +899,7 @@ async def api_abrir_os_cobranca(
     """, (fn_areceber_id,))
 
     if not fatura:
+    
         return JSONResponse({
             "ok": False,
             "msg": f"Fatura #{fn_areceber_id} não encontrada."
@@ -892,6 +910,7 @@ async def api_abrir_os_cobranca(
     )
 
     if not id_contrato:
+    
         return JSONResponse({
             "ok": False,
             "msg": (
@@ -902,6 +921,7 @@ async def api_abrir_os_cobranca(
         })
 
     if int(fatura.get("id_cliente") or 0) != id_cliente:
+    
         return JSONResponse({
             "ok": False,
             "msg": (
@@ -923,6 +943,7 @@ async def api_abrir_os_cobranca(
         fn_areceber_id=fn_areceber_id,
     )
 
+    
     return JSONResponse(resultado)
 
 
@@ -936,7 +957,9 @@ async def api_check_os_cobranca(id_cliente: int, request: Request, usuario=Depen
         ORDER BY data_abertura DESC LIMIT 1
     """, (id_cliente,))
     if r:
+    
         return JSONResponse({"aberta": True, "id_os": r["id"], "data_abertura": r["data_abertura"]})
+    
     return JSONResponse({"aberta": False})
 
 @router.get("/api/novos-pagamentos")
@@ -949,6 +972,7 @@ async def api_novos_pagamentos(request: Request, desde: str = "", usuario=Depend
     uid_filter = f"AND usuario_id = {uid}" if uid else ""
     interagidos = local_query(f"SELECT DISTINCT fn_areceber_id FROM cob_interacoes WHERE fn_areceber_id IS NOT NULL {uid_filter}", ())
     if not interagidos:
+    
         return JSONResponse({"novos": [], "total": 0})
     fn_ids = tuple(int(r["fn_areceber_id"]) for r in interagidos if r["fn_areceber_id"])
     ph = ",".join(["%s"]*len(fn_ids))
@@ -962,6 +986,7 @@ async def api_novos_pagamentos(request: Request, desde: str = "", usuario=Depend
         WHERE f.status='R' AND f.id IN ({ph}) {desde_filter}
         ORDER BY f.baixa_data DESC LIMIT 10
     """, fn_ids)
+    
     return JSONResponse({"novos": [dict(r) for r in novos], "total": len(novos)})
 
 
@@ -1129,6 +1154,103 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
                             abriu_os34 = True
 
     return {"ok": True, "abriu_os34": abriu_os34}
+
+
+
+# ================================================================
+# SERASA — JACTOS
+# ================================================================
+
+@router.get("/serasa")
+async def pagina_serasa(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
+    checar_nivel(usuario, 2)
+
+    rows = ss.get_clientes_serasa()
+    kpis = ss.get_kpis_serasa()
+
+    return templates.TemplateResponse(
+        "dashboards/serasa.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "rows": rows,
+            "kpis": kpis,
+        }
+    )
+
+
+@router.get("/serasa/saidas")
+async def pagina_serasa_saidas(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
+    checar_nivel(usuario, 2)
+
+    rows = ss.get_saidas_serasa()
+    kpis = ss.get_kpis_saidas()
+
+    return templates.TemplateResponse(
+        "dashboards/serasa_saidas.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "rows": rows,
+            "kpis": kpis,
+        }
+    )
+
+
+@router.get("/api/serasa/clientes")
+async def api_serasa_clientes(request: Request, cpf: str = "", usuario=Depends(get_usuario)):
+    checar_nivel(usuario, 2)
+    rows = ss.get_clientes_serasa(cpf=cpf or None, limite=30)
+    return JSONResponse(jsonable_encoder({"ok": True, "rows": rows}))
+
+
+@router.get("/api/serasa/saidas")
+async def api_serasa_saidas(
+    request: Request,
+    cpf: str = "",
+    usuario=Depends(get_usuario)
+):
+    checar_nivel(usuario, 2)
+    rows = ss.get_saidas_serasa(
+        cpf=cpf or None,
+        limite=30
+    )
+    return JSONResponse(
+        jsonable_encoder({
+            "ok": True,
+            "rows": rows,
+        })
+    )
+
+
+@router.get("/api/serasa/cliente/{id_cliente}")
+async def api_serasa_cliente(
+    id_cliente: int,
+    usuario=Depends(get_usuario)
+):
+    checar_nivel(usuario, 2)
+
+    dados = ss.get_historico_serasa(id_cliente)
+
+    if not dados or not dados.get("cliente"):
+        return JSONResponse(
+            {"ok": False, "erro": "Cliente não encontrado."},
+            status_code=404
+        )
+
+    return JSONResponse(
+        jsonable_encoder({
+            "ok": True,
+            "data": dados["cliente"],
+            "historico": dados["historico"],
+        })
+    )
 
 
 @router.get("/reprovados-serasa", response_class=HTMLResponse)

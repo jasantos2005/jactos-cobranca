@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clientes no Serasa — HubCobrança</title>
+<style>
+body{margin:0;background:#f8fafc;color:#172033;font-family:Inter,Arial,sans-serif}
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:220px;
+    height:100vh;
+    overflow-y:auto;
+    z-index:100;
+}
+
+.main{margin-left:220px;padding:28px}
+.header{margin-bottom:22px}
+.title{font-size:24px;font-weight:700}
+.sub{color:#64748b;font-size:13px;margin-top:5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:17px}
+.kpi-label{font-size:11px;text-transform:uppercase;color:#64748b;font-weight:600}
+.kpi-value{font-size:25px;font-weight:700;margin-top:6px}
+.card{background:white;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;background:#f8fafc;padding:12px;font-size:11px;color:#64748b;text-transform:uppercase}
+td{padding:12px;border-top:1px solid #eef2f7;font-size:13px}
+tr.clickable{cursor:pointer}
+tr.clickable:hover{background:#f8fafc}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.financeiro{background:#fff7ed;color:#c2410c}
+.equipamento{background:#eff6ff;color:#1d4ed8}
+.ambos{background:#fef2f2;color:#b91c1c}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1000;padding:40px}
+.modal-box{max-width:1000px;margin:auto;background:white;border-radius:12px;max-height:90vh;overflow:auto;padding:24px}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.close{border:0;background:#f1f5f9;border-radius:7px;padding:8px 12px;cursor:pointer}
+.section{margin-top:22px;border-top:1px solid #e2e8f0;padding-top:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.item{background:#f8fafc;padding:11px;border-radius:7px}
+.item b{display:block;font-size:10px;color:#64748b;text-transform:uppercase;margin-bottom:4px}
+</style>
+</head>
+<body>
+{% include '_sidebar.html' %}
+
+<div class="main">
+  <div class="header">
+    <div class="title">🔴 Clientes no Serasa</div>
+    <div class="sub">Clientes atualmente negativados — visão financeira e patrimonial</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-label">Clientes</div><div class="kpi-value">{{ kpis.clientes }}</div></div>
+    <div class="kpi"><div class="kpi-label">Valor financeiro</div><div class="kpi-value">R$ {{ "%.2f"|format(kpis.valor_financeiro) }}</div></div>
+    <div class="kpi"><div class="kpi-label">Somente financeiro</div><div class="kpi-value">{{ kpis.financeiro }}</div></div>
+    <div class="kpi"><div class="kpi-label">Somente equipamento</div><div class="kpi-value">{{ kpis.equipamento }}</div></div>
+    <div class="kpi"><div class="kpi-label">Financeiro + equipamento</div><div class="kpi-value">{{ kpis.ambos }}</div></div>
+    <div class="kpi"><div class="kpi-label">Equipamentos</div><div class="kpi-value">{{ kpis.equipamentos }}</div></div>
+  </div>
+
+  <div class="card" style="padding:16px;margin-bottom:16px">
+    <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+      <div style="flex:0 0 240px;width:240px">
+        <label style="display:block;font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;margin-bottom:6px">
+          Buscar por CPF/CNPJ
+        </label>
+        <input
+          id="buscaCpf"
+          type="text"
+          placeholder="Digite o CPF ou CNPJ"
+          style="width:240px;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:7px"
+          onkeydown="if(event.key==='Enter') pesquisarCpf()"
+        >
+      </div>
+      <button onclick="pesquisarCpf()" style="padding:10px 16px;border:0;border-radius:7px;cursor:pointer">
+        Pesquisar
+      </button>
+      <button onclick="limparPesquisa()" style="padding:10px 16px;border:1px solid #cbd5e1;background:white;border-radius:7px;cursor:pointer">
+        Últimos 30
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>CPF/CNPJ</th>
+          <th>Última negativação</th>
+          <th>Valor financeiro</th>
+          <th>Valor equipamento</th>
+          <th>Equipamentos</th>
+          <th>Classificação</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in rows %}
+        <tr class="clickable" onclick="abrirCliente({{ r.id_cliente }})">
+          <td><b>{{ r.razao }}</b></td>
+          <td>{{ r.cpf_cnpj or '—' }}</td>
+          <td>{{ r.ultima_negativacao }}</td>
+          <td>R$ {{ "%.2f"|format(r.valor_financeiro) }}</td>
+          <td>R$ {{ "%.2f"|format(r.valor_equipamento or 0) }}</td>
+          <td>{{ r.quantidade_equipamentos }}</td>
+          <td><span class="badge {{ r.categoria }}">{{ r.categoria_label }}</span></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">Nenhum cliente encontrado.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:20px;font-weight:700" id="modalNome">Cliente</div>
+        <div style="font-size:12px;color:#64748b" id="modalDoc"></div>
+      </div>
+      <button class="close" onclick="fecharModal()">Fechar</button>
+    </div>
+    <div id="modalConteudo">Carregando...</div>
+  </div>
+</div>
+
+<script>
+function moeda(v){
+  return Number(v || 0).toLocaleString('pt-BR',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function escapar(v){
+  return String(v ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function formatarData(v){
+  if(!v) return '—';
+  const s=String(v);
+  return s.length >= 19 ? s.substring(0,19).replace('T',' ') : s;
+}
+
+async function carregarClientes(cpf=''){
+  const cont=document.querySelector('tbody');
+  cont.innerHTML='<tr><td colspan="7">Carregando...</td></tr>';
+
+  try{
+    const parametro=cpf ? `?cpf=${encodeURIComponent(cpf)}` : '';
+    const r=await fetch(`/cobranca/api/serasa/clientes${parametro}`);
+
+    if(!r.ok){
+      throw new Error(`HTTP ${r.status}`);
+    }
+
+    const d=await r.json();
+
+    if(!d.ok || !Array.isArray(d.rows)){
+      throw new Error(d.erro || 'Resposta inválida.');
+    }
+
+    if(!d.rows.length){
+      cont.innerHTML='<tr><td colspan="7">Nenhum cliente encontrado.</td></tr>';
+      return;
+    }
+
+    cont.innerHTML=d.rows.map(r=>`
+      <tr class="clickable" onclick="abrirCliente(${Number(r.id_cliente)})">
+        <td><b>${escapar(r.razao)}</b></td>
+        <td>${escapar(r.cpf_cnpj || '—')}</td>
+        <td>${escapar(formatarData(r.ultima_negativacao))}</td>
+        <td>R$ ${moeda(r.valor_financeiro)}</td>
+        <td>R$ ${moeda(r.valor_equipamento)}</td>
+        <td>${Number(r.quantidade_equipamentos || 0)}</td>
+        <td><span class="badge ${escapar(r.categoria || '')}">${escapar(r.categoria_label || '—')}</span></td>
+      </tr>
+    `).join('');
+
+  }catch(e){
+    console.error('Erro ao carregar Serasa:',e);
+    cont.innerHTML=`<tr><td colspan="7">Erro ao carregar dados: ${escapar(e.message)}</td></tr>`;
+  }
+}
+
+async function pesquisarCpf(){
+  const campo=document.getElementById('buscaCpf');
+  const cpf=(campo.value || '').trim();
+
+  if(!cpf){
+    carregarClientes();
+    return;
+  }
+
+  await carregarClientes(cpf);
+}
+
+function limparPesquisa(){
+  document.getElementById('buscaCpf').value='';
+  carregarClientes();
+}
+
+async function abrirCliente(id){
+  const modal=document.getElementById('modal');
+  const cont=document.getElementById('modalConteudo');
+
+  modal.style.display='block';
+  cont.innerHTML='<p>Carregando histórico...</p>';
+
+  try{
+    const r=await fetch(`/cobranca/api/serasa/cliente/${id}`);
+
+    let d;
+    try{
+      d=await r.json();
+    }catch(e){
+      throw new Error(`Resposta inválida do servidor (HTTP ${r.status}).`);
+    }
+
+    if(!r.ok || !d.ok){
+      throw new Error(d.erro || `Erro HTTP ${r.status}`);
+    }
+
+    const c=d.data || {};
+    const historico=Array.isArray(d.historico) ? d.historico : [];
+    const equipamentos=Array.isArray(c.equipamentos) ? c.equipamentos : [];
+
+    document.getElementById('modalNome').textContent=c.razao || 'Cliente';
+    document.getElementById('modalDoc').textContent=c.cpf_cnpj || '';
+
+    let html=`
+      <div class="section">
+        <h3>Serasa</h3>
+        <div class="grid">
+          <div class="item"><b>Categoria</b>${escapar(c.categoria_label || '—')}</div>
+          <div class="item"><b>Valor financeiro</b>R$ ${moeda(c.valor_financeiro)}</div>
+          <div class="item"><b>Valor equipamento</b>R$ ${moeda(c.valor_equipamento)}</div>
+          <div class="item"><b>Negativações</b>${historico.length}</div>
+        </div>
+      </div>`;
+
+    html+=`<div class="section"><h3>Equipamentos</h3>`;
+
+    if(equipamentos.length){
+      html+='<div class="grid">';
+
+      for(const e of equipamentos){
+        html+=`
+          <div class="item">
+            <b>ID Patrimônio</b>${escapar(e.id_patrimonio || '—')}
+            <b>Equipamento</b>${escapar(e.equipamento || '—')}
+            <b>Valor</b>R$ ${moeda(e.valor_bem)}
+            <b>Serial</b>${escapar(e.serial || '—')}
+            <b>MAC</b>${escapar(e.mac || '—')}
+            <b>Status</b>${escapar(e.status_label || '—')}
+            <b>Devolução</b>${e.pendente ? '⚠️ Pendente' : 'Não pendente'}
+          </div>`;
+      }
+
+      html+='</div>';
+    }else{
+      html+='<p>Nenhum patrimônio identificado.</p>';
+    }
+
+    html+='</div>';
+
+    html+=`
+      <div class="section">
+        <h3>Histórico Serasa</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Entrada</th>
+              <th>Documento</th>
+              <th>Valor</th>
+              <th>Aberto</th>
+              <th>Saída</th>
+              <th>Forma</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    for(const h of historico){
+      html+=`
+        <tr>
+          <td>${escapar(formatarData(h.data_negativacao))}</td>
+          <td>${escapar(h.documento || '—')}</td>
+          <td>R$ ${moeda(h.valor)}</td>
+          <td>R$ ${moeda(h.valor_aberto)}</td>
+          <td>${escapar(formatarData(h.data_baixa))}</td>
+          <td>${escapar(h.forma_remocao || '—')}</td>
+        </tr>`;
+    }
+
+    html+=`</tbody></table></div>`;
+
+    cont.innerHTML=html;
+
+  }catch(e){
+    console.error('Erro ao carregar histórico Serasa:',e);
+    cont.innerHTML=`
+      <div class="section">
+        <h3>Erro</h3>
+        <p>Não foi possível carregar o histórico deste cliente.</p>
+        <p style="color:#64748b;font-size:12px">${escapar(e.message)}</p>
+      </div>`;
+  }
+}
+
+function fecharModal(){
+  document.getElementById('modal').style.display='none';
+}
+
+document.getElementById('modal').addEventListener('click',function(e){
+  if(e.target===this) fecharModal();
+});
+</script>
+</body>
+</html>

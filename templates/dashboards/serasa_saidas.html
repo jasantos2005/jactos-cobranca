@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saídas do Serasa — HubCobrança</title>
+
+<style>
+body{
+    margin:0;
+    background:#f8fafc;
+    color:#172033;
+    font-family:Inter,Arial,sans-serif
+}
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:220px;
+    height:100vh;
+    overflow-y:auto;
+    z-index:100;
+}
+.main{
+    margin-left:220px;
+    padding:28px
+}
+.title{
+    font-size:24px;
+    font-weight:700
+}
+.sub{
+    color:#64748b;
+    font-size:13px;
+    margin:5px 0 22px
+}
+.kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin-bottom:18px
+}
+.kpi{
+    background:white;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:17px
+}
+.label{
+    font-size:11px;
+    color:#64748b;
+    text-transform:uppercase
+}
+.value{
+    font-size:25px;
+    font-weight:700;
+    margin-top:6px
+}
+.toolbar{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    flex-wrap:wrap
+}
+.toolbar input{
+    flex:0 0 240px;
+    width:240px;
+    padding:11px 12px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-size:14px;
+    outline:none
+}
+.toolbar button{
+    padding:10px 15px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    background:white;
+    cursor:pointer;
+    font-weight:600
+}
+.toolbar button:hover{
+    background:#f1f5f9
+}
+.card{
+    background:white;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    overflow:auto
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1050px
+}
+th{
+    text-align:left;
+    padding:12px;
+    background:#f8fafc;
+    font-size:11px;
+    color:#64748b;
+    white-space:nowrap
+}
+td{
+    padding:12px;
+    border-top:1px solid #eef2f7;
+    font-size:13px
+}
+tr.data-row{
+    cursor:pointer
+}
+tr.data-row:hover{
+    background:#f8fafc
+}
+.money{
+    white-space:nowrap
+}
+.muted{
+    color:#64748b
+}
+.status{
+    padding:12px;
+    color:#64748b;
+    font-size:13px
+}
+.modal-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.55);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    padding:20px
+}
+.modal{
+    width:min(1000px,96vw);
+    max-height:90vh;
+    overflow:auto;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25)
+}
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid #e2e8f0
+}
+.modal-title{
+    font-size:18px;
+    font-weight:700
+}
+.modal-close{
+    border:0;
+    background:transparent;
+    font-size:24px;
+    cursor:pointer
+}
+.modal-body{
+    padding:20px
+}
+.detail-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+    margin-bottom:20px
+}
+.detail{
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+    padding:12px
+}
+.detail-label{
+    font-size:10px;
+    color:#64748b;
+    text-transform:uppercase
+}
+.detail-value{
+    margin-top:5px;
+    font-weight:600
+}
+.modal table{
+    min-width:700px
+}
+.section-title{
+    font-size:15px;
+    font-weight:700;
+    margin:20px 0 10px
+}
+</style>
+</head>
+
+<body>
+{% include '_sidebar.html' %}
+
+<div class="main">
+    <div class="title">🟢 Saídas do Serasa</div>
+    <div class="sub">
+        Histórico de clientes que tiveram a negativação removida.
+        Inicialmente são exibidas as 30 saídas mais recentes.
+    </div>
+
+    <div class="kpis">
+        <div class="kpi">
+            <div class="label">Clientes</div>
+            <div class="value">{{ kpis.clientes }}</div>
+        </div>
+
+        <div class="kpi">
+            <div class="label">Negativações removidas</div>
+            <div class="value">{{ kpis.negativacoes }}</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <input
+            id="buscaCpf"
+            type="text"
+            placeholder="Pesquisar por CPF/CNPJ..."
+            autocomplete="off"
+        >
+        <button type="button" onclick="pesquisarCpf()">Pesquisar</button>
+        <button type="button" onclick="limparPesquisa()">Últimos 30</button>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Valor financeiro</th>
+                    <th>Valor equipamento</th>
+                    <th>Fatura</th>
+                    <th>Forma da remoção</th>
+                </tr>
+            </thead>
+
+            <tbody id="tabelaSaidas">
+                {% for r in rows %}
+                <tr
+                    class="data-row"
+                    onclick="abrirCliente({{ r.id_cliente }})"
+                >
+                    <td><b>{{ r.razao }}</b></td>
+                    <td>{{ r.cnpj_cpf or '—' }}</td>
+                    <td>{{ r.data_negativacao or '—' }}</td>
+                    <td>{{ r.data_baixa or '—' }}</td>
+                    <td class="money">
+                        R$ {{ "%.2f"|format(r.valor_aberto or r.valor or 0) }}
+                    </td>
+                    <td class="money">
+                        R$ {{ "%.2f"|format(r.valor_equipamento or 0) }}
+                    </td>
+                    <td>#{{ r.id_finan or '—' }}</td>
+                    <td>{{ r.forma_remocao or '—' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="status">
+                        Nenhuma saída registrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalCliente" class="modal-backdrop" onclick="fecharModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <div class="modal-title" id="modalTitulo">Histórico do cliente</div>
+            <button class="modal-close" onclick="fecharModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalConteudo">
+            Carregando...
+        </div>
+    </div>
+</div>
+
+<script>
+function dinheiro(valor){
+    return Number(valor || 0).toLocaleString('pt-BR', {
+        style:'currency',
+        currency:'BRL'
+    });
+}
+
+function formatarData(valor){
+    if(!valor) return '—';
+
+    const texto = String(valor);
+
+    if(texto.includes('T')){
+        return texto.replace('T',' ').substring(0,19);
+    }
+
+    return texto;
+}
+
+function escapeHtml(valor){
+    return String(valor ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+}
+
+function renderizarTabela(rows){
+    const tbody = document.getElementById('tabelaSaidas');
+
+    if(!rows || !rows.length){
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="status">
+                    Nenhuma saída encontrada.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+        <tr class="data-row" onclick="abrirCliente(${Number(r.id_cliente)})">
+            <td><b>${escapeHtml(r.razao || '—')}</b></td>
+            <td>${escapeHtml(r.cnpj_cpf || '—')}</td>
+            <td>${formatarData(r.data_negativacao)}</td>
+            <td>${formatarData(r.data_baixa)}</td>
+            <td class="money">
+                ${dinheiro(r.valor_aberto ?? r.valor ?? 0)}
+            </td>
+            <td class="money">
+                ${dinheiro(r.valor_equipamento || 0)}
+            </td>
+            <td>#${escapeHtml(r.id_finan || '—')}</td>
+            <td>${escapeHtml(r.forma_remocao || '—')}</td>
+        </tr>
+    `).join('');
+}
+
+async function carregarSaidas(cpf=''){
+    const tbody = document.getElementById('tabelaSaidas');
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="status">Carregando...</td>
+        </tr>
+    `;
+
+    try{
+        const url = '/cobranca/api/serasa/saidas' +
+            (cpf ? '?cpf=' + encodeURIComponent(cpf) : '');
+
+        const resp = await fetch(url);
+
+        if(!resp.ok){
+            throw new Error('HTTP ' + resp.status);
+        }
+
+        const data = await resp.json();
+
+        if(!data.ok){
+            throw new Error(data.erro || 'Erro ao consultar saídas.');
+        }
+
+        renderizarTabela(data.rows || []);
+    }catch(e){
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="status">
+                    Erro ao carregar as saídas: ${escapeHtml(e.message)}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function pesquisarCpf(){
+    const campo = document.getElementById('buscaCpf');
+    carregarSaidas(campo.value.trim());
+}
+
+function limparPesquisa(){
+    document.getElementById('buscaCpf').value = '';
+    carregarSaidas('');
+}
+
+document.getElementById('buscaCpf').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+        pesquisarCpf();
+    }
+});
+
+async function abrirCliente(id){
+    const modal = document.getElementById('modalCliente');
+    const conteudo = document.getElementById('modalConteudo');
+    const titulo = document.getElementById('modalTitulo');
+
+    modal.style.display = 'flex';
+    conteudo.innerHTML = 'Carregando histórico...';
+
+    try{
+        const resp = await fetch('/cobranca/api/serasa/cliente/' + id);
+
+        if(!resp.ok){
+            throw new Error('HTTP ' + resp.status);
+        }
+
+        const data = await resp.json();
+
+        if(!data.ok){
+            throw new Error(data.erro || 'Cliente não encontrado.');
+        }
+
+        const cliente = data.data || {};
+        const historico = data.historico || [];
+
+        titulo.textContent = cliente.razao || 'Histórico do cliente';
+
+        const equipamentos = cliente.equipamentos || [];
+
+        conteudo.innerHTML = `
+            <div class="detail-grid">
+                <div class="detail">
+                    <div class="detail-label">CPF/CNPJ</div>
+                    <div class="detail-value">
+                        ${escapeHtml(cliente.cnpj_cpf || '—')}
+                    </div>
+                </div>
+
+                <div class="detail">
+                    <div class="detail-label">Classificação</div>
+                    <div class="detail-value">
+                        ${escapeHtml(cliente.classificacao_label || cliente.classificacao || '—')}
+                    </div>
+                </div>
+
+                <div class="detail">
+                    <div class="detail-label">Valor financeiro</div>
+                    <div class="detail-value">
+                        ${dinheiro(cliente.valor_financeiro || 0)}
+                    </div>
+                </div>
+
+                <div class="detail">
+                    <div class="detail-label">Valor equipamento</div>
+                    <div class="detail-value">
+                        ${dinheiro(cliente.valor_equipamento || 0)}
+                    </div>
+                </div>
+
+                <div class="detail">
+                    <div class="detail-label">Negativações</div>
+                    <div class="detail-value">
+                        ${cliente.quantidade_negativacoes || 0}
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Equipamentos</div>
+
+            ${
+                equipamentos.length
+                ? `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patrimônio</th>
+                            <th>Modelo</th>
+                            <th>Serial</th>
+                            <th>MAC</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${equipamentos.map(e => `
+                            <tr>
+                                <td>${escapeHtml(e.id_patrimonio || '—')}</td>
+                                <td>${escapeHtml(e.equipamento || '—')}</td>
+                                <td>${escapeHtml(e.serial || '—')}</td>
+                                <td>${escapeHtml(e.mac || '—')}</td>
+                                <td>${dinheiro(e.valor_bem || 0)}</td>
+                                <td>${escapeHtml(e.status_label || e.status || '—')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                `
+                : '<div class="muted">Nenhum equipamento identificado.</div>'
+            }
+
+            <div class="section-title">Histórico do Serasa</div>
+
+            ${
+                historico.length
+                ? `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Negativação</th>
+                            <th>Fatura</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Saída</th>
+                            <th>Forma</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${historico.map(h => `
+                            <tr>
+                                <td>${formatarData(h.data_negativacao)}</td>
+                                <td>#${escapeHtml(h.documento || h.id_finan || '—')}</td>
+                                <td>${formatarData(h.data_vencimento)}</td>
+                                <td>${dinheiro(h.valor_aberto ?? h.valor ?? 0)}</td>
+                                <td>${escapeHtml(h.status ?? '—')}</td>
+                                <td>${formatarData(h.data_baixa)}</td>
+                                <td>${escapeHtml(h.forma_remocao || '—')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                `
+                : '<div class="muted">Nenhum histórico encontrado.</div>'
+            }
+        `;
+    }catch(e){
+        conteudo.innerHTML = `
+            <div class="status">
+                Erro ao carregar histórico: ${escapeHtml(e.message)}
+            </div>
+        `;
+    }
+}
+
+function fecharModal(event){
+    if(event && event.target !== event.currentTarget){
+        return;
+    }
+
+    document.getElementById('modalCliente').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+        fecharModal();
+    }
+});
+</script>
+
+</body>
+</html>
