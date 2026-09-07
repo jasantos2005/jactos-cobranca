@@ -252,10 +252,10 @@ tr.data-row:hover{
                     <td>{{ r.data_negativacao or '—' }}</td>
                     <td>{{ r.data_baixa or '—' }}</td>
                     <td class="money">
-                        R$ {{ "%.2f"|format(r.valor_aberto or r.valor or 0) }}
+                        R$ {{ "{:,.2f}".format(r.valor_aberto or r.valor or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}
                     </td>
                     <td class="money">
-                        R$ {{ "%.2f"|format(r.valor_equipamento or 0) }}
+                        R$ {{ "{:,.2f}".format(r.valor_equipamento or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}
                     </td>
                     <td>#{{ r.id_finan or '—' }}</td>
                     <td>{{ r.forma_remocao or '—' }}</td>

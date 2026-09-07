@@ -56,7 +56,7 @@ tr.clickable:hover{background:#f8fafc}
 
   <div class="kpis">
     <div class="kpi"><div class="kpi-label">Clientes</div><div class="kpi-value">{{ kpis.clientes }}</div></div>
-    <div class="kpi"><div class="kpi-label">Valor financeiro</div><div class="kpi-value">R$ {{ "%.2f"|format(kpis.valor_financeiro) }}</div></div>
+    <div class="kpi"><div class="kpi-label">Valor financeiro</div><div class="kpi-value">R$ {{ "{:,.2f}".format(kpis.valor_financeiro or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</div></div>
     <div class="kpi"><div class="kpi-label">Somente financeiro</div><div class="kpi-value">{{ kpis.financeiro }}</div></div>
     <div class="kpi"><div class="kpi-label">Somente equipamento</div><div class="kpi-value">{{ kpis.equipamento }}</div></div>
     <div class="kpi"><div class="kpi-label">Financeiro + equipamento</div><div class="kpi-value">{{ kpis.ambos }}</div></div>
@@ -103,10 +103,10 @@ tr.clickable:hover{background:#f8fafc}
       {% for r in rows %}
         <tr class="clickable" onclick="abrirCliente({{ r.id_cliente }})">
           <td><b>{{ r.razao }}</b></td>
-          <td>{{ r.cpf_cnpj or '—' }}</td>
+          <td>{{ r.cnpj_cpf or '—' }}</td>
           <td>{{ r.ultima_negativacao }}</td>
-          <td>R$ {{ "%.2f"|format(r.valor_financeiro) }}</td>
-          <td>R$ {{ "%.2f"|format(r.valor_equipamento or 0) }}</td>
+          <td>R$ {{ "{:,.2f}".format(r.valor_financeiro or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+          <td>R$ {{ "{:,.2f}".format(r.valor_equipamento or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
           <td>{{ r.quantidade_equipamentos }}</td>
           <td><span class="badge {{ r.categoria }}">{{ r.categoria_label }}</span></td>
         </tr>

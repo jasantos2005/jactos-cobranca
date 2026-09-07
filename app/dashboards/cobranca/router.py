@@ -1161,6 +1161,515 @@ async def api_registrar_np(request: Request, usuario=Depends(get_usuario)):
 # SERASA — JACTOS
 # ================================================================
 
+
+@router.get("/colocar-serasa", response_class=HTMLResponse)
+async def pagina_colocar_serasa(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
+    rows = ss.get_clientes_colocar_serasa()
+    kpis = ss.get_kpis_colocar_serasa()
+
+    # O template usa os equipamentos em JavaScript.
+    # Converte datetime/date antes do render para evitar erro no |tojson.
+    for row in rows:
+        for equipamento in row.get("equipamentos") or []:
+            for chave, valor in list(equipamento.items()):
+                if hasattr(valor, "isoformat"):
+                    equipamento[chave] = valor.isoformat()
+
+    return templates.TemplateResponse(
+        "dashboards/colocar_serasa.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "rows": rows,
+            "kpis": kpis,
+        }
+    )
+
+
+@router.post("/api/serasa/colocar/cobrar")
+async def api_serasa_colocar_cobrar(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
+    checar_nivel(usuario, 1)
+    fd = await request.form()
+
+    os63 = int(fd.get("os63", 0))
+    acao = (fd.get("acao") or "").strip() or "Tentativa de cobrança - Serasa"
+    obs = (fd.get("obs") or "").strip()
+    data_promessa = fd.get("data_promessa") or None
+
+    if not os63:
+        return JSONResponse({
+            "ok": False,
+            "msg": "OS 63 não informada."
+        })
+
+    from app.core.db import query_one as _query_one, execute as _db_execute
+    from app.core.filial_scope import resolver_filial_contrato
+
+    os_row = _query_one("""
+        SELECT
+            id,
+            id_cliente,
+            id_contrato_kit
+        FROM ixcprovedor.su_oss_chamado
+        WHERE id=%s
+          AND id_assunto=63
+          AND status NOT IN ('F','AN')
+        LIMIT 1
+    """, (os63,))
+
+    if not os_row:
+        return JSONResponse({
+            "ok": False,
+            "msg": "OS 63 não encontrada ou já finalizada."
+        })
+
+    id_cliente = int(os_row["id_cliente"] or 0)
+    id_contrato = int(os_row["id_contrato_kit"] or 0)
+
+    if not id_cliente or not id_contrato:
+        return JSONResponse({
+            "ok": False,
+            "msg": "OS 63 sem cliente ou contrato válido."
+        })
+
+    try:
+        resolver_filial_contrato(id_contrato)
+    except (ValueError, TypeError) as exc:
+        return JSONResponse({
+            "ok": False,
+            "msg": f"Filial do contrato inválida: {exc}"
+        })
+
+    fatura = _query_one("""
+        SELECT
+            id,
+            id_cliente,
+            id_contrato,
+            valor_aberto
+        FROM ixcprovedor.fn_areceber
+        WHERE id_contrato=%s
+          AND id_cliente=%s
+          AND status='A'
+          AND valor_aberto > 0
+          AND data_vencimento < CURDATE()
+        ORDER BY data_vencimento ASC, id ASC
+        LIMIT 1
+    """, (id_contrato, id_cliente))
+
+    if not fatura:
+        return JSONResponse({
+            "ok": False,
+            "msg": "Não foi encontrada fatura vencida em aberto para este contrato."
+        })
+
+    fn_id = int(fatura["id"])
+
+    sv.registrar_interacao(
+        fn_areceber_id=fn_id,
+        usuario_id=usuario["id"],
+        acao=acao,
+        obs=obs,
+        pago=0,
+        data_promessa=data_promessa,
+        segunda_cobranca=0
+    )
+
+    # Mantém a OS 63 como histórico único do processo de negativação.
+    # A nova interação é acumulada sem sobrescrever a mensagem existente.
+    agora_fmt = __import__("datetime").datetime.now(__import__("zoneinfo").ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")
+    complemento = (
+        "\n\n[INTERAÇÃO DO OPERADOR]\n"
+        f"Data: {agora_fmt}\n"
+        f"Operador: {usuario.get('nome') or 'Operador'}\n"
+        f"Ação: {acao}"
+    )
+
+    if obs:
+        complemento += f"\nObservação: {obs}"
+
+    if data_promessa:
+        complemento += f"\nPromessa de pagamento: {data_promessa}"
+
+    _db_execute("""
+        UPDATE ixcprovedor.su_oss_chamado
+        SET mensagem = CONCAT(COALESCE(mensagem, ''), %s)
+        WHERE id=%s
+          AND id_assunto=63
+          AND status NOT IN ('F','AN')
+    """, (complemento, os63))
+
+    return JSONResponse({
+        "ok": True,
+        "msg": "Cobrança registrada na fatura e na OS 63. Cliente permanece na fila do Serasa."
+    })
+
+
+
+@router.post("/api/serasa/colocar/negativar")
+async def api_serasa_colocar_negativar(
+    request: Request,
+    usuario=Depends(get_usuario)
+):
+    """
+    Prepara a OS 63 - NEGATIVAR CLIENTE.
+
+    Esta rota NÃO executa a negativação no Serasa.
+    A negativação continua sendo feita manualmente pelo operador.
+    """
+    checar_nivel(usuario, 1)
+
+    fd = await request.form()
+
+    try:
+        os63 = int(fd.get("os63") or 0)
+    except (TypeError, ValueError):
+        os63 = 0
+
+    try:
+        id_cliente = int(fd.get("id_cliente") or 0)
+    except (TypeError, ValueError):
+        id_cliente = 0
+
+    try:
+        id_contrato = int(fd.get("id_contrato") or 0)
+    except (TypeError, ValueError):
+        id_contrato = 0
+
+    obs = (fd.get("obs") or "").strip()
+
+    from app.core.db import query_one as _query_one
+    from app.core.db import execute as _db_execute
+    from app.core.filial_scope import resolver_filial_contrato
+    from app.dashboards.cobranca import service_serasa as _ss
+
+    # ------------------------------------------------------------
+    # 1. Se a tela enviou uma OS 63, valida a OS existente.
+    # ------------------------------------------------------------
+    if os63:
+        existente = _query_one("""
+            SELECT
+                id,
+                id_cliente,
+                id_contrato_kit,
+                mensagem,
+                status,
+                id_filial
+            FROM ixcprovedor.su_oss_chamado
+            WHERE id=%s
+              AND id_assunto=63
+              AND status NOT IN ('F','AN')
+            LIMIT 1
+        """, (os63,))
+
+        if existente:
+            id_cliente = int(existente["id_cliente"] or 0)
+            id_contrato = int(existente["id_contrato_kit"] or 0)
+
+            if not id_cliente or not id_contrato:
+                return JSONResponse({
+                    "ok": False,
+                    "msg": "A OS 63 não possui cliente ou contrato válido."
+                })
+
+            try:
+                resolver_filial_contrato(id_contrato)
+            except (ValueError, TypeError) as exc:
+                return JSONResponse({
+                    "ok": False,
+                    "msg": f"Filial do contrato inválida: {exc}"
+                })
+
+            # A OS já é exatamente a OS de negativação.
+            # Não cria outra OS para o mesmo processo.
+            if obs:
+                mensagem_atual = (existente.get("mensagem") or "").strip()
+
+                agora_fmt = __import__("datetime").datetime.now(__import__("zoneinfo").ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S")
+                acao = (fd.get("acao") or "").strip() or "Negativar cliente"
+
+                complemento = (
+                    "\n\n[INTERAÇÃO DO OPERADOR]\n"
+                    f"Data: {agora_fmt}\n"
+                    f"Operador: {usuario.get('nome') or 'Operador'}\n"
+                    f"Ação: {acao}\n"
+                    f"Observação: {obs}"
+                )
+
+                if complemento.strip() not in mensagem_atual:
+                    _db_execute("""
+                        UPDATE ixcprovedor.su_oss_chamado
+                        SET mensagem = CONCAT(COALESCE(mensagem, ''), %s)
+                        WHERE id=%s
+                          AND id_assunto=63
+                          AND status NOT IN ('F','AN')
+                    """, (complemento, os63))
+
+            return JSONResponse({
+                "ok": True,
+                "criada": False,
+                "os63": os63,
+                "id_cliente": id_cliente,
+                "id_contrato": id_contrato,
+                "msg": (
+                    f"OS 63 #{os63} já está aberta. "
+                    "Cliente preparado para negativação manual."
+                )
+            })
+
+    # ------------------------------------------------------------
+    # 2. Sem OS válida: precisamos de cliente + contrato.
+    # ------------------------------------------------------------
+    if not id_cliente or not id_contrato:
+        return JSONResponse({
+            "ok": False,
+            "msg": "Cliente e contrato são obrigatórios para preparar a OS 63."
+        })
+
+    try:
+        id_filial = resolver_filial_contrato(id_contrato)
+    except (ValueError, TypeError) as exc:
+        return JSONResponse({
+            "ok": False,
+            "msg": f"Filial do contrato inválida: {exc}"
+        })
+
+    # ------------------------------------------------------------
+    # 3. Evita duplicação por cliente + contrato.
+    # ------------------------------------------------------------
+    existente = _query_one("""
+        SELECT
+            id,
+            mensagem,
+            status
+        FROM ixcprovedor.su_oss_chamado
+        WHERE id_cliente=%s
+          AND id_contrato_kit=%s
+          AND id_assunto=63
+          AND status NOT IN ('F','AN')
+        ORDER BY id DESC
+        LIMIT 1
+    """, (id_cliente, id_contrato))
+
+    if existente:
+        return JSONResponse({
+            "ok": True,
+            "criada": False,
+            "os63": int(existente["id"]),
+            "id_cliente": id_cliente,
+            "id_contrato": id_contrato,
+            "msg": (
+                f"OS 63 #{existente['id']} já está aberta. "
+                "Nenhuma duplicação foi criada."
+            )
+        })
+
+    # ------------------------------------------------------------
+    # 4. Busca informações reais para a mensagem da OS.
+    # ------------------------------------------------------------
+    cliente = _query_one("""
+        SELECT
+            id,
+            razao,
+            cnpj_cpf
+        FROM ixcprovedor.cliente
+        WHERE id=%s
+        LIMIT 1
+    """, (id_cliente,))
+
+    if not cliente:
+        return JSONResponse({
+            "ok": False,
+            "msg": "Cliente não encontrado no IXC."
+        })
+
+    financeiro = _query_one("""
+        SELECT
+            COALESCE(SUM(
+                CASE
+                    WHEN f.valor_aberto > 0
+                     AND f.status='A'
+                     AND f.data_vencimento < CURDATE()
+                    THEN f.valor_aberto
+                    ELSE 0
+                END
+            ), 0) AS valor_financeiro
+        FROM ixcprovedor.fn_areceber f
+        WHERE f.id_cliente=%s
+          AND f.id_contrato=%s
+    """, (id_cliente, id_contrato))
+
+    valor_financeiro = float(
+        (financeiro or {}).get("valor_financeiro") or 0
+    )
+
+    equipamentos = _ss._equipamentos_contrato(
+        id_contrato,
+        id_cliente
+    )
+
+    pendentes = [
+        e for e in equipamentos
+        if e.get("pendente")
+    ]
+
+    valor_equipamento = sum(
+        float(e.get("valor_bem") or 0)
+        for e in pendentes
+    )
+
+    # ------------------------------------------------------------
+    # 5. Monta mensagem informativa.
+    # Não define valor final de negativação.
+    # ------------------------------------------------------------
+    nome = cliente.get("razao") or f"Cliente #{id_cliente}"
+    documento = cliente.get("cnpj_cpf") or "-"
+
+    linhas = [
+        "NEGATIVAÇÃO — ANÁLISE MANUAL",
+        "",
+        f"Cliente: {nome}",
+        f"CPF/CNPJ: {documento}",
+        f"Contrato: #{id_contrato}",
+        "",
+    ]
+
+    if valor_financeiro > 0:
+        linhas.append(
+            f"Existe valor financeiro em aberto: "
+            f"R$ {valor_financeiro:,.2f}".replace(",", "X")
+            .replace(".", ",")
+            .replace("X", ".")
+        )
+    else:
+        linhas.append("Não foi identificado valor financeiro em aberto.")
+
+    if pendentes:
+        linhas.append("")
+        linhas.append("Equipamento(s) não devolvido(s):")
+
+        for equipamento in pendentes:
+            valor = float(equipamento.get("valor_bem") or 0)
+
+            valor_fmt = (
+                f"R$ {valor:,.2f}"
+                .replace(",", "X")
+                .replace(".", ",")
+                .replace("X", ".")
+            )
+
+            linhas.append(
+                f"- Patrimônio #{equipamento.get('id_patrimonio') or '-'}"
+                f" | {equipamento.get('equipamento') or 'Equipamento'}"
+                f" | Valor: {valor_fmt}"
+            )
+
+            serial = equipamento.get("serial")
+            mac = equipamento.get("mac")
+
+            if serial:
+                linhas.append(f"  Serial: {serial}")
+
+            if mac:
+                linhas.append(f"  MAC: {mac}")
+    else:
+        linhas.append("")
+        linhas.append("Não foi identificado equipamento pendente.")
+
+    linhas.extend([
+        "",
+        "A negativação no Serasa deve ser realizada manualmente pelo operador.",
+        "O HubCobrança não executa a negativação automaticamente.",
+    ])
+
+    if obs:
+        linhas.extend([
+            "",
+            "OBSERVAÇÃO DO OPERADOR:",
+            obs,
+        ])
+
+    mensagem = "\n".join(linhas)
+
+    # ------------------------------------------------------------
+    # 6. Cria a OS 63 usando a filial real do contrato.
+    # ------------------------------------------------------------
+    _db_execute("""
+        INSERT INTO ixcprovedor.su_oss_chamado
+            (
+                id_cliente,
+                id_assunto,
+                mensagem,
+                data_abertura,
+                status,
+                setor,
+                id_filial,
+                id_contrato_kit
+            )
+        VALUES
+            (%s, 63, %s, NOW(), 'A', 0, %s, %s)
+    """, (
+        id_cliente,
+        mensagem,
+        id_filial,
+        id_contrato,
+    ))
+
+    nova = _query_one("""
+        SELECT id
+        FROM ixcprovedor.su_oss_chamado
+        WHERE id_cliente=%s
+          AND id_contrato_kit=%s
+          AND id_assunto=63
+          AND status='A'
+        ORDER BY id DESC
+        LIMIT 1
+    """, (id_cliente, id_contrato))
+
+    if not nova:
+        return JSONResponse({
+            "ok": False,
+            "msg": "A OS 63 não pôde ser localizada após a criação."
+        })
+
+    return JSONResponse({
+        "ok": True,
+        "criada": True,
+        "os63": int(nova["id"]),
+        "id_cliente": id_cliente,
+        "id_contrato": id_contrato,
+        "valor_financeiro": valor_financeiro,
+        "valor_equipamento": valor_equipamento,
+        "msg": (
+            f"OS 63 #{nova['id']} preparada com sucesso. "
+            "Cliente pronto para negativação manual."
+        )
+    })
+
+
+@router.get("/api/serasa/colocar")
+async def api_colocar_serasa(
+    request: Request,
+    cpf: str = "",
+    usuario=Depends(get_usuario)
+):
+    rows = ss.get_clientes_colocar_serasa(
+        cpf=cpf or None,
+        limite=30
+    )
+
+    return JSONResponse({
+        "ok": True,
+        "rows": jsonable_encoder(rows),
+        "total": len(rows),
+    })
+
+
 @router.get("/serasa")
 async def pagina_serasa(
     request: Request,

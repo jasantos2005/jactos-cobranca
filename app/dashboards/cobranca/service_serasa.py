@@ -464,6 +464,220 @@ def get_clientes_serasa(cpf=None, limite=30):
 
     return result
 
+
+def get_clientes_colocar_serasa(cpf=None, limite=30):
+    """
+    Retorna a fila "Colocar no Serasa" a partir do cache local.
+
+    O IXC é atualizado pelo sincronizador periódico. A página não
+    executa mais a montagem pesada da fila diretamente no IXC.
+    """
+    from app.core.db_local import local_query
+
+    sql = """
+        SELECT
+            id,
+            id_cliente,
+            id_contrato,
+            os63,
+            razao,
+            cnpj_cpf,
+            data_abertura,
+            status_os,
+            mensagem,
+            status_contrato,
+            data_cancelamento,
+            motivo_cancelamento,
+            motivo_adicional,
+            motivo_desistencia,
+            origem_cancelamento,
+            id_filial,
+            valor_financeiro,
+            valor_equipamento,
+            quantidade_equipamentos,
+            categoria,
+            atualizado_em
+        FROM cob_serasa_colocar
+    """
+
+    params = ()
+
+    if cpf:
+        documento = "".join(
+            ch for ch in str(cpf) if ch.isdigit()
+        )
+
+        if documento:
+            sql += """
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(
+                    COALESCE(cnpj_cpf, ''), '.', ''), '-', ''), '/', ''), ' ', '') = ?
+            """
+            params = (documento,)
+        else:
+            return []
+    else:
+        sql += """
+            ORDER BY data_abertura DESC, os63 DESC
+        """
+
+    if not cpf:
+        try:
+            limite = int(limite)
+        except (TypeError, ValueError):
+            limite = 30
+
+        if limite > 0:
+            sql += " LIMIT ?"
+            params = (limite,)
+
+    rows = local_query(sql, params)
+
+    equipamentos_por_chave = {}
+
+    if rows:
+        clientes = [
+            (int(r["id_cliente"]), r.get("id_contrato"))
+            for r in rows
+        ]
+
+        placeholders = ",".join(["?"] * len(clientes))
+        where_parts = []
+        eq_params = []
+
+        for cliente, contrato in clientes:
+            if contrato:
+                where_parts.append(
+                    "(id_cliente = ? AND id_contrato = ?)"
+                )
+                eq_params.extend([cliente, contrato])
+            else:
+                where_parts.append(
+                    "(id_cliente = ? AND id_contrato IS NULL)"
+                )
+                eq_params.append(cliente)
+
+        if where_parts:
+            eq_rows = local_query(
+                """
+                SELECT
+                    id_cliente,
+                    id_contrato,
+                    id_patrimonio,
+                    equipamento,
+                    valor,
+                    serial,
+                    mac,
+                    status,
+                    status_label,
+                    pendente,
+                    data_movimentacao
+                FROM cob_serasa_colocar_equipamentos
+                WHERE %s
+                ORDER BY data_movimentacao DESC
+                """ % " OR ".join(where_parts),
+                tuple(eq_params),
+            )
+
+            for e in eq_rows:
+                chave = (
+                    int(e["id_cliente"]),
+                    e.get("id_contrato"),
+                )
+
+                equipamentos_por_chave.setdefault(
+                    chave, []
+                ).append({
+                    "id_patrimonio": e.get("id_patrimonio"),
+                    "id_contrato": e.get("id_contrato"),
+                    "equipamento": e.get("equipamento"),
+                    "valor_bem": float(e.get("valor") or 0),
+                    "serial": e.get("serial"),
+                    "mac": e.get("mac"),
+                    "status": e.get("status"),
+                    "status_label": e.get("status_label"),
+                    "pendente": bool(e.get("pendente")),
+                    "data_movimentacao": e.get(
+                        "data_movimentacao"
+                    ),
+                })
+
+    result = []
+
+    for row in rows:
+        row = dict(row)
+
+        chave = (
+            int(row["id_cliente"]),
+            row.get("id_contrato"),
+        )
+
+        equipamentos = equipamentos_por_chave.get(
+            chave, []
+        )
+
+        row["valor_financeiro"] = float(
+            row.get("valor_financeiro") or 0
+        )
+        row["valor_equipamento"] = float(
+            row.get("valor_equipamento") or 0
+        )
+        row["quantidade_equipamentos"] = int(
+            row.get("quantidade_equipamentos") or len(equipamentos)
+        )
+        row["equipamentos"] = equipamentos
+
+        result.append(row)
+
+    return result
+
+
+def get_kpis_colocar_serasa():
+    from app.core.db_local import local_query_one
+
+    row = local_query_one("""
+        SELECT
+            COUNT(*) AS clientes,
+            COALESCE(SUM(valor_financeiro), 0) AS valor_financeiro,
+            COALESCE(SUM(valor_equipamento), 0) AS valor_equipamento,
+            SUM(
+                CASE
+                    WHEN categoria = 'ambos' THEN 1
+                    ELSE 0
+                END
+            ) AS ambos,
+            SUM(
+                CASE
+                    WHEN categoria = 'financeiro' THEN 1
+                    ELSE 0
+                END
+            ) AS financeiro,
+            SUM(
+                CASE
+                    WHEN categoria = 'equipamento' THEN 1
+                    ELSE 0
+                END
+            ) AS equipamento
+        FROM cob_serasa_colocar
+    """)
+
+    row = row or {}
+
+    return {
+        "clientes": int(row.get("clientes") or 0),
+        "valor_financeiro": round(
+            float(row.get("valor_financeiro") or 0),
+            2,
+        ),
+        "valor_equipamento": round(
+            float(row.get("valor_equipamento") or 0),
+            2,
+        ),
+        "ambos": int(row.get("ambos") or 0),
+        "financeiro": int(row.get("financeiro") or 0),
+        "equipamento": int(row.get("equipamento") or 0),
+    }
+
+
 def get_kpis_serasa():
     rows = get_clientes_serasa(limite=0)
 
