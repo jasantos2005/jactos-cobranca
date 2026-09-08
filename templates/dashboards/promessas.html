@@ -4,7 +4,7 @@
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Promessas Quebradas — HubCobrança</title>
+<title>IaTechHub® — Promessas Quebradas</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -100,7 +100,7 @@ select:focus,textarea:focus{border-color:var(--primary)}
       </table>
     </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 
 <div class="overlay" id="modal-overlay" onclick="fecharModal(event)">
@@ -226,3 +226,280 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 {% include '_inatividade.html' %}
 </body>
 </html>
+
+
+<style id="IATECHHUB_PROMESSAS_QUEBRADAS_VISUAL_V1">
+/* ============================================================
+   IaTechHub® — Promessas Quebradas
+   VISUAL ONLY — lógica original preservada
+   ============================================================ */
+
+html, body{
+  background:#f1f5f9 !important;
+}
+
+body{
+  color:#0b2a4a !important;
+}
+
+/* Área principal */
+.main{
+  margin-left:220px !important;
+  padding:28px !important;
+  min-height:100vh;
+  background:#f1f5f9 !important;
+}
+
+/* Cabeçalho */
+.main > .page-header,
+.main .page-header{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  padding:22px 24px !important;
+  margin-bottom:14px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+}
+
+.header-title{
+  color:#082b50 !important;
+  font-size:24px !important;
+  font-weight:800 !important;
+  letter-spacing:-.5px !important;
+}
+
+.header-sub{
+  color:#64748b !important;
+}
+
+/* Botão Verificar agora */
+.btn-amber{
+  background:#20c6a7 !important;
+  border-color:#20c6a7 !important;
+  color:#ffffff !important;
+  border-radius:8px !important;
+  font-weight:700 !important;
+  padding:10px 16px !important;
+  box-shadow:none !important;
+}
+
+.btn-amber:hover{
+  background:#16b394 !important;
+  border-color:#16b394 !important;
+}
+
+/* KPIs */
+.kpi-grid{
+  gap:16px !important;
+  margin-bottom:20px !important;
+}
+
+.kpi{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  padding:20px 22px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+}
+
+.kpi:first-child{
+  border-top:3px solid #dc2626 !important;
+}
+
+.kpi:nth-child(2){
+  border-top:3px solid #f59e0b !important;
+}
+
+.kpi-label{
+  color:#64748b !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:1px !important;
+}
+
+.kpi-value{
+  color:#082b50 !important;
+  font-size:28px !important;
+  font-weight:800 !important;
+  margin-top:8px !important;
+}
+
+.kpi-sub{
+  color:#94a3b8 !important;
+}
+
+/* Card da tabela */
+.card{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+  overflow:hidden !important;
+}
+
+/* Tabela */
+table{
+  background:#ffffff !important;
+  font-size:13px !important;
+}
+
+thead th{
+  background:#f8fafc !important;
+  color:#64748b !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.7px !important;
+  padding:13px 14px !important;
+}
+
+tbody td{
+  color:#183b5d !important;
+  border-bottom:1px solid #edf2f7 !important;
+  padding:14px !important;
+}
+
+tbody tr{
+  transition:background .15s ease !important;
+}
+
+tbody tr:hover{
+  background:#f8fbfd !important;
+}
+
+.empty{
+  color:#64748b !important;
+  padding:32px !important;
+}
+
+/* Botões dentro da tabela */
+.btn{
+  border-radius:8px !important;
+  font-weight:700 !important;
+}
+
+.btn-green{
+  background:#20c6a7 !important;
+  border-color:#20c6a7 !important;
+  color:#ffffff !important;
+}
+
+.btn-green:hover{
+  background:#16b394 !important;
+}
+
+/* Modal */
+.overlay{
+  background:rgba(7,26,51,.58) !important;
+  backdrop-filter:blur(3px) !important;
+}
+
+.modal{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:16px !important;
+  box-shadow:0 24px 70px rgba(7,26,51,.22) !important;
+  padding:26px !important;
+}
+
+.modal-title{
+  color:#082b50 !important;
+  font-size:19px !important;
+  font-weight:800 !important;
+}
+
+.modal-sub{
+  color:#64748b !important;
+}
+
+.modal-close{
+  color:#64748b !important;
+}
+
+.modal-close:hover{
+  color:#dc2626 !important;
+}
+
+/* Sidebar IaTechHub® */
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+/* Responsivo */
+@media (max-width:900px){
+  .main{
+    margin-left:0 !important;
+    padding:18px !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
+@media (max-width:700px){
+  .main{
+    padding:12px !important;
+  }
+
+  .header-title{
+    font-size:20px !important;
+  }
+
+  .card{
+    overflow-x:auto !important;
+  }
+
+  table{
+    min-width:900px !important;
+  }
+}
+</style>

@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Primeira Cobrança — HubCobrança</title>
+<title>IaTechHub® — Fila de Cobrança</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -115,6 +115,292 @@ textarea{resize:vertical;min-height:70px}
 .pago-row label{font-size:13px;cursor:pointer}
 .loading-m{text-align:center;padding:40px;color:var(--muted)}
 .toast{position:fixed;bottom:24px;right:24px;background:#0f2a1f;border:1px solid var(--primary);color:var(--primary);padding:10px 18px;border-radius:8px;font-size:13px;z-index:999;display:none;font-weight:600}
+
+/* =========================================================
+   IaTechHub® — Fila de Cobrança
+   Camada exclusivamente visual.
+   Lógica, rotas, Jinja, APIs e ações preservadas.
+   ========================================================= */
+
+body{
+  background:#f1f5f9 !important;
+}
+
+.main{
+  background:#f1f5f9 !important;
+}
+
+.header{
+  background:#ffffff !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  padding:18px 28px !important;
+}
+
+.header-title{
+  color:#071a33 !important;
+  font-size:18px !important;
+  font-weight:800 !important;
+  letter-spacing:-.3px !important;
+}
+
+.header-sub{
+  color:#64748b !important;
+  margin-top:4px !important;
+}
+
+.filters{
+  gap:7px !important;
+}
+
+.filter-btn{
+  background:#ffffff !important;
+  border:1px solid #d7e0ea !important;
+  color:#475569 !important;
+  border-radius:8px !important;
+  padding:7px 12px !important;
+  font-weight:600 !important;
+}
+
+.filter-btn:hover{
+  border-color:#20c6a7 !important;
+  color:#071a33 !important;
+  background:#f8fffd !important;
+}
+
+.filter-btn.active{
+  background:#20c6a7 !important;
+  border-color:#20c6a7 !important;
+  color:#071a33 !important;
+  box-shadow:0 2px 6px rgba(32,198,167,.18) !important;
+}
+
+.search-box{
+  background:#f8fafc !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:8px !important;
+  color:#1e293b !important;
+  padding:8px 12px !important;
+  width:220px !important;
+}
+
+.search-box:focus{
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+.content{
+  padding:24px 28px !important;
+}
+
+.card{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:12px !important;
+  box-shadow:0 4px 16px rgba(15,23,42,.04) !important;
+}
+
+.card-title{
+  padding:16px 20px !important;
+  background:#ffffff !important;
+  color:#334155 !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:1.1px !important;
+}
+
+table{
+  background:#ffffff !important;
+}
+
+th{
+  background:#f8fafc !important;
+  color:#64748b !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  padding:11px 14px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+
+td{
+  color:#334155 !important;
+  border-bottom:1px solid #edf2f7 !important;
+  padding:12px 14px !important;
+}
+
+tr:hover td{
+  background:#f8fffd !important;
+}
+
+.cli-link{
+  color:#0f2742 !important;
+  font-weight:700 !important;
+}
+
+.cli-link:hover{
+  color:#079b80 !important;
+  text-decoration:none !important;
+}
+
+.cli-doc,
+.cli-id{
+  color:#64748b !important;
+}
+
+.tel{
+  color:#079b80 !important;
+}
+
+.valor{
+  color:#079b80 !important;
+  font-weight:700 !important;
+}
+
+.badge-atraso{
+  border-radius:6px !important;
+  padding:3px 8px !important;
+}
+
+.btn-blue{
+  background:#2563eb !important;
+  border-radius:7px !important;
+  font-weight:700 !important;
+}
+
+.btn-green{
+  background:#20c6a7 !important;
+  color:#071a33 !important;
+  border-radius:7px !important;
+  font-weight:800 !important;
+}
+
+.btn-outline{
+  background:#ffffff !important;
+  border:1px solid #d7e0ea !important;
+  color:#475569 !important;
+  border-radius:7px !important;
+}
+
+.paginacao{
+  background:#ffffff !important;
+  border-top:1px solid #e2e8f0 !important;
+  padding:14px 18px !important;
+}
+
+.pag-btn{
+  background:#ffffff !important;
+  border:1px solid #d7e0ea !important;
+  color:#475569 !important;
+  border-radius:7px !important;
+}
+
+.pag-btn:hover:not([disabled]){
+  border-color:#20c6a7 !important;
+  color:#071a33 !important;
+}
+
+.page-footer{
+  background:#f1f5f9 !important;
+  border-top:1px solid #e2e8f0 !important;
+  color:#94a3b8 !important;
+}
+
+/* Modal */
+.overlay{
+  background:rgba(7,26,51,.58) !important;
+  backdrop-filter:blur(3px) !important;
+}
+
+.modal{
+  background:#ffffff !important;
+  border:1px solid #dbe4ed !important;
+  border-radius:14px !important;
+  box-shadow:0 24px 70px rgba(7,26,51,.22) !important;
+}
+
+.modal-header{
+  background:#ffffff !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  padding:18px 22px !important;
+}
+
+.modal-title{
+  color:#071a33 !important;
+  font-weight:800 !important;
+}
+
+.modal-subtitle{
+  color:#64748b !important;
+}
+
+.modal-body{
+  background:#ffffff !important;
+}
+
+.modal-footer{
+  background:#f8fafc !important;
+  border-top:1px solid #e2e8f0 !important;
+}
+
+.sec-title{
+  color:#64748b !important;
+  border-bottom:1px solid #e2e8f0 !important;
+}
+
+.info-item .val{
+  color:#1e293b !important;
+}
+
+.os-card{
+  background:#f8fafc !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:9px !important;
+}
+
+select,
+textarea,
+input[type=date]{
+  background:#f8fafc !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:7px !important;
+}
+
+select:focus,
+textarea:focus,
+input[type=date]:focus{
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+
+/* IaTechHub® — responsividade da tabela */
+.card{
+  overflow:hidden !important;
+}
+
+.card table{
+  min-width:920px !important;
+}
+
+@media (max-width:1200px){
+  .content{
+    padding:20px !important;
+  }
+
+  .search-box{
+    width:190px !important;
+  }
+}
+
+@media (max-width:1050px){
+  .card{
+    overflow-x:auto !important;
+  }
+
+  .card table{
+    min-width:920px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -123,7 +409,7 @@ textarea{resize:vertical;min-height:70px}
 <main class="main">
   <header class="header">
     <div>
-      <div class="header-title">Primeira Cobrança</div>
+      <div class="header-title">Fila de Cobrança</div>
       <div class="header-sub">{{ total }} faturas aguardando cobrança</div>
     </div>
     <div class="filters">
@@ -205,7 +491,7 @@ textarea{resize:vertical;min-height:70px}
       </div>
     </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 
 <!-- OVERLAY MODAL -->

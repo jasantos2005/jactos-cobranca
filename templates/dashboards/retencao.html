@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Retenção — HubCobrança</title>
+<title>IaTechHub® — Retenção</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -157,6 +157,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       {% endif %}
     </div>
   </div>
+<footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 <script>
 function filtrarNivel(nivel){
@@ -261,5 +262,230 @@ async function salvarRetido(){
 </script>
 {% include '_briefing.html' %}
 {% include '_inatividade.html' %}
+
+<style id="IATECHHUB_RETENCAO_VISUAL_V1">
+/* IATECHHUB_RETENCAO_VISUAL_V1 */
+body{
+  background:#eef3f8 !important;
+  color:#172b43 !important;
+}
+
+.sidebar{
+  width:220px !important;
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#fff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#eef3f8 !important;
+}
+
+.header{
+  min-height:74px !important;
+  padding:16px 28px !important;
+  background:#fff !important;
+  border-bottom:1px solid #dbe4ee !important;
+  box-shadow:0 1px 3px rgba(15,35,55,.04) !important;
+}
+
+.header-title{
+  color:#102a43 !important;
+  font-size:18px !important;
+  font-weight:750 !important;
+  letter-spacing:-.3px !important;
+}
+
+.header-sub{
+  color:#71839a !important;
+  margin-top:4px !important;
+}
+
+.content{
+  padding:24px 28px 10px !important;
+  background:#eef3f8 !important;
+}
+
+.kpi-grid{
+  gap:14px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi{
+  background:#fff !important;
+  border:1px solid #dce5ee !important;
+  border-radius:12px !important;
+  padding:16px 18px !important;
+  box-shadow:0 2px 8px rgba(31,55,80,.04) !important;
+  transition:transform .15s ease,box-shadow .15s ease !important;
+}
+
+.kpi:hover{
+  transform:translateY(-1px) !important;
+  box-shadow:0 5px 14px rgba(31,55,80,.08) !important;
+}
+
+.kpi-label{
+  color:#71839a !important;
+  font-size:10px !important;
+  letter-spacing:1.1px !important;
+}
+
+.kpi-value{
+  margin-top:6px !important;
+  font-size:25px !important;
+}
+
+.kpi-sub{
+  color:#8a9bad !important;
+  margin-top:4px !important;
+}
+
+.card{
+  background:#fff !important;
+  border:1px solid #dce5ee !important;
+  border-radius:12px !important;
+  padding:18px !important;
+  box-shadow:0 2px 8px rgba(31,55,80,.04) !important;
+}
+
+table{
+  font-size:12px !important;
+}
+
+th{
+  padding:11px 10px !important;
+  color:#71839a !important;
+  border-bottom:1px solid #dbe4ee !important;
+  background:#f8fafc !important;
+}
+
+td{
+  padding:11px 10px !important;
+  border-bottom:1px solid #e8eef4 !important;
+  color:#30465e !important;
+}
+
+tr:hover td{
+  background:#f7fafc !important;
+}
+
+.score-bar{
+  width:90px !important;
+  height:7px !important;
+  background:#e5ebf1 !important;
+  border-radius:5px !important;
+}
+
+.score-fill{
+  height:7px !important;
+  border-radius:5px !important;
+}
+
+.badge{
+  border-radius:6px !important;
+  padding:4px 9px !important;
+}
+
+.btn-cobrar{
+  border-radius:7px !important;
+  background:#20c6a7 !important;
+  color:#fff !important;
+}
+
+.paginacao{
+  margin-top:18px !important;
+}
+
+.paginacao a{
+  background:#fff !important;
+  border-color:#dbe4ee !important;
+  color:#60748a !important;
+}
+
+.paginacao a.active,
+.paginacao a:hover{
+  background:#20c6a7 !important;
+  border-color:#20c6a7 !important;
+  color:#fff !important;
+}
+
+.page-footer{
+  margin-top:auto !important;
+  width:100% !important;
+  padding:18px 28px 10px !important;
+  box-sizing:border-box !important;
+  text-align:right !important;
+  color:#8a9bad !important;
+  font-size:11px !important;
+  flex-shrink:0 !important;
+}
+
+@media(max-width:900px){
+  .main{
+    margin-left:0 !important;
+  }
+
+  .header{
+    padding:14px 18px !important;
+  }
+
+  .content{
+    padding:18px 14px 10px !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+</style>
+
 </body>
 </html>

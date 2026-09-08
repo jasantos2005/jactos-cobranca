@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Cancelamentos por Inadimplência — HubCobrança</title>
+<title>IaTechHub® — Cancelamentos por Inadimplência</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -55,6 +55,432 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .paginacao a{padding:6px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px}
 .paginacao a.active,.paginacao a:hover{background:var(--primary);color:#0d1117;border-color:var(--primary)}
 </style>
+
+<style id="iathub-cancelamentos-inad-visual">
+/* IATECHHUB_CANCELAMENTOS_INAD_VISUAL_V1 */
+
+body{
+  background:#f4f7fb !important;
+  color:#17365d !important;
+}
+
+/* SIDEBAR */
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+/* ÁREA PRINCIPAL */
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f4f7fb !important;
+}
+
+/* HEADER */
+.header{
+  background:#ffffff !important;
+  border-bottom:1px solid #dce5ef !important;
+  padding:22px 30px !important;
+  min-height:106px !important;
+}
+
+.header-title{
+  color:#092f5f !important;
+  font-size:21px !important;
+  font-weight:800 !important;
+  letter-spacing:-.35px !important;
+}
+
+.header-sub{
+  color:#6f849b !important;
+  font-size:12px !important;
+  margin-top:6px !important;
+}
+
+/* FILTROS */
+.filters{
+  gap:8px !important;
+}
+
+.filters input[type=date],
+.filters select{
+  background:#ffffff !important;
+  border:1px solid #d5e0eb !important;
+  border-radius:8px !important;
+  color:#17365d !important;
+  padding:9px 11px !important;
+  min-height:38px !important;
+}
+
+.filters input[type=date]:focus,
+.filters select:focus{
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+.btn{
+  background:#20c6a7 !important;
+  color:#ffffff !important;
+  border-radius:8px !important;
+  min-height:38px !important;
+  padding:9px 16px !important;
+  font-weight:700 !important;
+  box-shadow:0 3px 8px rgba(32,198,167,.16) !important;
+}
+
+.btn:hover{
+  filter:brightness(.96);
+}
+
+/* CONTEÚDO */
+.content{
+  padding:26px 30px 18px !important;
+}
+
+/* KPIs */
+.kpi-grid{
+  grid-template-columns:repeat(6,minmax(145px,1fr)) !important;
+  gap:14px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi{
+  background:#ffffff !important;
+  border:1px solid #dce5ef !important;
+  border-radius:12px !important;
+  padding:17px 18px !important;
+  min-height:108px !important;
+  box-shadow:0 3px 12px rgba(20,52,84,.045) !important;
+  transition:all .16s ease !important;
+}
+
+.kpi:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(20,52,84,.08) !important;
+}
+
+.kpi-label{
+  color:#7890a8 !important;
+  font-size:10px !important;
+  letter-spacing:1.1px !important;
+}
+
+.kpi-value{
+  color:#123e70 !important;
+  font-size:26px !important;
+  margin-top:7px !important;
+}
+
+.kpi-sub{
+  color:#91a2b4 !important;
+  font-size:10px !important;
+  margin-top:4px !important;
+}
+
+/* TABELA */
+.card{
+  background:#ffffff !important;
+  border:1px solid #dce5ef !important;
+  border-radius:12px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  box-shadow:0 3px 14px rgba(20,52,84,.045) !important;
+}
+
+.card > div:first-child{
+  overflow-x:auto !important;
+}
+
+table{
+  min-width:1250px !important;
+  background:#ffffff !important;
+}
+
+th{
+  background:#f7f9fc !important;
+  color:#7890a8 !important;
+  border-bottom:1px solid #dce5ef !important;
+  padding:11px 10px !important;
+  font-size:9px !important;
+  letter-spacing:1px !important;
+}
+
+td{
+  color:#29496b !important;
+  border-bottom:1px solid #edf1f5 !important;
+  padding:11px 10px !important;
+}
+
+tbody tr:hover td{
+  background:#f8fbfd !important;
+}
+
+tbody tr:last-child td{
+  border-bottom:none !important;
+}
+
+/* BADGES */
+.badge{
+  border-radius:999px !important;
+  padding:4px 9px !important;
+  font-size:10px !important;
+}
+
+/* PAGINAÇÃO */
+.paginacao{
+  justify-content:flex-end !important;
+  padding:14px 18px !important;
+  margin-top:0 !important;
+  border-top:1px solid #edf1f5 !important;
+}
+
+.paginacao a{
+  background:#ffffff !important;
+  border:1px solid #dce5ef !important;
+  color:#607b96 !important;
+  border-radius:7px !important;
+  min-width:32px !important;
+  text-align:center !important;
+}
+
+.paginacao a.active,
+.paginacao a:hover{
+  background:#20c6a7 !important;
+  border-color:#20c6a7 !important;
+  color:#ffffff !important;
+}
+
+/* FOOTER */
+.page-footer{
+  color:#8a9bad !important;
+  text-align:right !important;
+  font-size:11px !important;
+  padding:20px 30px 10px !important;
+  margin-top:auto !important;
+  width:100% !important;
+  flex-shrink:0 !important;
+}
+
+/* RESPONSIVO */
+@media(max-width:1100px){
+  .kpi-grid{
+    grid-template-columns:repeat(3,minmax(150px,1fr)) !important;
+  }
+}
+
+@media(max-width:800px){
+  .sidebar{
+    width:190px !important;
+  }
+
+  .main{
+    margin-left:190px !important;
+  }
+
+  .header,
+  .content{
+    padding-left:18px !important;
+    padding-right:18px !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(140px,1fr)) !important;
+  }
+}
+
+@media(max-width:600px){
+  .sidebar{
+    position:relative !important;
+    width:100% !important;
+    min-height:auto !important;
+  }
+
+  .main{
+    margin-left:0 !important;
+  }
+
+  body{
+    display:block !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
+
+<!-- IATECHHUB_CANCELAMENTOS_INAD_FULLWIDTH_V1 -->
+<style id="iathub-cancelamentos-inad-fullwidth">
+/* ============================================================
+   IaTechHub® — Cancelamentos por Inadimplência
+   CORREÇÃO DE LAYOUT — somente visual
+   ============================================================ */
+
+html,
+body{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+.sidebar{
+  width:220px !important;
+  min-width:220px !important;
+  max-width:220px !important;
+  min-height:100vh !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  z-index:100 !important;
+  flex:none !important;
+}
+
+.main{
+  margin-left:220px !important;
+  width:calc(100% - 220px) !important;
+  max-width:calc(100% - 220px) !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+}
+
+.main > header,
+.content{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.content{
+  padding-left:30px !important;
+  padding-right:30px !important;
+  overflow-x:hidden !important;
+}
+
+.kpi-grid{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.kpi{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+.card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+@media(max-width:900px){
+  .main{
+    margin-left:0 !important;
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .sidebar{
+    width:220px !important;
+    min-width:220px !important;
+    max-width:220px !important;
+  }
+}
+</style>
+
+
+<!-- IATECHHUB_CANCELAMENTOS_INAD_HORIZONTAL_V2 -->
+<style id="iathub-cancelamentos-inad-horizontal">
+/* ============================================================
+   IaTechHub® — Cancelamentos por Inadimplência
+   AJUSTE FINAL DE POSICIONAMENTO HORIZONTAL — somente visual
+   ============================================================ */
+
+html{
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow-x:hidden !important;
+}
+
+body{
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow-x:hidden !important;
+}
+
+.sidebar{
+  left:0 !important;
+  margin-left:0 !important;
+  transform:none !important;
+}
+
+.main{
+  margin-left:220px !important;
+  width:calc(100vw - 220px) !important;
+  max-width:calc(100vw - 220px) !important;
+  min-width:0 !important;
+  overflow-x:hidden !important;
+}
+</style>
+
 </head>
 <body>
 {% include '_sidebar.html' %}
@@ -167,6 +593,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       {% endif %}
     </div>
   </div>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 <script>
 function filtrar(){

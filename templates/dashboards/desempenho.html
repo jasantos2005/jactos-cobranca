@@ -4,7 +4,7 @@
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Meu Desempenho — HubCobrança</title>
+<title>IaTechHub® — Meu Desempenho</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -67,6 +67,263 @@ tr:last-child td{border-bottom:none}
 .empty{text-align:center;padding:30px;color:var(--muted2);font-size:13px}
 .page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
 </style>
+
+<style>
+/* IATECHHUB_DESEMPENHO_VISUAL_V1 */
+
+:root{
+  --bg:#f4f7fb !important;
+  --surface:#ffffff !important;
+  --border:#e1e8f0 !important;
+  --border2:#cbd7e4 !important;
+  --text:#0b2a4a !important;
+  --muted:#58708a !important;
+  --muted2:#71869b !important;
+  --primary:#20c6a7 !important;
+  --amber:#e6a21a !important;
+  --red:#e05252 !important;
+  --blue:#2878d7 !important;
+  --cyan:#36b8c4 !important;
+}
+
+body{
+  background:#f4f7fb !important;
+  color:#0b2a4a !important;
+}
+
+.sidebar{
+  width:220px !important;
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+.main{
+  margin-left:220px !important;
+  background:#f4f7fb !important;
+  min-height:100vh !important;
+}
+
+.header{
+  background:#ffffff !important;
+  border-bottom:1px solid #e1e8f0 !important;
+  padding:20px 30px !important;
+  box-shadow:0 1px 0 rgba(7,26,51,.02) !important;
+}
+
+.header-title{
+  color:#0b2a4a !important;
+  font-size:18px !important;
+  font-weight:750 !important;
+  letter-spacing:-.25px !important;
+}
+
+.header-sub{
+  color:#6d8298 !important;
+  font-size:12px !important;
+  margin-top:4px !important;
+}
+
+.filters{
+  gap:8px !important;
+}
+
+input[type=date]{
+  background:#f8fafc !important;
+  border:1px solid #d7e1eb !important;
+  color:#0b2a4a !important;
+  border-radius:7px !important;
+  padding:8px 10px !important;
+}
+
+.btn{
+  border-radius:7px !important;
+  padding:8px 14px !important;
+}
+
+.btn-green{
+  background:#20c6a7 !important;
+  color:#062a27 !important;
+}
+
+.btn-blue{
+  background:#2878d7 !important;
+  color:#ffffff !important;
+}
+
+.content{
+  padding:26px 30px 18px !important;
+}
+
+.kpi-grid{
+  gap:16px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi{
+  background:#ffffff !important;
+  border:1px solid #e1e8f0 !important;
+  border-radius:12px !important;
+  padding:18px 19px !important;
+  box-shadow:0 4px 14px rgba(11,42,74,.045) !important;
+}
+
+.kpi-label{
+  color:#647b91 !important;
+  font-size:10px !important;
+  letter-spacing:1.2px !important;
+}
+
+.kpi-value{
+  color:#0b2a4a !important;
+  font-size:27px !important;
+  margin-top:9px !important;
+}
+
+.kpi-sub{
+  color:#71869b !important;
+}
+
+.kpi-accent{
+  height:3px !important;
+}
+
+.grid2{
+  gap:18px !important;
+  margin-bottom:20px !important;
+}
+
+.card{
+  background:#ffffff !important;
+  border:1px solid #e1e8f0 !important;
+  border-radius:12px !important;
+  padding:20px !important;
+  box-shadow:0 4px 14px rgba(11,42,74,.045) !important;
+}
+
+.card-title{
+  color:#58708a !important;
+  font-size:11px !important;
+  letter-spacing:1.15px !important;
+  margin-bottom:16px !important;
+}
+
+.efic-circle{
+  border-width:8px !important;
+  background:#fbfdff !important;
+}
+
+.efic-value{
+  font-size:32px !important;
+}
+
+table{
+  color:#0b2a4a !important;
+}
+
+th{
+  color:#60788f !important;
+  background:#f8fafc !important;
+  border-bottom:1px solid #dfe7ef !important;
+  padding:10px !important;
+}
+
+td{
+  border-bottom:1px solid #edf1f5 !important;
+  padding:11px 10px !important;
+}
+
+tr:hover td{
+  background:#f8fbfd !important;
+}
+
+.badge{
+  border-radius:5px !important;
+  padding:3px 8px !important;
+}
+
+.page-footer{
+  color:#8a9bad !important;
+  text-align:right !important;
+  font-size:11px !important;
+  padding:22px 30px 10px !important;
+  margin-top:auto !important;
+  width:100% !important;
+  flex-shrink:0 !important;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:200px !important;
+  }
+  .main{
+    margin-left:200px !important;
+  }
+  .header,
+  .content{
+    padding-left:20px !important;
+    padding-right:20px !important;
+  }
+}
+
+@media(max-width:700px){
+  .sidebar{
+    width:180px !important;
+  }
+  .main{
+    margin-left:180px !important;
+  }
+  .grid2{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
 </head>
 <body>
 {% include '_sidebar.html' %}
@@ -151,7 +408,7 @@ tr:last-child td{border-bottom:none}
       </table>
     </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 
 <script>

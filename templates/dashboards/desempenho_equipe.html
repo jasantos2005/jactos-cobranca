@@ -4,7 +4,7 @@
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Desempenho da Equipe — HubCobrança</title>
+<title>IaTechHub® — Desempenho Equipe</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -54,7 +54,399 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .meta-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:6px}
 .meta-fill{height:100%;border-radius:3px;background:var(--primary)}
 .sig{font-size:10px;color:var(--muted2);text-align:right;padding:12px 28px}
+
+/* IATECHHUB_DESEMPENHO_EQUIPE_VISUAL_V1 */
+
+/* Workspace */
+html, body{
+  background:#f4f7fb !important;
+  color:#18324f !important;
+}
+
+body{
+  font-family:'Inter',sans-serif !important;
+}
+
+/* Main area */
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f4f7fb !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+
+/* Header */
+.main > header{
+  background:#ffffff !important;
+  border-bottom:1px solid #e3eaf2 !important;
+  padding:24px 30px 20px !important;
+  box-shadow:0 1px 3px rgba(15,40,70,.03) !important;
+}
+
+.header-title{
+  color:#18324f !important;
+  font-size:21px !important;
+  font-weight:800 !important;
+  letter-spacing:-.35px !important;
+}
+
+.header-title:first-letter{
+  color:#20c6a7 !important;
+}
+
+.header-sub{
+  color:#71869b !important;
+  font-size:12px !important;
+  margin-top:5px !important;
+}
+
+.filters{
+  gap:8px !important;
+}
+
+.filters input[type=date]{
+  height:38px !important;
+  padding:8px 11px !important;
+  border:1px solid #d7e1eb !important;
+  border-radius:8px !important;
+  background:#ffffff !important;
+  color:#29445f !important;
+  font-size:12px !important;
+  box-shadow:0 1px 2px rgba(20,50,80,.03) !important;
+}
+
+.filters input[type=date]:focus{
+  outline:none !important;
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+.btn{
+  height:38px !important;
+  padding:0 16px !important;
+  border-radius:8px !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  transition:.15s ease !important;
+}
+
+.btn-primary{
+  background:#20c6a7 !important;
+  color:#ffffff !important;
+  border:none !important;
+}
+
+.btn-primary:hover{
+  background:#18b497 !important;
+}
+
+.btn-blue{
+  background:#2878d7 !important;
+  color:#ffffff !important;
+  border:1px solid #2878d7 !important;
+}
+
+.btn-blue:hover{
+  background:#216bc1 !important;
+}
+
+/* Content */
+.content{
+  padding:26px 30px 10px !important;
+  background:#f4f7fb !important;
+  flex:1 !important;
+}
+
+/* KPI cards */
+.kpi-grid{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr)) !important;
+  gap:16px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi-card{
+  background:#ffffff !important;
+  border:1px solid #dfe8f1 !important;
+  border-radius:12px !important;
+  padding:19px 20px 17px !important;
+  box-shadow:0 3px 10px rgba(24,50,79,.05) !important;
+  position:relative !important;
+  overflow:hidden !important;
+  transition:transform .15s ease,box-shadow .15s ease !important;
+}
+
+.kpi-card::after{
+  content:"" !important;
+  position:absolute !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  height:3px !important;
+  background:#20c6a7 !important;
+}
+
+.kpi-card:hover{
+  transform:translateY(-1px) !important;
+  box-shadow:0 6px 16px rgba(24,50,79,.08) !important;
+}
+
+.kpi-label{
+  color:#718aa3 !important;
+  font-size:10px !important;
+  font-weight:700 !important;
+  letter-spacing:1.1px !important;
+  margin-bottom:7px !important;
+}
+
+.kpi-nome{
+  color:#18324f !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  margin-bottom:9px !important;
+  min-height:18px !important;
+}
+
+.kpi-value{
+  color:#183f68 !important;
+  font-size:25px !important;
+  font-weight:800 !important;
+  font-family:'JetBrains Mono',monospace !important;
+}
+
+.kpi-sub{
+  color:#7890a7 !important;
+  font-size:11px !important;
+  margin-top:5px !important;
+}
+
+.meta-bar{
+  height:6px !important;
+  background:#e8eef4 !important;
+  border-radius:6px !important;
+  margin-top:12px !important;
+}
+
+.meta-fill{
+  background:#20c6a7 !important;
+  border-radius:6px !important;
+}
+
+/* Generic cards */
+.card{
+  background:#ffffff !important;
+  border:1px solid #dfe8f1 !important;
+  border-radius:12px !important;
+  box-shadow:0 3px 10px rgba(24,50,79,.045) !important;
+  margin-bottom:20px !important;
+  overflow:hidden !important;
+}
+
+.card-title{
+  color:#35536f !important;
+  background:#ffffff !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.9px !important;
+  padding:15px 18px !important;
+  border-bottom:1px solid #e7edf3 !important;
+}
+
+.chart-wrap{
+  padding:20px !important;
+  height:340px !important;
+  background:#ffffff !important;
+}
+
+/* Table */
+table{
+  background:#ffffff !important;
+}
+
+th{
+  color:#71879c !important;
+  background:#f8fafc !important;
+  padding:11px 14px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  letter-spacing:.7px !important;
+  border-bottom:1px solid #e3eaf1 !important;
+}
+
+td{
+  color:#29445f !important;
+  padding:11px 14px !important;
+  font-size:12px !important;
+  border-bottom:1px solid #edf1f5 !important;
+}
+
+tr:hover td{
+  background:#f7fbfa !important;
+}
+
+.badge{
+  padding:4px 9px !important;
+  border-radius:6px !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+}
+
+.badge-blue{
+  background:#e8f2ff !important;
+  color:#2878d7 !important;
+  border:1px solid #d4e6fb !important;
+}
+
+/* Footer */
+.sig{
+  color:#8a9bad !important;
+  text-align:right !important;
+  font-size:11px !important;
+  padding:14px 30px 12px !important;
+  margin-top:auto !important;
+  width:100% !important;
+  flex-shrink:0 !important;
+  background:#f4f7fb !important;
+}
+
+/* Shared sidebar reinforcement */
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+/* Responsive */
+@media(max-width:900px){
+  .main{
+    margin-left:0 !important;
+  }
+
+  .main > header{
+    padding:18px 18px 16px !important;
+  }
+
+  .content{
+    padding:18px !important;
+  }
+
+  .filters{
+    width:100% !important;
+    flex-wrap:wrap !important;
+  }
+
+  .filters input[type=date]{
+    flex:1 !important;
+    min-width:145px !important;
+  }
+
+  .sig{
+    padding-right:18px !important;
+  }
+}
+
 </style>
+
+<!-- IATECHHUB_DESEMPENHO_EQUIPE_FULLWIDTH_V1 -->
+<style id="iathub-desempenho-equipe-fullwidth">
+/* ============================================================
+   IaTechHub® — Desempenho Equipe
+   CORREÇÃO DE LAYOUT — somente visual
+   ============================================================ */
+
+.sidebar{
+  width:220px !important;
+  min-height:100vh !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  z-index:100 !important;
+  flex:none !important;
+}
+
+.main{
+  margin-left:220px !important;
+  width:calc(100% - 220px) !important;
+  max-width:calc(100% - 220px) !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  box-sizing:border-box !important;
+}
+
+.main > header,
+.content{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.content{
+  padding-left:30px !important;
+  padding-right:30px !important;
+}
+
+.kpi-grid{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+}
+
+.kpi-card,
+.card{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+</style>
+
 </head>
 <body>
 {% include '_sidebar.html' %}
@@ -109,7 +501,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
   </div>
-  <div class="sig">Iatch Axiom · Built by Ailton</div>
+  <div class="sig">IaTechHub® · Hub Cobrança</div>
 </div>
 
 <script>

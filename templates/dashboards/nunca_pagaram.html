@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>🚨 Nunca Pagaram — HubCobrança</title>
+<title>IaTechHub® — Nunca Pagaram</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -249,5 +249,310 @@ async function salvarInteracao() {
 </script>
 {% include '_briefing.html' %}
 {% include '_inatividade.html' %}
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </body>
 </html>
+
+<style>
+/* IATECHHUB_NUNCA_PAGARAM_VISUAL_V1 */
+
+body{
+  background:#f1f5f9 !important;
+  color:#0f2742 !important;
+}
+
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f1f5f9 !important;
+}
+
+.header{
+  background:#fff !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  padding:22px 30px !important;
+}
+
+.header-title{
+  color:#071a33 !important;
+  font-size:20px !important;
+  font-weight:800 !important;
+}
+
+.header-sub{
+  color:#64748b !important;
+  margin-top:5px !important;
+}
+
+.content{
+  padding:24px 30px 34px !important;
+}
+
+/* Alerta */
+.alerta-banner{
+  background:#fff !important;
+  border:1px solid #fecaca !important;
+  border-left:4px solid #ef4444 !important;
+  border-radius:10px !important;
+  padding:15px 18px !important;
+  box-shadow:0 2px 8px rgba(15,39,66,.04) !important;
+}
+
+.alerta-banner > div:nth-child(2) > div:first-child{
+  color:#dc2626 !important;
+}
+
+.alerta-banner > div:nth-child(2) > div:last-child{
+  color:#64748b !important;
+}
+
+/* KPIs */
+.kpi-grid{
+  gap:16px !important;
+  margin:18px 0 !important;
+}
+
+.kpi{
+  background:#fff !important;
+  border:1px solid #e2e8f0 !important;
+  border-top-width:3px !important;
+  border-radius:10px !important;
+  padding:18px !important;
+  box-shadow:0 2px 8px rgba(15,39,66,.04) !important;
+}
+
+.kpi-label{
+  color:#64748b !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  letter-spacing:1px !important;
+}
+
+.kpi-value{
+  margin-top:7px !important;
+  font-weight:800 !important;
+}
+
+.kpi-sub{
+  color:#94a3b8 !important;
+  margin-top:4px !important;
+}
+
+/* Tabela */
+.card{
+  background:#fff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:12px !important;
+  overflow-x:auto !important;
+  box-shadow:0 3px 12px rgba(15,39,66,.05) !important;
+}
+
+.card table{
+  width:100% !important;
+  min-width:1050px !important;
+  border-collapse:collapse !important;
+}
+
+.card th{
+  background:#f8fafc !important;
+  color:#526b84 !important;
+  border-bottom:1px solid #dbe4ee !important;
+  padding:12px 14px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  letter-spacing:.7px !important;
+}
+
+.card td{
+  border-bottom:1px solid #edf2f7 !important;
+  padding:13px 14px !important;
+  color:#334e68 !important;
+}
+
+.card tbody tr:hover{
+  background:#f8fbfd !important;
+}
+
+.card tbody tr:last-child td{
+  border-bottom:none !important;
+}
+
+/* Badges */
+.badge-red{
+  background:#fef2f2 !important;
+  color:#dc2626 !important;
+  border:1px solid #fecaca !important;
+  border-radius:999px !important;
+  padding:4px 8px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  display:inline-block !important;
+}
+
+.badge-amber{
+  background:#fffbeb !important;
+  color:#b45309 !important;
+  border:1px solid #fde68a !important;
+  border-radius:999px !important;
+  padding:4px 8px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  display:inline-block !important;
+}
+
+/* Cobrar */
+.btn-cobrar{
+  background:#20c6a7 !important;
+  color:#071a33 !important;
+  border:none !important;
+  border-radius:7px !important;
+  padding:7px 14px !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  cursor:pointer !important;
+  box-shadow:0 2px 5px rgba(32,198,167,.18) !important;
+}
+
+.btn-cobrar:hover{
+  background:#18b596 !important;
+  opacity:1 !important;
+}
+
+/* Paginação */
+.paginacao{
+  padding:16px !important;
+  margin:0 !important;
+  border-top:1px solid #edf2f7 !important;
+}
+
+.paginacao a{
+  background:#fff !important;
+  border:1px solid #dbe4ee !important;
+  color:#526b84 !important;
+  border-radius:7px !important;
+}
+
+.paginacao a.active,
+.paginacao a:hover{
+  background:#20c6a7 !important;
+  color:#071a33 !important;
+  border-color:#20c6a7 !important;
+}
+
+/* Modal */
+#modal-inter{
+  background:rgba(7,26,51,.58) !important;
+  backdrop-filter:blur(2px) !important;
+}
+
+#modal-inter > div{
+  background:#fff !important;
+  border:1px solid #dbe4ee !important;
+  border-radius:12px !important;
+  box-shadow:0 20px 50px rgba(7,26,51,.22) !important;
+  color:#0f2742 !important;
+}
+
+#modal-inter label{
+  color:#526b84 !important;
+}
+
+#modal-inter select,
+#modal-inter input,
+#modal-inter textarea{
+  background:#f8fafc !important;
+  color:#0f2742 !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:7px !important;
+}
+
+#modal-inter select:focus,
+#modal-inter input:focus,
+#modal-inter textarea:focus{
+  outline:none !important;
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+#modal-inter button[onclick="salvarInteracao()"]{
+  background:#20c6a7 !important;
+  color:#071a33 !important;
+  font-weight:800 !important;
+}
+
+#modal-inter button[onclick="fecharModal()"]{
+  background:#fff !important;
+  color:#526b84 !important;
+  border-color:#d7e0ea !important;
+}
+
+/* Sidebar IaTechHub® */
+.sidebar{
+  width:220px !important;
+  min-height:100vh !important;
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  z-index:1000 !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#fff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+@media(max-width:900px){
+  .content{
+    padding:18px !important;
+  }
+
+  .header{
+    padding:18px !important;
+  }
+}
+</style>

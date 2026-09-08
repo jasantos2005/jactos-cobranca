@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pagos — HubCobrança</title>
+<title>IaTechHub® — Pagos</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -105,7 +105,7 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 <script>
 let pagAtual = {{ filtros.pagina }};
@@ -178,3 +178,174 @@ setInterval(verificarPagamentos, 30000);
 {% include '_inatividade.html' %}
 </body>
 </html>
+
+
+<style id="IATECHHUB_PAGOS_VISUAL_V1">
+/* ============================================================
+   IaTechHub® — Pagos
+   VISUAL ONLY — lógica original preservada
+   ============================================================ */
+
+html, body{
+  background:#f1f5f9 !important;
+}
+
+body{
+  color:#0b2a4a !important;
+}
+
+.main{
+  margin-left:220px !important;
+  padding:28px !important;
+  min-height:100vh;
+  background:#f1f5f9 !important;
+}
+
+.main .page-header{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  padding:22px 24px !important;
+  margin-bottom:18px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+}
+
+.header-title{
+  color:#082b50 !important;
+  font-size:24px !important;
+  font-weight:800 !important;
+  letter-spacing:-.5px !important;
+}
+
+.header-sub{
+  color:#64748b !important;
+}
+
+.card{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  box-shadow:0 2px 8px rgba(15,23,42,.04) !important;
+  overflow:hidden !important;
+}
+
+table{
+  background:#ffffff !important;
+  font-size:13px !important;
+}
+
+thead th{
+  background:#f8fafc !important;
+  color:#64748b !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.7px !important;
+  padding:13px 14px !important;
+}
+
+tbody td{
+  color:#183b5d !important;
+  border-bottom:1px solid #edf2f7 !important;
+  padding:14px !important;
+}
+
+tbody tr:hover{
+  background:#f8fbfd !important;
+}
+
+.pag-btn{
+  border:1px solid #cbd5e1 !important;
+  background:#ffffff !important;
+  color:#0b2a4a !important;
+  border-radius:8px !important;
+  font-weight:700 !important;
+}
+
+.pag-btn:not(:disabled):hover{
+  background:#f0fdfa !important;
+  border-color:#20c6a7 !important;
+  color:#087f6b !important;
+}
+
+.page-footer{
+  color:#64748b !important;
+  border-top:1px solid #e2e8f0 !important;
+  background:#f1f5f9 !important;
+  padding:16px 28px !important;
+}
+
+/* Sidebar IaTechHub® */
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+@media (max-width:900px){
+  .main{
+    margin-left:0 !important;
+    padding:18px !important;
+  }
+}
+
+@media (max-width:700px){
+  .main{
+    padding:12px !important;
+  }
+
+  .card{
+    overflow-x:auto !important;
+  }
+
+  table{
+    min-width:900px !important;
+  }
+}
+</style>

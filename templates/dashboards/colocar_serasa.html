@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Colocar no Serasa — HubCobrança</title>
+<title>IaTechHub® — Colocar no Serasa</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
@@ -843,5 +843,363 @@ function render(rows){
 {% include '_briefing.html' %}
 {% include '_inatividade.html' %}
 
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </body>
 </html>
+
+
+<style>
+/* =========================================================
+   IaTechHub® — Colocar no Serasa
+   Redesign visual — lógica preservada
+   ========================================================= */
+
+body{
+  background:#f1f5f9 !important;
+  color:#0f2742 !important;
+}
+
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f1f5f9 !important;
+}
+
+.header{
+  background:#fff !important;
+  border-bottom:1px solid #e2e8f0 !important;
+  padding:22px 30px !important;
+}
+
+.header-title{
+  color:#071a33 !important;
+  font-size:20px !important;
+  font-weight:800 !important;
+  letter-spacing:-.3px !important;
+}
+
+.header-sub{
+  color:#64748b !important;
+  margin-top:5px !important;
+}
+
+/* Área dos KPIs */
+.kpis{
+  padding:24px 30px 4px !important;
+  gap:16px !important;
+}
+
+.kpi{
+  background:#fff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:10px !important;
+  padding:18px !important;
+  box-shadow:0 2px 8px rgba(15,39,66,.04) !important;
+}
+
+.kpi-label{
+  color:#64748b !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  letter-spacing:1px !important;
+}
+
+.kpi-value{
+  color:#071a33 !important;
+  font-weight:800 !important;
+  margin-top:7px !important;
+}
+
+/* Barra de pesquisa */
+.toolbar{
+  margin:18px 30px !important;
+  padding:14px !important;
+  background:#fff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:10px !important;
+  box-shadow:0 2px 8px rgba(15,39,66,.04) !important;
+}
+
+.toolbar input{
+  background:#f8fafc !important;
+  color:#0f2742 !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:7px !important;
+  padding:9px 11px !important;
+}
+
+.toolbar input:focus{
+  outline:none !important;
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+.btn-primary{
+  background:#20c6a7 !important;
+  color:#071a33 !important;
+  border:none !important;
+  border-radius:7px !important;
+  font-weight:800 !important;
+  cursor:pointer !important;
+}
+
+.btn-primary:hover{
+  background:#18b596 !important;
+}
+
+.btn-secondary{
+  background:#fff !important;
+  color:#526b84 !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:7px !important;
+  font-weight:700 !important;
+}
+
+.btn-secondary:hover{
+  background:#f8fafc !important;
+}
+
+/* Tabela */
+.main > table{
+  width:calc(100% - 60px) !important;
+  margin:0 30px 30px !important;
+  background:#fff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:12px !important;
+  overflow:hidden !important;
+  box-shadow:0 3px 12px rgba(15,39,66,.05) !important;
+}
+
+.main > table th{
+  background:#f8fafc !important;
+  color:#526b84 !important;
+  border-bottom:1px solid #dbe4ee !important;
+  padding:12px 13px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  letter-spacing:.65px !important;
+}
+
+.main > table td{
+  border-bottom:1px solid #edf2f7 !important;
+  padding:12px 13px !important;
+  color:#334e68 !important;
+  font-size:12px !important;
+}
+
+.main > table tbody tr:hover{
+  background:#f8fbfd !important;
+}
+
+.main > table tbody tr:last-child td{
+  border-bottom:none !important;
+}
+
+.badge{
+  background:#eef6ff !important;
+  color:#2563eb !important;
+  border:1px solid #dbeafe !important;
+  border-radius:999px !important;
+  padding:4px 8px !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+
+.valor{
+  color:#0f2742 !important;
+  font-weight:700 !important;
+}
+
+/* Modal */
+.overlay{
+  background:rgba(7,26,51,.58) !important;
+  backdrop-filter:blur(2px) !important;
+}
+
+.modal{
+  background:#fff !important;
+  border:1px solid #dbe4ee !important;
+  border-radius:12px !important;
+  box-shadow:0 20px 50px rgba(7,26,51,.22) !important;
+  color:#0f2742 !important;
+}
+
+.modal-title{
+  color:#071a33 !important;
+  font-weight:800 !important;
+}
+
+.modal-sub{
+  color:#64748b !important;
+}
+
+.modal-close{
+  color:#64748b !important;
+  background:#f8fafc !important;
+  border-color:#dbe4ee !important;
+}
+
+.modal-close:hover{
+  color:#071a33 !important;
+  background:#eef2f7 !important;
+}
+
+.info-grid{
+  gap:10px !important;
+}
+
+.info-item{
+  background:#f8fafc !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:8px !important;
+  padding:11px !important;
+}
+
+.info-item label,
+.form-field label{
+  color:#526b84 !important;
+}
+
+.info-item span{
+  color:#0f2742 !important;
+  font-weight:700 !important;
+}
+
+.form-field select,
+.form-field input,
+.form-field textarea{
+  background:#f8fafc !important;
+  color:#0f2742 !important;
+  border:1px solid #d7e0ea !important;
+  border-radius:7px !important;
+}
+
+.form-field select:focus,
+.form-field input:focus,
+.form-field textarea:focus{
+  outline:none !important;
+  border-color:#20c6a7 !important;
+  box-shadow:0 0 0 3px rgba(32,198,167,.10) !important;
+}
+
+.equipamentos{
+  margin:12px 0 !important;
+}
+
+.equipamento{
+  background:#f8fafc !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:8px !important;
+  padding:9px 11px !important;
+  margin-bottom:6px !important;
+  color:#526b84 !important;
+  font-size:11px !important;
+}
+
+.check-row{
+  color:#334e68 !important;
+}
+
+.modal-actions{
+  border-top:1px solid #edf2f7 !important;
+  padding-top:14px !important;
+  margin-top:16px !important;
+}
+
+.msg-ok{
+  background:#ecfdf5 !important;
+  color:#047857 !important;
+  border:1px solid #a7f3d0 !important;
+  border-radius:7px !important;
+}
+
+/* Sidebar IaTechHub® */
+.sidebar{
+  width:220px !important;
+  min-height:100vh !important;
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  z-index:1000 !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#fff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+@media(max-width:1100px){
+  .main > table{
+    display:block !important;
+    overflow-x:auto !important;
+    white-space:nowrap !important;
+  }
+}
+
+@media(max-width:900px){
+  .kpis{
+    padding-left:18px !important;
+    padding-right:18px !important;
+  }
+
+  .toolbar{
+    margin-left:18px !important;
+    margin-right:18px !important;
+  }
+
+  .main > table{
+    width:calc(100% - 36px) !important;
+    margin-left:18px !important;
+    margin-right:18px !important;
+  }
+
+  .header{
+    padding:18px !important;
+  }
+}
+</style>

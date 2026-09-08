@@ -1,7 +1,7 @@
 <nav class="sidebar">
-  <div class="sb-logo" style="padding:20px 18px 16px;border-bottom:1px solid #e2e8f0">
-    <div style="font-size:18px;font-weight:700;color:#059669">⚡ HubCobrança</div>
-    <div style="font-size:10px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-top:2px">ISP · Cobrança</div>
+  <div class="sb-logo" style="padding:20px 18px 16px;background:#071a33;border-bottom:1px solid rgba(255,255,255,.08)">
+    <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-.4px">IaTechHub<span style="color:#20c6a7">®</span></div>
+    <div style="font-size:9px;font-weight:700;color:#20c6a7;letter-spacing:1.8px;text-transform:uppercase;margin-top:5px">HUB COBRANÇA · AUTOMAÇÃO PARA ISP</div>
   </div>
 
   <div class="sb-nav">
@@ -32,6 +32,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Clientes no Serasa</a>
         <a class="sb-item {% if path == '/cobranca/serasa/saidas' %}active{% endif %}" href="/cobranca/serasa/saidas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Saídas do Serasa</a>
+
         <a class="sb-item {% if path == '/cobranca/promessas' %}active{% endif %}" href="/cobranca/promessas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Promessas Quebradas</a>
         <a class="sb-item {% if path == '/cobranca/promessas-realizadas' %}active{% endif %}" href="/cobranca/promessas-realizadas">
@@ -174,3 +175,56 @@ function toggleGroup(el){
   if(!isActive) el.classList.add('active');
 }
 </script>
+
+<style>
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+</style>

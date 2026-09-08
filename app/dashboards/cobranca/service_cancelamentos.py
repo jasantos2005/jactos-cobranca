@@ -70,14 +70,14 @@ def get_cancelamentos(mes=None, data_ini=None, data_fim=None, pagina=1, por_pagi
     """, ids)
     parc_map = {r["id_cliente"]: r for r in parcelas}
 
-    # Suporte últimos 6 meses (assuntos 16, 20, 21)
+    # Suporte técnico últimos 6 meses (assuntos 16, 18, 20, 21, 40)
     suporte = query(f"""
         SELECT id_cliente, COUNT(*) AS qtd_suporte,
                GROUP_CONCAT(DISTINCT sa.assunto ORDER BY sa.assunto SEPARATOR ', ') AS tipos
         FROM ixcprovedor.su_oss_chamado o
         INNER JOIN ixcprovedor.su_oss_assunto sa ON sa.id=o.id_assunto
         WHERE o.id_cliente IN ({ph})
-          AND o.id_assunto IN (16, 20, 21)
+          AND o.id_assunto IN (16, 18, 20, 21, 40)
           AND o.data_abertura >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
         GROUP BY id_cliente
     """, ids)
@@ -230,7 +230,7 @@ def get_kpis_cancelamentos(data_ini=None, data_fim=None):
         s = query_one(f"""
             SELECT COUNT(DISTINCT id_cliente) AS total
             FROM ixcprovedor.su_oss_chamado
-            WHERE id_cliente IN ({ph}) AND id_assunto IN (16,20,21)
+            WHERE id_cliente IN ({ph}) AND id_assunto IN (16,18,20,21,40)
               AND data_abertura >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
         """, ids)
         com_sup = int(s["total"]) if s else 0

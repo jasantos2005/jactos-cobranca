@@ -4,7 +4,7 @@
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Equipe — HubCobrança</title>
+<title>IaTechHub® — Equipe</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -81,7 +81,355 @@ tr:last-child td{border-bottom:none}
 .modal-kpi-lbl{font-size:10px;color:var(--muted2);margin-top:2px}
 .page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
 </style>
-</head>
+
+<!-- IATECHHUB_EQUIPE_VISUAL_V1 -->
+<style>
+/* ===== IaTechHub® — Equipe / camada visual ===== */
+
+body{
+  background:#f4f7fb !important;
+  color:#172b4d !important;
+}
+
+.sidebar{
+  width:220px !important;
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#fff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f4f7fb !important;
+}
+
+.header{
+  padding:20px 30px !important;
+  background:#fff !important;
+  border-bottom:1px solid #dfe7f1 !important;
+  box-shadow:0 1px 3px rgba(15,40,70,.03) !important;
+}
+
+.header-title{
+  font-size:20px !important;
+  font-weight:800 !important;
+  color:#173455 !important;
+  letter-spacing:-.3px !important;
+}
+
+.header-title::first-letter{
+  color:#20c6a7;
+}
+
+.header-sub{
+  color:#6c829b !important;
+  font-size:12px !important;
+  margin-top:4px !important;
+}
+
+.filters{
+  gap:8px !important;
+}
+
+input[type=date]{
+  background:#fff !important;
+  border:1px solid #d6e1ec !important;
+  border-radius:8px !important;
+  padding:9px 11px !important;
+  color:#29435f !important;
+}
+
+.btn{
+  padding:9px 16px !important;
+  border-radius:8px !important;
+  font-size:12px !important;
+}
+
+.btn-green{
+  background:#20c6a7 !important;
+  color:#fff !important;
+}
+
+.btn-blue{
+  background:#2878d8 !important;
+  color:#fff !important;
+}
+
+.content{
+  padding:26px 30px 18px !important;
+}
+
+.kpi-grid{
+  gap:16px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi{
+  background:#fff !important;
+  border:1px solid #dfe7f1 !important;
+  border-radius:12px !important;
+  padding:18px 20px !important;
+  box-shadow:0 3px 12px rgba(23,52,85,.045) !important;
+  position:relative !important;
+  overflow:hidden !important;
+}
+
+.kpi::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:3px;
+  background:#20c6a7;
+}
+
+.kpi-label{
+  color:#64809c !important;
+  font-size:10px !important;
+  letter-spacing:1.2px !important;
+}
+
+.kpi-value{
+  color:#102f52 !important;
+  font-size:25px !important;
+  font-weight:800 !important;
+  margin-top:8px !important;
+}
+
+.kpi-sub{
+  color:#8094a9 !important;
+  margin-top:5px !important;
+}
+
+.operadores-grid{
+  grid-template-columns:repeat(auto-fill,minmax(275px,1fr)) !important;
+  gap:16px !important;
+  margin-bottom:24px !important;
+}
+
+.op-card{
+  background:#fff !important;
+  border:1px solid #dfe7f1 !important;
+  border-radius:12px !important;
+  padding:20px !important;
+  box-shadow:0 3px 12px rgba(23,52,85,.045) !important;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease !important;
+}
+
+.op-card:hover{
+  border-color:#20c6a7 !important;
+  transform:translateY(-2px) !important;
+  box-shadow:0 8px 24px rgba(23,52,85,.09) !important;
+}
+
+.op-nome{
+  color:#173455 !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+}
+
+.op-nivel{
+  border-radius:999px !important;
+  padding:4px 9px !important;
+  font-size:10px !important;
+}
+
+.n1{
+  background:#eaf3ff !important;
+  color:#2878d8 !important;
+}
+
+.n2{
+  background:#fff5df !important;
+  color:#c27a00 !important;
+}
+
+.n3{
+  background:#e7faf5 !important;
+  color:#079b7f !important;
+}
+
+.op-valor{
+  color:#079b7f !important;
+  font-size:21px !important;
+  margin-top:3px !important;
+}
+
+.op-sub{
+  color:#8094a9 !important;
+}
+
+.op-stat{
+  background:#f4f7fb !important;
+  border:1px solid #e7edf4 !important;
+  border-radius:8px !important;
+  padding:9px 10px !important;
+}
+
+.op-stat-val{
+  color:#173455 !important;
+}
+
+.op-stat-lbl{
+  color:#7b91a7 !important;
+}
+
+.efic-bar{
+  background:#e4ebf2 !important;
+  height:5px !important;
+  border-radius:99px !important;
+}
+
+.efic-fill{
+  background:#20c6a7 !important;
+}
+
+.efic-label{
+  color:#7b91a7 !important;
+}
+
+.page-footer{
+  color:#8094a9 !important;
+  text-align:right !important;
+  font-size:11px !important;
+  padding:18px 30px 12px !important;
+  border-top:1px solid #dfe7f1 !important;
+  background:#f4f7fb !important;
+  margin-top:auto !important;
+}
+
+.overlay{
+  background:rgba(7,26,51,.58) !important;
+  backdrop-filter:blur(2px) !important;
+}
+
+.modal{
+  background:#fff !important;
+  border:1px solid #dfe7f1 !important;
+  border-radius:14px !important;
+  box-shadow:0 20px 60px rgba(7,26,51,.20) !important;
+  padding:28px !important;
+}
+
+.modal-kpi{
+  background:#f4f7fb !important;
+  border:1px solid #e1e9f1 !important;
+  border-radius:9px !important;
+}
+
+.modal-close{
+  color:#8094a9 !important;
+}
+
+table th{
+  color:#6d849d !important;
+  border-bottom:1px solid #dfe7f1 !important;
+}
+
+table td{
+  border-bottom:1px solid #edf1f5 !important;
+  color:#29435f !important;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:200px !important;
+  }
+
+  .main{
+    margin-left:200px !important;
+  }
+
+  .header{
+    padding:18px 20px !important;
+  }
+
+  .content{
+    padding:20px !important;
+  }
+
+  .filters{
+    width:100%;
+    flex-wrap:wrap;
+  }
+}
+
+@media(max-width:700px){
+  .sidebar{
+    position:relative !important;
+    width:100% !important;
+    min-height:auto !important;
+  }
+
+  .main{
+    margin-left:0 !important;
+  }
+
+  body{
+    display:block !important;
+  }
+
+  .header{
+    position:relative !important;
+  }
+
+  .operadores-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .page-footer{
+    padding-right:20px !important;
+  }
+}
+</style>
+
 <body>
 {% include '_sidebar.html' %}
   <div class="sb-footer">
@@ -117,7 +465,7 @@ tr:last-child td{border-bottom:none}
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Carregando...</div>
     </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 
 <div class="overlay" id="modal-overlay" onclick="fecharModal(event)">

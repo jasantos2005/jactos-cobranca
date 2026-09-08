@@ -88,67 +88,237 @@ select:focus,textarea:focus{border-color:var(--primary)}
 .empty{text-align:center;padding:40px;color:var(--muted2);font-size:13px}
 .page-footer{padding:14px 28px;text-align:right;font-size:11px;color:var(--muted2);border-top:1px solid var(--border)}
 </style>
+    <link rel="stylesheet" href="/static/css/iathub-cobranca.css">
 </head>
 <body>
 
 {% include '_sidebar.html' %}
 
-<main class="main">
-  <header class="header">
-    <div>
-      <div class="header-title">Painel de Inadimplência</div>
+
+<main class="main ih-dashboard">
+
+  <header class="header ih-header">
+
+    <div class="ih-header-left">
+      <div class="ih-breadcrumb">HUB COBRANÇA <span>/</span> OPERAÇÃO</div>
+      <div class="header-title">Central de operações de cobrança</div>
       <div class="header-sub" id="header-sub">Carregando dados...</div>
     </div>
-    <div class="filters">
-      <div style="display:flex;gap:6px">
-        <button class="filter-btn active" data-faixa="all">Todas</button>
-        <button class="filter-btn" data-faixa="30">1–30d</button>
-        <button class="filter-btn" data-faixa="60">31–60d</button>
-        <button class="filter-btn" data-faixa="90">61–90d</button>
-        <button class="filter-btn" data-faixa="120">+90d</button>
+
+    <div class="ih-header-actions">
+
+      <div class="ih-search">
+        <span>⌕</span>
+        <input id="busca" type="text" placeholder="Buscar cliente...">
       </div>
-      <input class="search-box" id="busca" type="search" placeholder="Buscar cliente, CPF, fone..."/>
+
+      <div class="ih-header-user">
+        <div class="ih-avatar">CO</div>
+        <div>
+          <strong>Operação</strong>
+          <small>Hub Cobrança</small>
+        </div>
+      </div>
+
     </div>
+
   </header>
 
-  <div class="content">
-    <div class="kpi-grid">
-      <div class="kpi primary"><div class="kpi-label">Total em Aberto</div><div class="kpi-value" id="kpi-total-valor">—</div><div class="kpi-sub" id="kpi-total-fat">— faturas</div></div>
-      <div class="kpi blue"><div class="kpi-label">1 a 30 dias</div><div class="kpi-value" id="kpi-30">—</div><div class="kpi-sub">em atraso</div></div>
-      <div class="kpi amber"><div class="kpi-label">31 a 60 dias</div><div class="kpi-value" id="kpi-60">—</div><div class="kpi-sub">em atraso</div></div>
-      <div class="kpi red"><div class="kpi-label">61 a 90 dias</div><div class="kpi-value" id="kpi-90">—</div><div class="kpi-sub">em atraso</div></div>
-      <div class="kpi" style="border-color:#f85149"><div class="kpi-label">Acima 90 dias</div><div class="kpi-value" id="kpi-120" style="color:#ff6b6b">—</div><div class="kpi-sub">crítico</div></div>
-      <div class="kpi cyan"><div class="kpi-label">Clientes</div><div class="kpi-value" id="kpi-clientes">—</div><div class="kpi-sub">inadimplentes</div></div>
+
+  <div class="content ih-content">
+
+    <!-- =====================================================
+         VISÃO GERAL
+         ===================================================== -->
+
+    <section class="ih-welcome">
+      <div>
+        <div class="ih-eyebrow">VISÃO GERAL</div>
+        <h1>Bom trabalho, equipe.</h1>
+        <p>Acompanhe os indicadores e priorize o que precisa de atenção.</p>
+      </div>
+
+      <div class="filters ih-filters">
+        <button class="filter-btn active" onclick="carregarDados('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="carregarDados('30', this)">1–30 dias</button>
+        <button class="filter-btn" onclick="carregarDados('60', this)">31–60 dias</button>
+        <button class="filter-btn" onclick="carregarDados('90', this)">61–90 dias</button>
+        <button class="filter-btn" onclick="carregarDados('120', this)">90+ dias</button>
+      </div>
+    </section>
+
+
+    <!-- =====================================================
+         INDICADORES
+         ===================================================== -->
+
+    <section class="ih-kpi-grid">
+
+      <div class="kpi ih-kpi ih-kpi-main">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon">R$</span>
+          <span class="ih-kpi-status">EM ABERTO</span>
+        </div>
+
+        <div class="kpi-label">Total em aberto</div>
+        <div class="kpi-value" id="kpi-total-valor">—</div>
+        <div class="kpi-sub" id="kpi-total-fat">— faturas</div>
+      </div>
+
+
+      <div class="kpi ih-kpi">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon blue">01</span>
+        </div>
+
+        <div class="kpi-label">1 a 30 dias</div>
+        <div class="kpi-value" id="kpi-30">—</div>
+        <div class="kpi-sub">em atraso</div>
+      </div>
+
+
+      <div class="kpi ih-kpi">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon amber">02</span>
+        </div>
+
+        <div class="kpi-label">31 a 60 dias</div>
+        <div class="kpi-value" id="kpi-60">—</div>
+        <div class="kpi-sub">em atraso</div>
+      </div>
+
+
+      <div class="kpi ih-kpi">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon red">03</span>
+        </div>
+
+        <div class="kpi-label">61 a 90 dias</div>
+        <div class="kpi-value" id="kpi-90">—</div>
+        <div class="kpi-sub">em atraso</div>
+      </div>
+
+
+      <div class="kpi ih-kpi">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon critical">04</span>
+        </div>
+
+        <div class="kpi-label">Acima de 90 dias</div>
+        <div class="kpi-value" id="kpi-120">—</div>
+        <div class="kpi-sub">crítico</div>
+      </div>
+
+
+      <div class="kpi ih-kpi">
+        <div class="ih-kpi-top">
+          <span class="ih-kpi-icon green">CL</span>
+        </div>
+
+        <div class="kpi-label">Clientes</div>
+        <div class="kpi-value" id="kpi-clientes">—</div>
+        <div class="kpi-sub">inadimplentes</div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ATENÇÃO
+         ===================================================== -->
+
+    <section class="ih-section-head">
+      <div>
+        <div class="ih-eyebrow">AÇÃO</div>
+        <h2>Precisa da sua atenção</h2>
+      </div>
+
+      <span class="ih-live">
+        <i></i> Dados em tempo real
+      </span>
+    </section>
+
+
+    <section class="grid-main ih-attention-grid">
+
+      <div class="card ih-card ih-card-large">
+        <div class="ih-card-head">
+          <div>
+            <div class="card-title">Maiores devedores</div>
+            <div class="ih-card-sub">Clientes que exigem maior prioridade</div>
+          </div>
+          <span class="ih-card-badge">TOP 10</span>
+        </div>
+
+        <div id="top10-corpo" class="ih-card-body">
+          <div class="loading">Carregando...</div>
+        </div>
+      </div>
+
+
+      <div class="card ih-card">
+        <div class="ih-card-head">
+          <div>
+            <div class="card-title">Inadimplência por bairro</div>
+            <div class="ih-card-sub">Concentração da carteira em atraso</div>
+          </div>
+          <span class="ih-card-badge">BAIRROS</span>
+        </div>
+
+        <div id="cidades-corpo" class="ih-card-body">
+          <div class="loading">Carregando...</div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         EVOLUÇÃO
+         ===================================================== -->
+
+    <section class="card ih-card ih-chart-card">
+
+      <div class="ih-card-head">
+        <div>
+          <div class="card-title">Evolução dos vencimentos</div>
+          <div class="ih-card-sub">Últimos 30 dias</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap ih-chart-wrap">
+        <canvas id="chart-evolucao"></canvas>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MODAL CLIENTE
+         ===================================================== -->
+
+    <div class="overlay" id="modal-overlay" onclick="fecharModal(event)">
+      <div class="modal" id="modal-box">
+        <div class="modal-close" onclick="fecharModal()">×</div>
+        <div id="modal-content">
+          <div class="loading">Carregando...</div>
+        </div>
+      </div>
     </div>
 
-    <div class="grid-main">
-      <!-- TOP 10 DEVEDORES -->
-      <div class="card" style="flex:1;min-width:340px">
-        <div class="card-title">🏆 Top 10 Maiores Devedores</div>
-        <div id="top10-corpo" style="min-height:200px"><div class="loading">Carregando...</div></div>
-      </div>
-      <!-- INADIMPLÊNCIA POR CIDADE -->
-      <div class="card" style="flex:1;min-width:340px">
-        <div class="card-title">📍 Inadimplência por Bairro</div>
-        <div id="cidades-corpo" style="min-height:200px"><div class="loading">Carregando...</div></div>
-      </div>
-      <div style="display:none">
-      </div>
-      <div class="card">
-        <div class="card-title">Vencimentos — Últimos 30 dias</div>
-        <div class="chart-wrap"><canvas id="chart-evolucao"></canvas></div>
-      </div>
-    </div>
   </div>
-  <footer class="page-footer">Iatch Axiom · Built by Ailton</footer>
+
+
+  <footer class="ih-footer">
+    <div>
+      <strong>IaTechHub®</strong>
+      <span>Hub Cobrança</span>
+    </div>
+
+    <span>Automação nativa para IXC Soft</span>
+  </footer>
+
 </main>
-
-<div class="overlay" id="modal-overlay" onclick="fecharModal(event)">
-  <div class="modal" id="modal-box">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div id="modal-content"><div class="loading">Carregando...</div></div>
-  </div>
-</div>
 
 <script>
 let state={faixa:'all',busca:'',pagina:1,por_pagina:50,total:0,paginas:1};

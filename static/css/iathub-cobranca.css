@@ -1,0 +1,830 @@
+/* =========================================================
+   IaTechHub® — Hub Cobrança
+   Camada visual — redesign
+   Não altera regras, APIs ou lógica do sistema.
+   ========================================================= */
+
+:root {
+    --ih-navy: #071a33;
+    --ih-navy-2: #0b2342;
+    --ih-blue: #1264d8;
+    --ih-blue-light: #eaf3ff;
+    --ih-green: #12a875;
+    --ih-green-light: #e9faf4;
+    --ih-bg: #f4f7fb;
+    --ih-card: #ffffff;
+    --ih-border: #e5eaf1;
+    --ih-text: #172033;
+    --ih-muted: #718096;
+    --ih-danger: #d64545;
+    --ih-warning: #d89016;
+    --ih-shadow: 0 2px 10px rgba(7, 26, 51, .055);
+}
+
+/* Base */
+html,
+body {
+    background: var(--ih-bg) !important;
+    color: var(--ih-text);
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, Arial, sans-serif !important;
+}
+
+/* Área principal */
+.main-content,
+.main,
+.content,
+.dashboard-content {
+    background: var(--ih-bg) !important;
+}
+
+/* Cabeçalhos */
+h1,
+h2,
+h3,
+h4 {
+    color: var(--ih-text);
+    letter-spacing: -.02em;
+}
+
+h1 {
+    font-weight: 750 !important;
+}
+
+/* Cards */
+.card,
+.kpi-card,
+.stat-card,
+.metric-card,
+.dashboard-card,
+.panel,
+.box,
+.section-card {
+    background: var(--ih-card) !important;
+    border: 1px solid var(--ih-border) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--ih-shadow) !important;
+}
+
+/* KPIs */
+.kpi-card,
+.stat-card,
+.metric-card {
+    min-height: 112px;
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.kpi-card:hover,
+.stat-card:hover,
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 22px rgba(7, 26, 51, .08) !important;
+}
+
+/* Números dos indicadores */
+.kpi-value,
+.kpi-number,
+.stat-value,
+.metric-value {
+    color: var(--ih-navy) !important;
+    font-weight: 800 !important;
+}
+
+/* Textos secundários */
+.kpi-label,
+.stat-label,
+.metric-label,
+.muted,
+.text-muted {
+    color: var(--ih-muted) !important;
+}
+
+/* Botões */
+button,
+.btn {
+    border-radius: 9px !important;
+    font-weight: 600;
+}
+
+.btn-primary,
+button.primary,
+button[type="submit"] {
+    background: var(--ih-blue) !important;
+    border-color: var(--ih-blue) !important;
+}
+
+.btn-primary:hover,
+button.primary:hover,
+button[type="submit"]:hover {
+    filter: brightness(.94);
+}
+
+/* Filtros */
+.filter,
+.filters,
+.filter-bar,
+.toolbar {
+    background: #fff !important;
+    border: 1px solid var(--ih-border) !important;
+    border-radius: 12px !important;
+}
+
+/* Campos */
+input,
+select,
+textarea {
+    border: 1px solid #dce3ec !important;
+    border-radius: 9px !important;
+    background: #fff !important;
+    color: var(--ih-text) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #77a9e8 !important;
+    box-shadow: 0 0 0 3px rgba(18, 100, 216, .10) !important;
+    outline: none !important;
+}
+
+/* Tabelas */
+table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    width: 100%;
+}
+
+thead th {
+    background: #f8fafc !important;
+    color: #68768a !important;
+    font-size: 11px !important;
+    font-weight: 750 !important;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--ih-border) !important;
+}
+
+tbody td {
+    border-bottom: 1px solid #edf1f5 !important;
+    color: #273449;
+}
+
+tbody tr:hover {
+    background: #f8fbff !important;
+}
+
+/* Badges/status */
+.badge,
+.status,
+.tag,
+.pill {
+    border-radius: 999px !important;
+    font-weight: 650 !important;
+}
+
+/* Área de atenção */
+.alert,
+.attention,
+.warning,
+.danger {
+    border-radius: 12px !important;
+}
+
+/* Sidebar — acabamento IaTechHub */
+.sidebar {
+    background: linear-gradient(180deg, var(--ih-navy) 0%, #092442 100%) !important;
+    border-right: 0 !important;
+}
+
+.sidebar a {
+    border-radius: 9px !important;
+    margin: 2px 10px !important;
+    transition: background .15s ease, color .15s ease;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,.08) !important;
+}
+
+.sidebar a.active,
+.sidebar .active {
+    background: rgba(18,100,216,.28) !important;
+    color: #fff !important;
+}
+
+/* Marca */
+.sb-logo {
+    padding-bottom: 22px !important;
+}
+
+.sb-product {
+    letter-spacing: .09em !important;
+}
+
+.sb-tagline {
+    opacity: .72;
+}
+
+/* Cabeçalho superior */
+header,
+.topbar,
+.top-header,
+.navbar {
+    background: #fff !important;
+    border-bottom: 1px solid var(--ih-border) !important;
+}
+
+/* Títulos de seção */
+.section-title,
+.card-title,
+.panel-title {
+    color: var(--ih-navy) !important;
+    font-weight: 750 !important;
+}
+
+/* Gráfico */
+#chart-evolucao {
+    background: #fff;
+    border-radius: 14px;
+}
+
+/* Modais */
+.modal,
+.modal-content,
+dialog {
+    border-radius: 16px !important;
+}
+
+.modal-content {
+    border: 1px solid var(--ih-border) !important;
+    box-shadow: 0 18px 60px rgba(7,26,51,.18) !important;
+}
+
+/* Paginação */
+.pagination button,
+.pagination a,
+#btn-prev,
+#btn-next {
+    border-radius: 8px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 99px;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+    .sidebar {
+        width: 230px !important;
+    }
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 72px !important;
+    }
+
+    .sb-brand-name,
+    .sb-product,
+    .sb-tagline {
+        display: none !important;
+    }
+}
+
+/* =========================================================
+   IaTechHub® — Estrutura visual do novo dashboard
+   ========================================================= */
+
+.ih-dashboard {
+    min-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+
+.ih-header {
+    min-height: 76px;
+    padding: 0 30px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.ih-header-left {
+    min-width: 0;
+}
+
+.ih-breadcrumb {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    color: var(--ih-blue);
+    margin-bottom: 4px;
+}
+
+.ih-breadcrumb span {
+    color: #a8b3c2;
+    margin: 0 5px;
+}
+
+.ih-header .header-title {
+    font-size: 21px !important;
+    font-weight: 780 !important;
+    color: var(--ih-navy) !important;
+    line-height: 1.25;
+}
+
+.ih-header .header-sub {
+    margin-top: 3px;
+    color: var(--ih-muted);
+    font-size: 12px;
+}
+
+.ih-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.ih-search {
+    width: 230px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border: 1px solid var(--ih-border);
+    background: #f8fafc;
+    border-radius: 9px;
+}
+
+.ih-search span {
+    color: #8491a3;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.ih-search input {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    width: 100%;
+    font-size: 12px;
+}
+
+.ih-header-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.ih-header-user strong {
+    display: block;
+    color: var(--ih-navy);
+    font-size: 12px;
+}
+
+.ih-header-user small {
+    display: block;
+    color: var(--ih-muted);
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.ih-avatar {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ih-blue-light);
+    color: var(--ih-blue);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+/* ---------- Conteúdo ---------- */
+
+.ih-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 30px !important;
+}
+
+
+/* ---------- Welcome ---------- */
+
+.ih-welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.ih-eyebrow {
+    color: var(--ih-blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    margin-bottom: 5px;
+}
+
+.ih-welcome h1 {
+    margin: 0;
+    font-size: 25px;
+    line-height: 1.2;
+    color: var(--ih-navy);
+}
+
+.ih-welcome p {
+    margin: 6px 0 0;
+    color: var(--ih-muted);
+    font-size: 13px;
+}
+
+.ih-filters {
+    display: flex;
+    gap: 4px !important;
+    padding: 4px !important;
+    flex-shrink: 0;
+}
+
+.ih-filters .filter-btn {
+    border: 0 !important;
+    background: transparent !important;
+    color: #68768a !important;
+    padding: 8px 11px !important;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.ih-filters .filter-btn.active {
+    background: var(--ih-navy) !important;
+    color: #fff !important;
+}
+
+
+/* ---------- KPIs ---------- */
+
+.ih-kpi-grid {
+    display: grid;
+    grid-template-columns: 1.45fr repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.ih-kpi {
+    padding: 17px !important;
+    min-height: 125px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ih-kpi::after {
+    content: "";
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    right: -24px;
+    bottom: -24px;
+    background: var(--ih-blue-light);
+    opacity: .65;
+}
+
+.ih-kpi-main {
+    background: linear-gradient(135deg, #ffffff 0%, #f4f9ff 100%) !important;
+    border-color: #d9e7fa !important;
+}
+
+.ih-kpi-top {
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.ih-kpi-icon {
+    width: 27px;
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: var(--ih-blue-light);
+    color: var(--ih-blue);
+    font-size: 9px;
+    font-weight: 850;
+    position: relative;
+    z-index: 1;
+}
+
+.ih-kpi-icon.blue {
+    background: #edf4ff;
+    color: #3978cf;
+}
+
+.ih-kpi-icon.amber {
+    background: #fff6df;
+    color: #bd7c09;
+}
+
+.ih-kpi-icon.red {
+    background: #fff0f0;
+    color: #cc4a4a;
+}
+
+.ih-kpi-icon.critical {
+    background: #ffe9e9;
+    color: #b83232;
+}
+
+.ih-kpi-icon.green {
+    background: var(--ih-green-light);
+    color: var(--ih-green);
+}
+
+.ih-kpi-status {
+    color: var(--ih-green);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .07em;
+}
+
+.ih-kpi .kpi-label {
+    font-size: 10px !important;
+    font-weight: 650;
+    color: var(--ih-muted) !important;
+    margin-bottom: 4px;
+}
+
+.ih-kpi .kpi-value {
+    font-size: 23px !important;
+    line-height: 1.15;
+    color: var(--ih-navy) !important;
+    font-weight: 800 !important;
+    position: relative;
+    z-index: 1;
+}
+
+.ih-kpi .kpi-sub {
+    font-size: 10px !important;
+    color: #94a0b1 !important;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ---------- Seção ---------- */
+
+.ih-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 13px;
+}
+
+.ih-section-head h2 {
+    margin: 0;
+    font-size: 17px;
+    color: var(--ih-navy);
+}
+
+.ih-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #7c8898;
+    font-size: 10px;
+}
+
+.ih-live i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ih-green);
+    box-shadow: 0 0 0 3px var(--ih-green-light);
+}
+
+
+/* ---------- Cards principais ---------- */
+
+.ih-attention-grid {
+    display: grid !important;
+    grid-template-columns: 1.25fr .75fr;
+    gap: 14px !important;
+    margin-bottom: 14px;
+}
+
+.ih-card {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.ih-card-head {
+    min-height: 67px;
+    padding: 15px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--ih-border);
+}
+
+.ih-card .card-title {
+    font-size: 13px !important;
+    color: var(--ih-navy) !important;
+    margin: 0 !important;
+}
+
+.ih-card-sub {
+    color: var(--ih-muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.ih-card-badge {
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #f2f6fb;
+    color: #728096;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.ih-card-body {
+    min-height: 230px;
+    padding: 7px 17px 12px;
+}
+
+.ih-card-body .loading {
+    padding: 50px 10px !important;
+}
+
+
+/* ---------- Gráfico ---------- */
+
+.ih-chart-card {
+    margin-top: 14px;
+}
+
+.ih-chart-wrap {
+    height: 265px !important;
+    padding: 15px 20px 20px;
+}
+
+.ih-chart-wrap canvas {
+    max-height: 225px;
+}
+
+
+/* ---------- Footer ---------- */
+
+.ih-footer {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 30px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #8a96a7;
+    font-size: 10px;
+}
+
+.ih-footer strong {
+    color: var(--ih-navy);
+    font-size: 11px;
+    margin-right: 7px;
+}
+
+.ih-footer span {
+    color: #8a96a7;
+}
+
+
+/* ---------- Modal ---------- */
+
+.ih-dashboard .modal-close {
+    position: absolute;
+    top: 11px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f3f5f8;
+    color: #657184;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+
+/* ---------- Responsividade ---------- */
+
+@media (max-width: 1250px) {
+    .ih-kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ih-kpi-main {
+        grid-column: span 3;
+    }
+
+    .ih-attention-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 850px) {
+    .ih-header {
+        padding: 15px 18px !important;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ih-header-actions {
+        width: 100%;
+    }
+
+    .ih-search {
+        flex: 1;
+    }
+
+    .ih-content {
+        padding: 20px !important;
+    }
+
+    .ih-welcome {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ih-filters {
+        overflow-x: auto;
+    }
+
+    .ih-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ih-kpi-main {
+        grid-column: span 2;
+    }
+
+    .ih-footer {
+        padding: 18px 20px 25px;
+    }
+}
+
+@media (max-width: 520px) {
+    .ih-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ih-kpi-main {
+        grid-column: span 1;
+    }
+
+    .ih-header-user {
+        display: none;
+    }
+
+    .ih-section-head {
+        align-items: flex-start;
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .ih-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+    }
+}

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Equipamentos Cancelados — HubCobrança</title>
+<title>IaTechHub® — Equipamentos Cancelados</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -40,6 +40,507 @@ tr:hover td{background:rgba(0,0,0,.02)}
 .timeline-row:hover td{background:rgba(5,150,105,.04)}
 .timeline-row.selected td{background:rgba(5,150,105,.06)}
 </style>
+
+<!-- IATECHHUB_EQUIPAMENTOS_CANCELADOS_VISUAL_V1 -->
+
+<style id="iathub-equipamentos-cancelados">
+/* ============================================================
+   IaTechHub® — Equipamentos Cancelados
+   VISUAL ONLY — lógica preservada
+   ============================================================ */
+
+body{
+  background:#f4f7fb !important;
+  color:#172b4d !important;
+}
+
+.main{
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f4f7fb !important;
+}
+
+/* SIDEBAR */
+.sidebar{
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav{
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group{
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title{
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item{
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover{
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active{
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer{
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer *{
+  color:#a9bdd2 !important;
+}
+
+.sidebar select{
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+/* HEADER */
+.header{
+  background:#ffffff !important;
+  border-bottom:1px solid #e3eaf2 !important;
+  padding:18px 28px !important;
+  box-shadow:0 1px 4px rgba(16,42,67,.03) !important;
+}
+
+.header-title{
+  color:#102a43 !important;
+  font-size:16px !important;
+  font-weight:750 !important;
+  letter-spacing:-.2px !important;
+}
+
+.header-sub{
+  color:#718096 !important;
+}
+
+/* FILTERS */
+.filters{
+  gap:7px !important;
+}
+
+.filter-btn{
+  background:#ffffff !important;
+  color:#52667a !important;
+  border:1px solid #d8e2ec !important;
+  border-radius:7px !important;
+  padding:6px 13px !important;
+  font-size:11px !important;
+  font-weight:600 !important;
+}
+
+.filter-btn:hover,
+.filter-btn.active{
+  background:#20c6a7 !important;
+  color:#ffffff !important;
+  border-color:#20c6a7 !important;
+}
+
+/* CONTENT */
+.content{
+  padding:24px 28px 72px !important;
+}
+
+/* KPIs */
+.kpi-grid{
+  gap:14px !important;
+  margin-bottom:20px !important;
+}
+
+.kpi{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:11px !important;
+  padding:16px 17px !important;
+  box-shadow:0 2px 7px rgba(16,42,67,.035) !important;
+  transition:transform .15s ease,box-shadow .15s ease !important;
+}
+
+.kpi:hover{
+  transform:translateY(-1px) !important;
+  box-shadow:0 5px 14px rgba(16,42,67,.07) !important;
+}
+
+.kpi-label{
+  color:#718096 !important;
+  font-size:10px !important;
+  letter-spacing:.9px !important;
+}
+
+.kpi-value{
+  margin-top:5px !important;
+  font-size:23px !important;
+  line-height:1.15 !important;
+}
+
+.kpi-sub{
+  color:#8a9bad !important;
+  margin-top:4px !important;
+}
+
+/* CARDS */
+.card{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+  border-radius:11px !important;
+  padding:19px !important;
+  margin-bottom:17px !important;
+  box-shadow:0 2px 7px rgba(16,42,67,.035) !important;
+}
+
+.card-title{
+  color:#52667a !important;
+  font-size:11px !important;
+  letter-spacing:.9px !important;
+}
+
+/* TABLE */
+table{
+  font-size:12px !important;
+}
+
+th{
+  color:#718096 !important;
+  background:#f8fafc !important;
+  padding:10px 11px !important;
+  border-bottom:1px solid #dfe7ef !important;
+  white-space:nowrap !important;
+}
+
+td{
+  color:#334e68 !important;
+  padding:10px 11px !important;
+  border-bottom:1px solid #edf2f7 !important;
+}
+
+tbody tr:hover td{
+  background:#f8fbfd !important;
+}
+
+.mono{
+  color:#52667a !important;
+}
+
+/* STATUS BADGES */
+.badge{
+  border-radius:6px !important;
+  padding:4px 8px !important;
+  font-size:10px !important;
+  font-weight:700 !important;
+  white-space:nowrap !important;
+}
+
+.b-ok{
+  background:rgba(32,198,167,.10) !important;
+  color:#129477 !important;
+}
+
+.b-risco{
+  background:rgba(220,38,38,.09) !important;
+  color:#c53030 !important;
+}
+
+.b-avaria{
+  background:rgba(217,119,6,.10) !important;
+  color:#b76505 !important;
+}
+
+.b-novo{
+  background:rgba(37,99,235,.09) !important;
+  color:#245bb5 !important;
+}
+
+.b-sem{
+  background:#edf2f7 !important;
+  color:#60758a !important;
+}
+
+/* TIMELINE */
+.timeline-row{
+  cursor:pointer !important;
+  transition:background .12s ease !important;
+}
+
+.timeline-row:hover td{
+  background:rgba(32,198,167,.045) !important;
+}
+
+.timeline-row.selected td{
+  background:rgba(32,198,167,.08) !important;
+}
+
+.timeline-row td:first-child{
+  color:#102a43 !important;
+}
+
+/* TABELA DE DETALHES */
+.card > div[style*="overflow-x:auto"]{
+  border-radius:8px !important;
+}
+
+.card > div[style*="overflow-x:auto"] table{
+  min-width:1080px !important;
+}
+
+/* FOOTER */
+.page-footer{
+  color:#8a9bad !important;
+  text-align:right !important;
+  font-size:11px !important;
+  padding:18px 28px 12px !important;
+  margin-top:auto !important;
+  width:100% !important;
+  flex-shrink:0 !important;
+}
+
+/* RESPONSIVO */
+@media(max-width:900px){
+  .main{
+    margin-left:0 !important;
+  }
+
+  .header{
+    padding:15px 18px !important;
+  }
+
+  .content{
+    padding:18px 16px 64px !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media(max-width:560px){
+  .kpi-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .filters{
+    width:100% !important;
+    flex-wrap:wrap !important;
+  }
+}
+</style>
+
+<!-- IATECHHUB_EQUIPAMENTOS_CANCELADOS_LAYOUT_FIX_V1 -->
+
+<style id="iathub-equipamentos-cancelados-layout-fix">
+/* ============================================================
+   IaTechHub® — Correção de largura
+   VISUAL ONLY — lógica preservada
+   ============================================================ */
+
+html, body{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+.main{
+  margin-left:220px !important;
+  width:calc(100% - 220px) !important;
+  max-width:calc(100% - 220px) !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+}
+
+.content{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+}
+
+/* KPIs: distribuição equilibrada dos 6 indicadores */
+.kpi-grid{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  box-sizing:border-box !important;
+}
+
+.kpi{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Cabeçalho e filtros */
+.header{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.header > div{
+  min-width:0 !important;
+}
+
+.filters{
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Cards não podem aumentar a largura da página */
+.card{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+/* Tabelas: rolagem fica dentro do card */
+.card > div[style*="overflow-x:auto"]{
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  overflow-x:auto !important;
+  overflow-y:hidden !important;
+  box-sizing:border-box !important;
+}
+
+.card > div[style*="overflow-x:auto"] table{
+  min-width:1080px !important;
+  width:max-content !important;
+  max-width:none !important;
+}
+
+/* Rodapé */
+.page-footer{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+  text-align:right !important;
+}
+
+/* Responsividade */
+@media(max-width:1100px){
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media(max-width:700px){
+  .main{
+    margin-left:0 !important;
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .kpi-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
+<!-- IATECHHUB_EQUIPAMENTOS_CANCELADOS_KPI_FINAL_V1 -->
+
+<style id="iathub-equipamentos-cancelados-kpi-final">
+/* IaTechHub® — distribuição final dos KPIs — visual only */
+
+.kpi-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:12px !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+
+.kpi{
+  min-width:0 !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+
+@media(max-width:1100px){
+  .kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media(max-width:560px){
+  .kpi-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
+
+<!-- IATECHHUB_EQUIPAMENTOS_CANCELADOS_FULLWIDTH_V1 -->
+<style id="iathub-equipamentos-fullwidth">
+/* ============================================================
+   IaTechHub® — Equipamentos Cancelados
+   CORREÇÃO DE LAYOUT — somente visual
+   ============================================================ */
+
+.sidebar{
+  width:220px !important;
+  min-height:100vh !important;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  z-index:100 !important;
+  flex:none !important;
+}
+
+.main{
+  margin-left:220px !important;
+  width:calc(100% - 220px) !important;
+  max-width:calc(100% - 220px) !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  box-sizing:border-box !important;
+}
+
+.header,
+.content{
+  width:100% !important;
+  max-width:none !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+
+.content{
+  padding-left:28px !important;
+  padding-right:28px !important;
+}
+
+.kpi-grid{
+  width:100% !important;
+  max-width:none !important;
+}
+
+.card{
+  width:100% !important;
+  max-width:none !important;
+}
+</style>
+
 </head>
 <body>
 {% include '_sidebar.html' %}
@@ -174,6 +675,7 @@ tr:hover td{background:rgba(0,0,0,.02)}
       </div>
     </div>
   </div>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 <script>
 function filtrarMes(mes){

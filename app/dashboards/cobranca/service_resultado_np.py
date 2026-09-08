@@ -105,7 +105,7 @@ def get_resultado_nunca_pagaram(data_ini="2026-01-01", data_fim=None, pagina=1, 
             situacao = "retirado_cancelado"
         elif cancel:
             situacao = "cancelado"
-        elif os34 and os34 not in ("F",):
+        elif os34 in ("A", "AG", "RAG", "EN"):
             situacao = "em_retirada"
         else:
             situacao = "pendente"

@@ -3,7 +3,7 @@
 <head>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Controle de Sessões — HubCobrança</title>
+<title>IaTechHub® — Sessões</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -34,6 +34,255 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .dot-green{background:var(--primary);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 </style>
+
+<style id="iathub-sessoes-visual">
+/* IATECHHUB_SESSOES_VISUAL_V1 */
+
+/* Workspace */
+body {
+  background:#f4f7fb !important;
+  color:#17324d !important;
+}
+
+.main {
+  margin-left:220px !important;
+  min-height:100vh !important;
+  background:#f4f7fb !important;
+}
+
+.header {
+  background:#ffffff !important;
+  border-bottom:1px solid #dfe8f1 !important;
+  padding:24px 30px !important;
+  min-height:100px !important;
+}
+
+.header-title {
+  color:#12345a !important;
+  font-size:22px !important;
+  font-weight:800 !important;
+  letter-spacing:-.4px !important;
+}
+
+.header-sub {
+  color:#71859a !important;
+  font-size:12px !important;
+  margin-top:7px !important;
+}
+
+.header button {
+  background:#20c6a7 !important;
+  color:#ffffff !important;
+  border:none !important;
+  border-radius:8px !important;
+  padding:8px 14px !important;
+  font-weight:700 !important;
+  box-shadow:none !important;
+}
+
+.content {
+  padding:26px 30px 30px !important;
+  max-width:1600px !important;
+  width:100% !important;
+  margin:0 auto !important;
+}
+
+/* Sidebar */
+.sidebar {
+  background:#071a33 !important;
+  color:#dbe7f5 !important;
+  border-right:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-nav {
+  background:#071a33 !important;
+}
+
+.sidebar .sb-group {
+  border-bottom:1px solid rgba(255,255,255,.045) !important;
+}
+
+.sidebar .sb-group-title {
+  color:#8fa8c2 !important;
+}
+
+.sidebar .sb-item {
+  color:#c7d6e8 !important;
+  border-radius:8px !important;
+  margin:2px 8px !important;
+}
+
+.sidebar .sb-item:hover {
+  background:rgba(32,198,167,.08) !important;
+  color:#ffffff !important;
+}
+
+.sidebar .sb-item.active {
+  background:rgba(32,198,167,.14) !important;
+  color:#20c6a7 !important;
+  font-weight:700 !important;
+  border-left:3px solid #20c6a7 !important;
+}
+
+.sidebar .sb-footer {
+  background:#071a33 !important;
+  border-top:1px solid rgba(255,255,255,.08) !important;
+}
+
+.sidebar .sb-footer * {
+  color:#a9bdd2 !important;
+}
+
+.sidebar select {
+  background:#0d2948 !important;
+  color:#dbe7f5 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+}
+
+/* KPI */
+.kpi-grid {
+  gap:16px !important;
+  margin-bottom:22px !important;
+}
+
+.kpi {
+  background:#ffffff !important;
+  border:1px solid #dce6ef !important;
+  border-radius:12px !important;
+  padding:18px 20px !important;
+  box-shadow:0 2px 8px rgba(20,50,80,.04) !important;
+  min-height:100px !important;
+}
+
+.kpi-label {
+  color:#71859a !important;
+  font-size:10px !important;
+  letter-spacing:1.1px !important;
+}
+
+.kpi-value {
+  color:#12345a !important;
+  font-size:27px !important;
+  margin-top:7px !important;
+}
+
+/* Cards */
+.card {
+  background:#ffffff !important;
+  border:1px solid #dce6ef !important;
+  border-radius:12px !important;
+  padding:0 !important;
+  margin-bottom:18px !important;
+  box-shadow:0 2px 8px rgba(20,50,80,.04) !important;
+  overflow:hidden !important;
+}
+
+.card-title {
+  color:#12345a !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+  letter-spacing:.7px !important;
+  padding:17px 20px !important;
+  margin:0 !important;
+  border-bottom:1px solid #e7edf3 !important;
+  text-transform:uppercase !important;
+}
+
+/* Tables */
+table {
+  font-size:12px !important;
+}
+
+th {
+  background:#f7f9fc !important;
+  color:#71859a !important;
+  padding:11px 14px !important;
+  font-size:9px !important;
+  letter-spacing:.8px !important;
+  border-bottom:1px solid #e1e8ef !important;
+}
+
+td {
+  color:#29435d !important;
+  padding:12px 14px !important;
+  border-bottom:1px solid #edf1f5 !important;
+}
+
+tbody tr:hover td {
+  background:#f8fbfd !important;
+}
+
+td b {
+  color:#173b60 !important;
+}
+
+.dot-green {
+  background:#20c6a7 !important;
+}
+
+.badge {
+  border-radius:999px !important;
+  padding:4px 9px !important;
+  font-size:10px !important;
+}
+
+.online {
+  background:rgba(32,198,167,.12) !important;
+  color:#0c9b7d !important;
+}
+
+.offline {
+  background:#eef2f6 !important;
+  color:#71859a !important;
+}
+
+.inativo {
+  background:rgba(220,38,38,.10) !important;
+  color:#c62828 !important;
+}
+
+/* Footer */
+.page-footer {
+  margin-top:auto !important;
+  width:100% !important;
+  padding:18px 30px 14px !important;
+  color:#8a9bad !important;
+  text-align:right !important;
+  font-size:11px !important;
+  flex-shrink:0 !important;
+}
+
+/* Responsive */
+@media (max-width:900px) {
+  .main {
+    margin-left:0 !important;
+  }
+
+  .header {
+    padding:18px !important;
+  }
+
+  .content {
+    padding:18px !important;
+    overflow-x:auto !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns:repeat(2,minmax(150px,1fr)) !important;
+  }
+}
+
+@media (max-width:560px) {
+  .kpi-grid {
+    grid-template-columns:1fr !important;
+  }
+
+  .header {
+    display:block !important;
+  }
+}
+</style>
+
 </head>
 <body>
 {% include '_sidebar.html' %}
@@ -141,6 +390,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
   </div>
+  <footer class="page-footer">IaTechHub® · Hub Cobrança</footer>
 </main>
 <script>setTimeout(()=>location.reload(), 30000);</script>
 {% include '_briefing.html' %}
