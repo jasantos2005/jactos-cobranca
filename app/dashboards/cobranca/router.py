@@ -222,9 +222,9 @@ async def api_registrar(request: Request, usuario=Depends(get_usuario)):
         obs=fd.get("obs", ""),
         pago=pago_i,
         data_promessa=fd.get("data_promessa") or None,
-        # Toda interacao feita na 1a cobranca ja escala para a 2a cobranca,
-        # a nao ser que o caso ja tenha sido resolvido com pagamento agora
-        segunda_cobranca=0 if pago_i == 1 else 0
+        # Toda interação concluída na 1ª cobrança escala para a 2ª cobrança,
+        # exceto quando o pagamento foi confirmado nesta mesma interação.
+        segunda_cobranca=0 if pago_i == 1 else 1
     )
 
     # Alerta Telegram
